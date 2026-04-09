@@ -441,7 +441,7 @@ const TIPS = [
 ];
 
 function TipsSection() {
-  const [tipIdx, setTipIdx] = React.useState(0);
+  const [tipIdx, setTipIdx] = useState(0);
   const tip = TIPS[tipIdx];
   return (
     <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"16px", marginBottom:16 }}>
@@ -810,7 +810,7 @@ function PedidosScreen({ pedidos, setPedidos, clienteUser }) {
   const readyPedido = misPedidos.find(p => p.estado === 3);
 
   // Save review when submitted
-  React.useEffect(() => {
+  useEffect(() => {
     if (!reviewData) return;
     setPedidos(prev => prev.map(p => p.id===reviewData.pedidoId ? {...p, resena:reviewData.resena} : p));
     setReviewData(null);
@@ -1994,7 +1994,7 @@ export default function App() {
   const [visitas, setVisitas] = useState([]);
 
   // ── Load from storage on mount + check Firebase ──
-  React.useEffect(() => {
+  useEffect(() => {
     const load = async () => {
       const fbOk = await checkFirebase();
       setFirebaseOk(fbOk);
@@ -2013,7 +2013,7 @@ export default function App() {
   // (polling caused state resets while editing)
 
   // ── Auto-save with 5s debounce ──
-  React.useEffect(() => {
+  useEffect(() => {
     if (!storageReady) return;
     const timer = setTimeout(async () => {
       setSavingIndicator(true);
