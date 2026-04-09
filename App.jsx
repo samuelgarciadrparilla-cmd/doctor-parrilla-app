@@ -736,7 +736,7 @@ function CatalogoScreen({ productos }) {
   );
   if (selected !== null) {
     const p = productos.find(x => x.id===selected);
-    const curColor = colorSel || (p.colores[0]||"");
+    const curColor = colorSel || ((p.colores||[])[0]||"");
     return (
       <div style={{ paddingBottom:100 }}>
         <Header title={p.nombre} back onBack={() => { setSelected(null); setColorSel(null); }} />
@@ -748,10 +748,10 @@ function CatalogoScreen({ productos }) {
           <div style={{ fontSize:22, fontWeight:"bold", marginBottom:6 }}>{p.nombre}</div>
           <div style={{ fontSize:22, color:GOLD, fontWeight:"bold", marginBottom:16 }}>{p.precio}</div>
           <div style={{ fontSize:14, color:"#AAA", fontFamily:"sans-serif", lineHeight:1.7, marginBottom:24 }}>{p.desc}</div>
-          {p.colores.length > 0 && <>
+          {(p.colores||[]).length > 0 && <>
             <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>COLOR / ACABADO</div>
             <div style={{ display:"flex", gap:10, marginBottom:24 }}>
-              {p.colores.map(c => (
+              {(p.colores||[]).map(c => (
                 <button key={c} onClick={() => setColorSel(c)} style={{ flex:1, padding:"12px", borderRadius:10, border:`2px solid ${curColor===c?GOLD:BORDER}`, background:curColor===c?GOLD+"18":CARD, cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
                   <div style={{ width:28, height:28, borderRadius:"50%", background:c==="Negro"?"#1a1a1a":"#C0C0C0", border:`2px solid ${c==="Negro"?"#444":"#888"}` }} />
                   <span style={{ fontSize:12, color:curColor===c?GOLD:"#888", fontFamily:"sans-serif", fontWeight:curColor===c?"bold":"normal" }}>{c}</span>
@@ -761,7 +761,7 @@ function CatalogoScreen({ productos }) {
           </>}
           <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>ESPECIFICACIONES</div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:28 }}>
-            {p.specs.map((s,i) => <div key={i} style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:8, padding:"10px 14px", fontSize:13, fontFamily:"sans-serif", color:"#CCC" }}>✓ {s}</div>)}
+            {(p.specs||[]).map((s,i) => <div key={i} style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:8, padding:"10px 14px", fontSize:13, fontFamily:"sans-serif", color:"#CCC" }}>✓ {s}</div>)}
           </div>
           <button onClick={() => setDone(true)} style={{ width:"100%", background:`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, border:"none", color:DARK, padding:"16px", borderRadius:10, fontSize:15, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"2px", cursor:"pointer", marginBottom:12 }}>SOLICITAR COTIZACIÓN</button>
           <a href={`https://wa.me/${WA_NUMBER}?text=Hola! Me interesa la ${p.nombre} en color ${curColor}`} target="_blank" rel="noreferrer"
@@ -786,9 +786,9 @@ function CatalogoScreen({ productos }) {
                 <div style={{ fontSize:16, fontWeight:"bold" }}>{p.nombre}</div><Tag label={p.tag} />
               </div>
               <div style={{ display:"flex", gap:6, marginBottom:8 }}>
-                {p.colores.map(c => <span key={c} style={{ fontSize:10, color:"#888", fontFamily:"sans-serif", background:DARK3, border:`1px solid ${BORDER}`, padding:"2px 8px", borderRadius:20 }}>{c}</span>)}
+                {(p.colores||[]).map(c => <span key={c} style={{ fontSize:10, color:"#888", fontFamily:"sans-serif", background:DARK3, border:`1px solid ${BORDER}`, padding:"2px 8px", borderRadius:20 }}>{c}</span>)}
               </div>
-              <div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif", marginBottom:10, lineHeight:1.5 }}>{p.desc.slice(0,80)}…</div>
+              <div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif", marginBottom:10, lineHeight:1.5 }}>{(p.desc||"").slice(0,80)}…</div>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                 <div style={{ fontSize:17, color:GOLD, fontWeight:"bold" }}>{p.precio}</div>
                 <span style={{ color:GOLD, fontSize:20 }}>›</span>
@@ -1178,7 +1178,7 @@ function AdminCatalog({ productos, setProductos }) {
   const [form, setForm] = useState(emptyForm);
   const [newSpec, setNewSpec] = useState("");
   const COLORES_OPT = ["Grill","Negro"];
-  const openEdit = (i) => { setForm({ ...productos[i], specs:[...productos[i].specs], colores:[...productos[i].colores] }); setIdx(i); setView("form"); };
+  const openEdit = (i) => { setForm({ ...productos[i], specs:[...(productos[i].specs||[])], colores:[...(productos[i].colores||[])] }); setIdx(i); setView("form"); };
   const openAdd  = () => { setForm(emptyForm); setIdx(null); setView("form"); };
   const toggleColor = (c) => setForm(f => ({ ...f, colores: f.colores.includes(c)?f.colores.filter(x=>x!==c):[...f.colores,c] }));
   const addSpec = () => { if (newSpec.trim()) { setForm(f=>({...f,specs:[...f.specs,newSpec.trim()]})); setNewSpec(""); } };
@@ -1265,7 +1265,7 @@ function AdminCatalog({ productos, setProductos }) {
               <div style={{ flex:1 }}>
                 <div style={{ display:"flex",justifyContent:"space-between",marginBottom:4 }}><div style={{ fontSize:15,fontWeight:"bold" }}>{p.nombre}</div><Tag label={p.tag} /></div>
                 <div style={{ fontSize:14,color:GOLD,fontFamily:"sans-serif",marginBottom:4 }}>{p.precio}</div>
-                <div style={{ display:"flex",gap:6 }}>{p.colores.map(c => <span key={c} style={{ fontSize:10,color:"#888",fontFamily:"sans-serif",background:DARK3,border:`1px solid ${BORDER}`,padding:"2px 8px",borderRadius:20 }}>{c}</span>)}</div>
+                <div style={{ display:"flex",gap:6 }}>{(p.colores||[]).map(c => <span key={c} style={{ fontSize:10,color:"#888",fontFamily:"sans-serif",background:DARK3,border:`1px solid ${BORDER}`,padding:"2px 8px",borderRadius:20 }}>{c}</span>)}</div>
               </div>
               <button onClick={() => openEdit(i)} style={{ background:GOLD+"22",border:`1px solid ${GOLD}44`,color:GOLD,padding:"8px 14px",borderRadius:8,fontFamily:"sans-serif",fontSize:12,cursor:"pointer",flexShrink:0 }}>✏️ Editar</button>
             </div>
@@ -1690,7 +1690,7 @@ function AdminTickets({ tickets, setTickets, clientes }) {
               <div style={{ background:sc[t.estado]+"22",color:sc[t.estado],fontSize:11,padding:"3px 10px",borderRadius:20,fontFamily:"sans-serif" }}>{t.estado}</div>
             </div>
             <div style={{ fontSize:14,color:"#F5EDD6",fontFamily:"sans-serif",marginBottom:4, fontWeight:"bold" }}>{getNombre(t.tel)}</div>
-            <div style={{ fontSize:13,color:"#888",fontFamily:"sans-serif",lineHeight:1.5 }}>{t.desc.slice(0,70)}…</div>
+            <div style={{ fontSize:13,color:"#888",fontFamily:"sans-serif",lineHeight:1.5 }}>{(t.desc||"").slice(0,70)}…</div>
             <div style={{ fontSize:11,color:"#555",fontFamily:"sans-serif",marginTop:8 }}>{t.fecha}</div>
           </button>
         ))}
