@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import React from "react";
 
 // ── EUROPEAN PREMIUM DESIGN SYSTEM ──────────────────────────────────────────
@@ -22,7 +22,6 @@ const GOLD_GRAD   = "linear-gradient(135deg, #9A7A3E 0%, #C8A96E 40%, #E2C98A 70
 const STEEL_CARD  = "linear-gradient(145deg, #0E1014 0%, #0B0D11 100%)";
 const FLAME_LOW   = "linear-gradient(0deg, rgba(180,80,0,0.1) 0%, rgba(200,120,0,0.04) 40%, transparent 100%)";
 const WA_NUMBER = "595994389932";
-const BUILD_TS = 1775762469075;
 // Link de reseña Google — reemplazá con el link de "Obtener más reseñas" de Google Business
 // Ir a business.google.com → tu perfil → "Obtener más reseñas" → copiar link
 const GOOGLE_REVIEW_URL = "https://share.google/D7XEt1nQQzynvpxG5";
@@ -983,7 +982,8 @@ function SoporteScreen({ tickets, setTickets, clienteUser }) {
   const misTickets = clienteUser ? tickets.filter(t => normalizePhone(t.tel)===normalizePhone(clienteUser.tel)) : [];
   const submit = () => {
     if (desc.length<10||!clienteUser) return;
-    setTickets([{ id:`T-0${50+tickets.length}`, tel:clienteUser.tel, tipo, desc, fecha:new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"}), estado:"Abierto" }, ...tickets]);
+    const maxTNum = tickets.reduce((max, t) => { const m = t.id?.match(/T-(\d+)/); return m ? Math.max(max, parseInt(m[1])) : max; }, 0);
+    setTickets([{ id:`T-${String(maxTNum+1).padStart(3,"0")}`, tel:clienteUser.tel, tipo, desc, fecha:new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"}), estado:"Abierto" }, ...tickets]);
     setOk(true);
   };
   if (ok) return (
@@ -1053,8 +1053,11 @@ function AdminClientes({ clientes, setClientes }) {
     const telNorm = normalizePhone(form.tel);
     const duplicado = clientes.find((c, i) => normalizePhone(c.tel||"") === telNorm && i !== idx);
     if (duplicado) { setError("⚠️ Ya existe un cliente con ese número: " + duplicado.nombre.trim()); return; }
+    const nombreDup = clientes.find((c, i) => c.nombre.trim().toLowerCase() === form.nombre.trim().toLowerCase() && i !== idx);
+    if (nombreDup) { setError("⚠️ Ya existe un cliente con ese nombre: " + nombreDup.nombre.trim()); return; }
     if (idx === null) {
-      const next = [...clientes, { ...form, id:`C-${String(clientes.length+1).padStart(3,"0")}`, tel:normalizePhone(form.tel) }];
+      const maxId = clientes.reduce((max, c) => { const m = c.id?.match(/C-(\d+)/); return m ? Math.max(max, parseInt(m[1])) : max; }, 0);
+      const next = [...clientes, { ...form, id:`C-${String(maxId+1).padStart(3,"0")}`, tel:normalizePhone(form.tel) }];
       setClientes(next);
       appStorage.set("dp_clientes", JSON.stringify(next));
     } else {
@@ -1289,8 +1292,9 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
     const cliente = newForm.clienteId ? clientes.find(c => (c.tel||"") === newForm.clienteId) : null;
     if (!cliente || !newForm.modelo || !newForm.monto) return;
     const fecha = new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
-    const num = String(pedidos.length + 1).padStart(3, "0");
     const year = new Date().getFullYear();
+    const maxNum = pedidos.reduce((max, p) => { const m = p.id?.match(/DP-\d+-(\d+)/); return m ? Math.max(max, parseInt(m[1])) : max; }, 0);
+    const num = String(maxNum + 1).padStart(3, "0");
     const nuevo = {
       id: `DP-${year}-${num}`,
       serie: newForm.serie.trim().toUpperCase() || `PED-${year}-${num}`,
@@ -1329,7 +1333,7 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
                     <div style={{ fontSize:14, fontWeight:"bold", color: (newForm.clienteId && c.tel === newForm.clienteId) ? GOLD : "#F0F0F0" }}>{c.nombre}</div>
                     <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>{c.tel}{c.codigo ? ` · ${c.codigo}` : ""}</div>
                   </div>
-                  {newForm.clienteId && c.tel === newForm.clienteId && <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>✓</span>}
+                  {(newForm.clienteId && c.tel === newForm.clienteId) && <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>✓</span>}
                 </button>
               ))}
               {clientes.length === 0 && <div style={{ color:"#555", fontFamily:"sans-serif", fontSize:13, padding:"16px", textAlign:"center" }}>No hay clientes registrados aún</div>}
@@ -2014,51 +2018,66 @@ export default function App() {
     load();
   }, []);
 
-  // ── Polling: sync from Firebase every 60 seconds (slower to avoid interrupting forms) ──
-  // ── Smart polling: sync from Firebase every 30s ──
-  // Uses reference equality — only re-renders if data actually changed
-  useEffect(() => {
-    if (!firebaseOk || !FIREBASE_URL) return;
-    const poll = setInterval(async () => {
-      try {
-        const r1 = await appStorage.get("dp_clientes");
-        if (r1) { const nd = JSON.parse(r1); setClientes(prev => JSON.stringify(prev)===JSON.stringify(nd) ? prev : nd); }
-      } catch(e) {}
-      try {
-        const r2 = await appStorage.get("dp_pedidos");
-        if (r2) { const nd = JSON.parse(r2); setPedidos(prev => JSON.stringify(prev)===JSON.stringify(nd) ? prev : nd); }
-      } catch(e) {}
-      try {
-        const r3 = await appStorage.get("dp_tickets");
-        if (r3) { const nd = JSON.parse(r3); setTickets(prev => JSON.stringify(prev)===JSON.stringify(nd) ? prev : nd); }
-      } catch(e) {}
-    }, 30000);
-    return () => clearInterval(poll);
-  }, [firebaseOk]);
+  // ── Guardado inmediato: cada cambio se persiste al instante a Firebase ──
+  const saveNow = useCallback(async (key, data) => {
+    setSavingIndicator(true);
+    try { await appStorage.set(key, JSON.stringify(data)); } catch(e) {}
+    setTimeout(() => setSavingIndicator(false), 600);
+  }, []);
 
-  // ── Auto-save with 5s debounce ──
+  // Helpers: guardan a Firebase inmediatamente al cambiar estado
+  const savePedidos = useCallback((next) => {
+    setPedidos(prev => {
+      const data = typeof next === 'function' ? next(prev) : next;
+      saveNow("dp_pedidos", data);
+      return data;
+    });
+  }, [saveNow]);
+  const saveTickets = useCallback((next) => {
+    setTickets(prev => {
+      const data = typeof next === 'function' ? next(prev) : next;
+      saveNow("dp_tickets", data);
+      return data;
+    });
+  }, [saveNow]);
+  const saveVisitas = useCallback((next) => {
+    setVisitas(prev => {
+      const data = typeof next === 'function' ? next(prev) : next;
+      saveNow("dp_visitas", data);
+      return data;
+    });
+  }, [saveNow]);
+  const saveClientes = useCallback((next) => {
+    setClientes(prev => {
+      const data = typeof next === 'function' ? next(prev) : next;
+      saveNow("dp_clientes", data);
+      return data;
+    });
+  }, [saveNow]);
+  const saveProductos = useCallback((next) => {
+    setProductos(prev => {
+      const data = typeof next === 'function' ? next(prev) : next;
+      saveNow("dp_productos", data);
+      return data;
+    });
+  }, [saveNow]);
+
+  // ── Auto-save de respaldo: guarda TODO cada 15s por si algo se escapó ──
   useEffect(() => {
     if (!storageReady) return;
     const timer = setTimeout(async () => {
-      setSavingIndicator(true);
       try { await appStorage.set("dp_clientes",  JSON.stringify(clientes)); } catch(e) {}
       try { await appStorage.set("dp_pedidos",   JSON.stringify(pedidos)); } catch(e) {}
       try { await appStorage.set("dp_tickets",   JSON.stringify(tickets)); } catch(e) {}
       try { await appStorage.set("dp_productos", JSON.stringify(productos)); } catch(e) {}
       try { await appStorage.set("dp_visitas",  JSON.stringify(visitas));   } catch(e) {}
-      setTimeout(() => setSavingIndicator(false), 800);
-    }, 10000); // 10 seconds — sync rápido para tiempo real
+    }, 15000);
     return () => clearTimeout(timer);
-  }, [clientes, pedidos, tickets, productos, visitas, storageReady])
+  }, [clientes, pedidos, tickets, productos, visitas, storageReady]);
 
-  // ── SYNC EN TIEMPO REAL: polling inteligente cada 15s ──────────────────
-  // Usa timestamp para detectar cambios reales — no sobreescribe si hay cambios locales pendientes
+  // ── Polling: sync desde Firebase cada 20s (solo lee, no pisa cambios locales recientes) ──
   useEffect(() => {
     if (!firebaseOk || !FIREBASE_URL) return;
-    let lastSyncedPedidos = null;
-    let lastSyncedTickets = null;
-    let lastSyncedClientes = null;
-
     const poll = setInterval(async () => {
       try {
         const [r1, r2, r3] = await Promise.all([
@@ -2067,32 +2086,13 @@ export default function App() {
           fetch(`${FIREBASE_URL}/drparrilla/dp_clientes.json`)
         ]);
         const [fbPedidos, fbTickets, fbClientes] = await Promise.all([r1.json(), r2.json(), r3.json()]);
-
-        if (fbPedidos) {
-          const fbStr = JSON.stringify(fbPedidos);
-          if (fbStr !== lastSyncedPedidos) {
-            lastSyncedPedidos = fbStr;
-            setPedidos(fbPedidos);
-          }
-        }
-        if (fbTickets) {
-          const fbStr = JSON.stringify(fbTickets);
-          if (fbStr !== lastSyncedTickets) {
-            lastSyncedTickets = fbStr;
-            setTickets(fbTickets);
-          }
-        }
-        if (fbClientes) {
-          const fbStr = JSON.stringify(fbClientes);
-          if (fbStr !== lastSyncedClientes) {
-            lastSyncedClientes = fbStr;
-            setClientes(fbClientes);
-          }
-        }
+        if (fbPedidos) setPedidos(prev => JSON.stringify(prev)===JSON.stringify(fbPedidos) ? prev : fbPedidos);
+        if (fbTickets) setTickets(prev => JSON.stringify(prev)===JSON.stringify(fbTickets) ? prev : fbTickets);
+        if (fbClientes) setClientes(prev => JSON.stringify(prev)===JSON.stringify(fbClientes) ? prev : fbClientes);
       } catch(e) {}
-    }, 15000); // cada 15 segundos
+    }, 20000);
     return () => clearInterval(poll);
-  }, [firebaseOk]);;
+  }, [firebaseOk]);
 
   if (!logged) return (
     <div style={{ fontFamily:"Georgia, serif",background:DARK,color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto" }}>
@@ -2103,15 +2103,15 @@ export default function App() {
   const screens = {
     home:             () => <HomeScreen setActive={setActive} clienteUser={clienteUser} pedidos={pedidos} />,
     catalogo:         () => <CatalogoScreen productos={productos} />,
-    pedidos:          () => <PedidosScreen setPedidos={setPedidos} pedidos={pedidos} clienteUser={clienteUser} />,
-    soporte:          () => <SoporteScreen tickets={tickets} setTickets={setTickets} clienteUser={clienteUser} />,
-    "admin-orders":   () => <AdminOrders pedidos={pedidos} setPedidos={setPedidos} clientes={clientes} adminUser={adminUser} productos={productos} />,
-    "admin-tickets":  () => <AdminTickets tickets={tickets} setTickets={setTickets} clientes={clientes} />,
-    "admin-clientes": () => <AdminClientes clientes={clientes} setClientes={setClientes} />,
-    "admin-catalog":  () => <AdminCatalog productos={productos} setProductos={setProductos} />,
+    pedidos:          () => <PedidosScreen setPedidos={savePedidos} pedidos={pedidos} clienteUser={clienteUser} />,
+    soporte:          () => <SoporteScreen tickets={tickets} setTickets={saveTickets} clienteUser={clienteUser} />,
+    "admin-orders":   () => <AdminOrders pedidos={pedidos} setPedidos={savePedidos} clientes={clientes} adminUser={adminUser} productos={productos} />,
+    "admin-tickets":  () => <AdminTickets tickets={tickets} setTickets={saveTickets} clientes={clientes} />,
+    "admin-clientes": () => <AdminClientes clientes={clientes} setClientes={saveClientes} />,
+    "admin-catalog":  () => <AdminCatalog productos={productos} setProductos={saveProductos} />,
     "admin-resenas":  () => <AdminResenas pedidos={pedidos} clientes={clientes} />,
-    "admin-visitas":  () => <AdminVisitas visitas={visitas} setVisitas={setVisitas} />,
-    "agendar":        () => <AgendarVisitaScreen visitas={visitas} setVisitas={setVisitas} clienteUser={clienteUser} />,
+    "admin-visitas":  () => <AdminVisitas visitas={visitas} setVisitas={saveVisitas} />,
+    "agendar":        () => <AgendarVisitaScreen visitas={visitas} setVisitas={saveVisitas} clienteUser={clienteUser} />,
   };
   const Screen = screens[active] || screens["home"];
 
