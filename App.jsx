@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import React from "react";
 
 // ── EUROPEAN PREMIUM DESIGN SYSTEM ──────────────────────────────────────────
@@ -2009,7 +2009,7 @@ export default function App() {
   }, []);
 
   // ── Polling: sync from Firebase every 60 seconds (slower to avoid interrupting forms) ──
-  React.// Poll disabled — autosave handles Firebase sync
+  // Poll disabled — autosave handles Firebase sync
   // (polling caused state resets while editing)
 
   // ── Auto-save with 5s debounce ──
