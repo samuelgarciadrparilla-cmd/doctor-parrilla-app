@@ -1042,11 +1042,16 @@ function AdminClientes({ clientes, setClientes }) {
   const emptyForm = { nombre:"", tel:"", dir:"", historial:"" };
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
   const openAdd  = () => { setForm(emptyForm); setIdx(null); setError(""); setView("form"); };
   const openEdit = (i) => { setForm({ ...clientes[i] }); setIdx(i); setError(""); setView("form"); };
   const guardar = () => {
     if (!form.nombre.trim()) { setError("El nombre es obligatorio."); return; }
     if (normalizePhone(form.tel).length < 7) { setError("Ingresá un número válido."); return; }
+    // Anti-duplicado: verificar que no exista otro cliente con el mismo teléfono
+    const telNorm = normalizePhone(form.tel);
+    const duplicado = clientes.find((c, i) => normalizePhone(c.tel) === telNorm && i !== idx);
+    if (duplicado) { setError("⚠️ Ya existe un cliente con ese número: " + duplicado.nombre.trim()); return; }
     if (idx === null) {
       const next = [...clientes, { ...form, id:`C-${String(clientes.length+1).padStart(3,"0")}`, tel:normalizePhone(form.tel) }];
       setClientes(next);
@@ -1280,7 +1285,7 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
   const getNombre = (tel) => { const c=clientes.find(x=>normalizePhone(x.tel)===normalizePhone(tel)); return c?c.nombre:tel; };
 
   const crearPedido = () => {
-    const cliente = clientes.find(c => c.id === newForm.clienteId);
+    const cliente = clientes.find(c => normalizePhone(c.tel) === normalizePhone(newForm.clienteId));
     if (!cliente || !newForm.modelo || !newForm.monto) return;
     const fecha = new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
     const num = String(pedidos.length + 1).padStart(3, "0");
@@ -1304,7 +1309,7 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
 
   // ── NEW ORDER FORM ──
   if (view === "new") {
-    const clienteSeleccionado = clientes.find(c => c.id === newForm.clienteId);
+    const clienteSeleccionado = clientes.find(c => normalizePhone(c.tel) === normalizePhone(newForm.clienteId));
     const formOk = newForm.clienteId && newForm.modelo && newForm.monto;
     return (
       <div style={{ paddingBottom:80 }}>
@@ -1316,14 +1321,14 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
             <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:10 }}>CLIENTE *</div>
             <div style={{ display:"flex", flexDirection:"column", gap:8, maxHeight:200, overflowY:"auto" }}>
               {clientes.map(c => (
-                <button key={c.id} onClick={() => setNewForm({...newForm, clienteId: c.id})}
-                  style={{ background: newForm.clienteId===c.id ? GOLD+"22" : CARD, border:`1px solid ${newForm.clienteId===c.id ? GOLD : BORDER}`, borderRadius:10, padding:"12px 16px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:12 }}>
+                <button key={c.id} onClick={() => setNewForm({...newForm, clienteId: c.tel})}
+                  style={{ background: normalizePhone(newForm.clienteId)===normalizePhone(c.tel) ? GOLD+"22" : CARD, border:`1px solid ${normalizePhone(newForm.clienteId)===normalizePhone(c.tel) ? GOLD : BORDER}`, borderRadius:10, padding:"12px 16px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:12 }}>
                   <div style={{ width:36, height:36, borderRadius:"50%", background:GOLD+"18", border:`1px solid ${GOLD}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>👤</div>
                   <div>
-                    <div style={{ fontSize:14, fontWeight:"bold", color: newForm.clienteId===c.id ? GOLD : "#F0F0F0" }}>{c.nombre}</div>
+                    <div style={{ fontSize:14, fontWeight:"bold", color: normalizePhone(newForm.clienteId)===normalizePhone(c.tel) ? GOLD : "#F0F0F0" }}>{c.nombre}</div>
                     <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>{c.tel}{c.codigo ? ` · ${c.codigo}` : ""}</div>
                   </div>
-                  {newForm.clienteId===c.id && <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>✓</span>}
+                  {newForm.normalizePhone(newForm.clienteId)===normalizePhone(c.tel) && <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>✓</span>}
                 </button>
               ))}
               {clientes.length === 0 && <div style={{ color:"#555", fontFamily:"sans-serif", fontSize:13, padding:"16px", textAlign:"center" }}>No hay clientes registrados aún</div>}
@@ -1998,7 +2003,7 @@ export default function App() {
     const load = async () => {
       const fbOk = await checkFirebase();
       setFirebaseOk(fbOk);
-      try { const r1 = await appStorage.get("dp_clientes");  if (r1) setClientes(JSON.parse(r1));  } catch(e) {}
+      try { const r1 = await appStorage.get("dp_clientes"); if (r1) { const raw=JSON.parse(r1); const seen=new Set(); const fixed=raw.map(c=>{if(!c.id||seen.has(c.id)){return{...c,id:"C-"+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,4).toUpperCase()};} seen.add(c.id); return c;}); setClientes(fixed); if(fixed.some((c,i)=>c.id!==raw[i]?.id))appStorage.set("dp_clientes",JSON.stringify(fixed)); } } catch(e) {}
       try { const r2 = await appStorage.get("dp_pedidos");   if (r2) setPedidos(JSON.parse(r2));   } catch(e) {}
       try { const r3 = await appStorage.get("dp_tickets");   if (r3) setTickets(JSON.parse(r3));   } catch(e) {}
       try { const r4 = await appStorage.get("dp_productos"); if (r4) setProductos(JSON.parse(r4)); } catch(e) {}
