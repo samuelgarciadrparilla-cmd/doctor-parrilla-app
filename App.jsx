@@ -8,16 +8,16 @@ const GOLD_DARK   = "#9A7A3E";       // Deep gold
 const CREAM       = "#F5EDD6";       // Warm cream for text
 const DARK        = "#080808";       // Near black
 const DARK2       = "#0C0C0C";
-const DARK3       = "#121418";       // Steel dark
-const CARD        = "#0E1014";       // Deep steel card
-const CARD2       = "#13161B";       // Slightly lighter card
+const DARK3       = "#10131A";       // Steel dark
+const CARD        = "#0E1116";       // Deep steel card
+const CARD2       = "#13171E";       // Slightly lighter card
 const BORDER      = "#1E2228";       // Refined border
 const BORDER2     = "#2A2F38";       // Active border
 const RED         = "#C0392B";
 const GREEN       = "#27AE60";
 const ORANGE      = "#E67E22";
 // Premium gradients
-const STEEL_BG    = "linear-gradient(160deg, #0C0F14 0%, #080808 45%, #0F0900 100%)";
+const STEEL_BG    = "linear-gradient(160deg, #0D1117 0%, #0A0C10 30%, #080808 55%, #0C0E08 80%, #0A0D0A 100%)";
 const GOLD_GRAD   = "linear-gradient(135deg, #9A7A3E 0%, #C8A96E 40%, #E2C98A 70%, #C8A96E 100%)";
 const STEEL_CARD  = "linear-gradient(145deg, #0E1014 0%, #0B0D11 100%)";
 const FLAME_LOW   = "linear-gradient(0deg, rgba(200,100,0,0.08) 0%, transparent 100%)";
@@ -1134,7 +1134,7 @@ function AdminClientes({ clientes, setClientes }) {
             <div style={{ width:44,height:44,borderRadius:"50%",background:`${GOLD}18`,border:`1px solid ${GOLD}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>👤</div>
             <div style={{ flex:1 }}>
               <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:3 }}>
-                <div style={{ fontSize:15, fontWeight:"bold" }}>{c.nombre}</div>
+                <div style={{ fontSize:15, fontWeight:"bold", color:"#F5EDD6" }}>{c.nombre}</div>
                 {c.codigo && <span style={{ background:GOLD+"22", border:`1px solid ${GOLD}55`, color:GOLD, fontSize:9, padding:"2px 7px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"1px" }}>{c.codigo}</span>}
               </div>
               <div style={{ fontSize:12,color:GOLD,fontFamily:"sans-serif",marginBottom:2 }}>📞 {c.tel}</div>
@@ -1519,6 +1519,19 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
             style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#0A1F0A",border:"1px solid #1A3A1A",borderRadius:10,padding:"14px",textDecoration:"none",color:"#4CAF50",fontFamily:"sans-serif",fontSize:14 }}>
             💬 Notificar al cliente por WhatsApp
           </a>
+          {p.estado === 4 && (
+            <button
+              onClick={() => {
+                if (window.confirm(`¿Eliminar el pedido ${p.id} de forma permanente? Esta acción no se puede deshacer.`)) {
+                  setPedidos(prev => prev.filter((_,j) => j !== selected));
+                  setSelected(null);
+                  setNota("");
+                }
+              }}
+              style={{ width:"100%", marginTop:10, background:"#180000", border:"1px solid #C0392B44", color:"#E57373", padding:"13px", borderRadius:10, fontSize:13, fontFamily:"sans-serif", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+              🗑️ Eliminar pedido entregado
+            </button>
+          )}
         </div>
       </div>
     );
@@ -1566,7 +1579,7 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
               </div>
                 <div style={{ background:tc[p.estado]+"22",color:tc[p.estado],fontSize:11,padding:"3px 10px",borderRadius:20,fontFamily:"sans-serif",border:`1px solid ${tc[p.estado]}44` }}>{ESTADO_LABELS[p.estado]}</div>
               </div>
-              <div style={{ fontSize:15,fontWeight:"bold",marginBottom:2 }}>{getNombre(p.tel)}</div>
+              <div style={{ fontSize:15,fontWeight:"bold",marginBottom:2, color:"#F5EDD6", letterSpacing:"0.3px" }}>{getNombre(p.tel)}</div>
               <div style={{ fontSize:13,color:"#888",fontFamily:"sans-serif",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                 <span>{p.modelo}</span>
                 {dias !== null && p.estado < 4 && <CountdownBadge fecha={p.fecha} diasHabiles={p.diasHabiles} size="small" />}
@@ -1632,7 +1645,7 @@ function AdminTickets({ tickets, setTickets, clientes }) {
               <div style={{ display:"flex",gap:8,alignItems:"center" }}><span style={{ fontSize:12,color:"#666",fontFamily:"sans-serif" }}>{t.id}</span><Tag label={t.tipo} color={sc[t.estado]} /></div>
               <div style={{ background:sc[t.estado]+"22",color:sc[t.estado],fontSize:11,padding:"3px 10px",borderRadius:20,fontFamily:"sans-serif" }}>{t.estado}</div>
             </div>
-            <div style={{ fontSize:14,color:"#CCC",fontFamily:"sans-serif",marginBottom:4 }}>{getNombre(t.tel)}</div>
+            <div style={{ fontSize:14,color:"#F5EDD6",fontFamily:"sans-serif",marginBottom:4, fontWeight:"bold" }}>{getNombre(t.tel)}</div>
             <div style={{ fontSize:13,color:"#888",fontFamily:"sans-serif",lineHeight:1.5 }}>{t.desc.slice(0,70)}…</div>
             <div style={{ fontSize:11,color:"#555",fontFamily:"sans-serif",marginTop:8 }}>{t.fecha}</div>
           </button>
@@ -1984,7 +1997,7 @@ export default function App() {
       try { await appStorage.set("dp_productos", JSON.stringify(productos)); } catch(e) {}
       try { await appStorage.set("dp_visitas",  JSON.stringify(visitas));   } catch(e) {}
       setTimeout(() => setSavingIndicator(false), 800);
-    }, 8000); // 8 seconds
+    }, 45000); // 45 seconds — más tiempo para editar sin interrupciones
     return () => clearTimeout(timer);
   }, [clientes, pedidos, tickets, productos, visitas, storageReady]);
 
@@ -2010,7 +2023,7 @@ export default function App() {
   const Screen = screens[active] || screens["home"];
 
   return (
-    <div style={{ fontFamily:"Georgia, serif",background:DARK,color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto",position:"relative" }}>
+    <div style={{ fontFamily:"Georgia, serif",background:"linear-gradient(180deg, #0D1117 0%, #080808 20%, #08080A 100%)",color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto",position:"relative" }}>
       <div style={{ background:"#080808", padding:"10px 20px 6px", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:11, color:"#555", fontFamily:"sans-serif" }}>
         <span style={{ fontSize:10, minWidth:50, fontFamily:"sans-serif" }}>
           {savingIndicator
