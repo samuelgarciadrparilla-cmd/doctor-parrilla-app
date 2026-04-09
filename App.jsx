@@ -1329,7 +1329,7 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
                     <div style={{ fontSize:14, fontWeight:"bold", color: (newForm.clienteId && c.tel === newForm.clienteId) ? GOLD : "#F0F0F0" }}>{c.nombre}</div>
                     <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>{c.tel}{c.codigo ? ` · ${c.codigo}` : ""}</div>
                   </div>
-                  {newForm.(newForm.clienteId && c.tel === newForm.clienteId) && <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>✓</span>}
+                  {newForm.clienteId && c.tel === newForm.clienteId && <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>✓</span>}
                 </button>
               ))}
               {clientes.length === 0 && <div style={{ color:"#555", fontFamily:"sans-serif", fontSize:13, padding:"16px", textAlign:"center" }}>No hay clientes registrados aún</div>}
