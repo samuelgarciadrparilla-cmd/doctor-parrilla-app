@@ -9,18 +9,18 @@ const CREAM       = "#F5EDD6";       // Warm cream for text
 const DARK        = "#080808";       // Near black
 const DARK2       = "#0C0C0C";
 const DARK3       = "#10131A";       // Steel dark
-const CARD        = "#0E1116";       // Deep steel card
-const CARD2       = "#13171E";       // Slightly lighter card
-const BORDER      = "#1E2228";       // Refined border
-const BORDER2     = "#2A2F38";       // Active border
+const CARD        = "#0F1115";       // Deep steel card - premium
+const CARD2       = "#13161C";       // Premium card
+const BORDER      = "#1D2025";       // Refined border - premium
+const BORDER2     = "#292E36";       // Active border - premium
 const RED         = "#C0392B";
 const GREEN       = "#27AE60";
 const ORANGE      = "#E67E22";
 // Premium gradients
-const STEEL_BG    = "linear-gradient(160deg, #0D1117 0%, #0A0C10 30%, #080808 55%, #0C0E08 80%, #0A0D0A 100%)";
+const STEEL_BG    = "linear-gradient(160deg, #0A0C0F 0%, #0D0A08 25%, #080808 50%, #0A0C0D 75%, #0C0A09 100%)";
 const GOLD_GRAD   = "linear-gradient(135deg, #9A7A3E 0%, #C8A96E 40%, #E2C98A 70%, #C8A96E 100%)";
 const STEEL_CARD  = "linear-gradient(145deg, #0E1014 0%, #0B0D11 100%)";
-const FLAME_LOW   = "linear-gradient(0deg, rgba(200,100,0,0.08) 0%, transparent 100%)";
+const FLAME_LOW   = "linear-gradient(0deg, rgba(180,80,0,0.1) 0%, rgba(200,120,0,0.04) 40%, transparent 100%)";
 const WA_NUMBER = "595994389932";
 // Link de reseña Google — reemplazá con el link de "Obtener más reseñas" de Google Business
 // Ir a business.google.com → tu perfil → "Obtener más reseñas" → copiar link
@@ -279,7 +279,7 @@ function Tag({ label, color = GOLD }) {
 }
 function Header({ title, subtitle, back, onBack }) {
   return (
-    <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}`, display:"flex", alignItems:"center", gap:12, background:"linear-gradient(90deg, #0D1015 0%, #0A0A0A 100%)" }}>
+    <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}`, display:"flex", alignItems:"center", gap:12, background:"linear-gradient(135deg, #0E1015 0%, #0B0C0F 50%, #0D0C0B 100%)", boxShadow:"0 1px 0 rgba(200,169,110,0.08)" }}>
       {back && <button onClick={onBack} style={{ background:"none", border:"none", color:GOLD, fontSize:22, cursor:"pointer", padding:"0 4px 0 0" }}>←</button>}
       <div>
         <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", textTransform:"uppercase", marginBottom:2 }}>{subtitle||"DOCTOR PARRILLA"}</div>
@@ -1619,7 +1619,21 @@ function AdminTickets({ tickets, setTickets, clientes }) {
             <div style={{ fontSize:11,color:"#555",fontFamily:"sans-serif",marginTop:12 }}>📅 {t.fecha}</div>
           </div>
           {t.estado!=="Resuelto" && <button onClick={() => { setTickets(tickets.map((x,i)=>i===selected?{...x,estado:next[x.estado]}:x)); setSelected(null); }} style={{ width:"100%",background:`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`,border:"none",color:DARK,padding:"16px",borderRadius:10,fontSize:15,fontFamily:"sans-serif",fontWeight:"bold",cursor:"pointer",marginBottom:12 }}>→ MARCAR COMO {next[t.estado].toUpperCase()}</button>}
-          {t.estado==="Resuelto" && <div style={{ background:"#0A1F0A",border:"1px solid #1A3A1A",borderRadius:10,padding:"16px",textAlign:"center",color:"#4CAF50",fontFamily:"sans-serif",fontWeight:"bold" }}>✅ TICKET RESUELTO</div>}
+          {t.estado==="Resuelto" && (
+          <div>
+            <div style={{ background:"#0A1F0A",border:"1px solid #1A3A1A",borderRadius:10,padding:"16px",textAlign:"center",color:"#4CAF50",fontFamily:"sans-serif",fontWeight:"bold" }}>✅ TICKET RESUELTO</div>
+            <button
+              onClick={() => {
+                if (window.confirm(`¿Eliminar el ticket ${t.id} de forma permanente?`)) {
+                  setTickets(prev => prev.filter((_,j) => j !== selected));
+                  setSelected(null);
+                }
+              }}
+              style={{ width:"100%", marginTop:10, background:"#180000", border:"1px solid #C0392B44", color:"#E57373", padding:"13px", borderRadius:10, fontSize:13, fontFamily:"sans-serif", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+              🗑️ Eliminar ticket resuelto
+            </button>
+          </div>
+        )}
         </div>
       </div>
     );
@@ -2023,7 +2037,7 @@ export default function App() {
   const Screen = screens[active] || screens["home"];
 
   return (
-    <div style={{ fontFamily:"Georgia, serif",background:"linear-gradient(180deg, #0D1117 0%, #080808 20%, #08080A 100%)",color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto",position:"relative" }}>
+    <div style={{ fontFamily:"Georgia, serif",background:"linear-gradient(180deg, #0B0D10 0%, #09090B 15%, #080808 40%, #080A08 70%, #0A0808 100%)",color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto",position:"relative" }}>
       <div style={{ background:"#080808", padding:"10px 20px 6px", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:11, color:"#555", fontFamily:"sans-serif" }}>
         <span style={{ fontSize:10, minWidth:50, fontFamily:"sans-serif" }}>
           {savingIndicator
