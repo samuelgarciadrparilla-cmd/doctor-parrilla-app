@@ -441,7 +441,7 @@ const TIPS = [
 ];
 
 function TipsSection() {
-  const [tipIdx, setTipIdx] = React.useState(0);
+  const [tipIdx, setTipIdx] = useState(0);
   const tip = TIPS[tipIdx];
   return (
     <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"16px", marginBottom:16 }}>
@@ -810,7 +810,7 @@ function PedidosScreen({ pedidos, setPedidos, clienteUser }) {
   const readyPedido = misPedidos.find(p => p.estado === 3);
 
   // Save review when submitted
-  React.useEffect(() => {
+  useEffect(() => {
     if (!reviewData) return;
     setPedidos(prev => prev.map(p => p.id===reviewData.pedidoId ? {...p, resena:reviewData.resena} : p));
     setReviewData(null);
@@ -1994,7 +1994,7 @@ export default function App() {
   const [visitas, setVisitas] = useState([]);
 
   // ── Load from storage on mount + check Firebase ──
-  React.useEffect(() => {
+  useEffect(() => {
     const load = async () => {
       const fbOk = await checkFirebase();
       setFirebaseOk(fbOk);
@@ -2009,11 +2009,29 @@ export default function App() {
   }, []);
 
   // ── Polling: sync from Firebase every 60 seconds (slower to avoid interrupting forms) ──
-  // Poll disabled — autosave handles Firebase sync
-  // (polling caused state resets while editing)
+  // ── Smart polling: sync from Firebase every 30s ──
+  // Uses reference equality — only re-renders if data actually changed
+  useEffect(() => {
+    if (!firebaseOk || !FIREBASE_URL) return;
+    const poll = setInterval(async () => {
+      try {
+        const r1 = await appStorage.get("dp_clientes");
+        if (r1) { const nd = JSON.parse(r1); setClientes(prev => JSON.stringify(prev)===JSON.stringify(nd) ? prev : nd); }
+      } catch(e) {}
+      try {
+        const r2 = await appStorage.get("dp_pedidos");
+        if (r2) { const nd = JSON.parse(r2); setPedidos(prev => JSON.stringify(prev)===JSON.stringify(nd) ? prev : nd); }
+      } catch(e) {}
+      try {
+        const r3 = await appStorage.get("dp_tickets");
+        if (r3) { const nd = JSON.parse(r3); setTickets(prev => JSON.stringify(prev)===JSON.stringify(nd) ? prev : nd); }
+      } catch(e) {}
+    }, 30000);
+    return () => clearInterval(poll);
+  }, [firebaseOk]);
 
   // ── Auto-save with 5s debounce ──
-  React.useEffect(() => {
+  useEffect(() => {
     if (!storageReady) return;
     const timer = setTimeout(async () => {
       setSavingIndicator(true);
