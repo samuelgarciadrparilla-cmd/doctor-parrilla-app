@@ -17,101 +17,114 @@ const RED         = "#C0392B";
 const GREEN       = "#27AE60";
 const ORANGE      = "#E67E22";
 
-const WA_NUMBER = "595994389932";
-const GOOGLE_REVIEW_URL = "https://share.google/D7XEt1nQQzynvpxG5";
-
-// ── FIREBASE + LOCAL STORAGE (MANUAL SAVE) ─────────────────────────────────
-// IMPORTANTE: Reemplaza esta URL con tu Firebase Realtime Database URL
+// ── FIREBASE REALTIME DATABASE ──────────────────────────────────────────────
+// IMPORTANTE: Reemplaza con tu URL de Firebase
 const FIREBASE_URL = "https://doctor-parrilla-clientes-default-rtdb.firebaseio.com";
 
-const appStorage = {
-  async get(key) {
-    // 1. Try Firebase first
-    if (FIREBASE_URL) {
-      try {
-        const response = await fetch(`${FIREBASE_URL}/drparrilla/${key}.json`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" }
-        });
-        
-        if (response.ok) { 
-          const data = await response.json(); 
-          if (data !== null) {
-            console.log(`✅ Firebase: Loaded ${key}`);
-            return JSON.stringify(data);
-          }
-        } else if (response.status === 401 || response.status === 403) {
-          console.error(`❌ Firebase: Permission denied for ${key}`);
-        }
-      } catch(error) {
-        console.warn(`⚠️ Firebase read failed for ${key}:`, error.message);
-      }
-    }
-    
-    // 2. Fallback to localStorage
-    try { 
-      const data = localStorage.getItem(key);
-      if (data) {
-        console.log(`📱 localStorage: Loaded ${key}`);
+class FirebaseSync {
+  constructor(baseUrl) {
+    this.baseUrl = baseUrl;
+    this.listeners = {};
+  }
+
+  async get(path) {
+    if (!this.baseUrl) return null;
+    try {
+      const response = await fetch(`${this.baseUrl}/${path}.json`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`✅ Firebase GET: ${path}`, data);
         return data;
       }
-    } catch(e) { 
-      console.error(`❌ localStorage read error for ${key}:`, e);
+    } catch (error) {
+      console.warn(`⚠️ Firebase GET failed for ${path}:`, error.message);
     }
-    
     return null;
-  },
-  
-  async set(key, value) {
-    let savedToFirebase = false;
-    
-    // 1. Save to Firebase (primary)
-    if (FIREBASE_URL) {
-      try {
-        const response = await fetch(`${FIREBASE_URL}/drparrilla/${key}.json`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: value
-        });
-        
-        if (response.ok) {
-          console.log(`✅ Firebase: Saved ${key}`);
-          savedToFirebase = true;
-        } else if (response.status === 401 || response.status === 403) {
-          console.error(`❌ Firebase: Permission denied for ${key}`);
-        }
-      } catch(error) {
-        console.warn(`⚠️ Firebase write failed for ${key}:`, error.message);
-      }
-    }
-    
-    // 2. Always backup to localStorage
-    try { 
-      localStorage.setItem(key, value);
-      console.log(`📱 localStorage: Saved ${key}`);
-    } catch(e) { 
-      console.error(`❌ localStorage write error for ${key}:`, e);
-    }
-    
-    return savedToFirebase;
   }
-};
 
-async function checkFirebase() {
-  if (!FIREBASE_URL) return false;
-  try {
-    const response = await fetch(`${FIREBASE_URL}/.json?shallow=true`, { 
-      signal: AbortSignal.timeout(3000),
-      method: "GET"
-    });
-    const ok = response.ok;
-    console.log(`🔥 Firebase: ${ok ? "CONNECTED" : "DISCONNECTED"}`);
-    return ok;
-  } catch(e) { 
-    console.warn(`⚠️ Firebase connection check failed:`, e.message);
+  async set(path, data) {
+    if (!this.baseUrl) {
+      console.warn("⚠️ Firebase URL not configured");
+      return false;
+    }
+    try {
+      const response = await fetch(`${this.baseUrl}/${path}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (response.ok) {
+        console.log(`✅ Firebase SET: ${path}`);
+        return true;
+      } else {
+        console.error(`❌ Firebase SET failed for ${path}:`, response.status);
+      }
+    } catch (error) {
+      console.error(`❌ Firebase SET error for ${path}:`, error.message);
+    }
     return false;
   }
+
+  async update(path, data) {
+    if (!this.baseUrl) return false;
+    try {
+      const response = await fetch(`${this.baseUrl}/${path}.json`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (response.ok) {
+        console.log(`✅ Firebase UPDATE: ${path}`);
+        return true;
+      }
+    } catch (error) {
+      console.error(`❌ Firebase UPDATE error:`, error.message);
+    }
+    return false;
+  }
+
+  async delete(path) {
+    if (!this.baseUrl) return false;
+    try {
+      const response = await fetch(`${this.baseUrl}/${path}.json`, {
+        method: "DELETE"
+      });
+      if (response.ok) {
+        console.log(`✅ Firebase DELETE: ${path}`);
+        return true;
+      }
+    } catch (error) {
+      console.error(`❌ Firebase DELETE error:`, error.message);
+    }
+    return false;
+  }
+
+  // Polling para sincronización en tiempo real
+  poll(path, callback, interval = 3000) {
+    const pollId = `${path}_${Date.now()}`;
+    const pollFn = async () => {
+      const data = await this.get(path);
+      if (data) callback(data);
+    };
+    
+    this.listeners[pollId] = setInterval(pollFn, interval);
+    pollFn(); // Ejecutar inmediatamente
+    console.log(`🔄 Polling started for ${path} (${interval}ms)`);
+    
+    return () => {
+      clearInterval(this.listeners[pollId]);
+      delete this.listeners[pollId];
+      console.log(`🛑 Polling stopped for ${path}`);
+    };
+  }
+
+  stopAllListeners() {
+    Object.values(this.listeners).forEach(listener => clearInterval(listener));
+    this.listeners = {};
+  }
 }
+
+const firebase = new FirebaseSync(FIREBASE_URL);
 
 // ── ADMIN USERS ────────────────────────────────────────────────────────────
 const ADMIN_USERS = [
@@ -141,11 +154,11 @@ function Header({ title, subtitle, back, onBack }) {
   );
 }
 
-function SaveButton({ onClick, loading, success }) {
+function SaveButton({ onClick, loading, label = "Guardar Cambios" }) {
   return (
-    <button onClick={onClick} style={{
+    <button onClick={onClick} disabled={loading} style={{
       width:"100%",
-      background: success ? GREEN : GOLD,
+      background: loading ? "#666" : GOLD,
       color: DARK,
       padding:"14px",
       borderRadius:10,
@@ -158,12 +171,12 @@ function SaveButton({ onClick, loading, success }) {
       opacity: loading ? 0.7 : 1,
       transition:"all 0.3s ease"
     }}>
-      {loading ? "💾 Guardando..." : success ? "✅ Guardado" : "💾 Guardar Cambios"}
+      {loading ? "💾 Guardando..." : `💾 ${label}`}
     </button>
   );
 }
 
-function LoginScreen({ clientes, onLogin }) {
+function LoginScreen({ onLogin }) {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -172,7 +185,7 @@ function LoginScreen({ clientes, onLogin }) {
     e.preventDefault();
     const admin = findAdmin(phone, password);
     if (admin) {
-      onLogin(admin, null, true);
+      onLogin(admin, true);
       return;
     }
     setError("Credenciales inválidas");
@@ -189,7 +202,7 @@ function LoginScreen({ clientes, onLogin }) {
       <form onSubmit={handleLogin} style={{ display:"flex", flexDirection:"column", gap:16 }}>
         <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Teléfono" style={{ width:"100%", padding:"12px", background:CARD, border:`1px solid ${BORDER}`, color:CREAM, borderRadius:8, fontSize:14, outline:"none", boxSizing:"border-box" }} />
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" style={{ width:"100%", padding:"12px", background:CARD, border:`1px solid ${BORDER}`, color:CREAM, borderRadius:8, fontSize:14, outline:"none", boxSizing:"border-box" }} />
-        {error && <div style={{ color:RED, fontSize:12, fontFamily:"sans-serif" }}>{error}</div>}
+        {error && <div style={{ color:RED, fontSize:12, fontFamily:"sans-serif" }}>❌ {error}</div>}
         <button type="submit" style={{ background:GOLD, color:DARK, padding:"12px", borderRadius:8, border:"none", fontWeight:"bold", cursor:"pointer", fontSize:14 }}>Ingresar</button>
       </form>
       
@@ -200,7 +213,7 @@ function LoginScreen({ clientes, onLogin }) {
   );
 }
 
-function AdminClientes({ clientes, setClientes, onSave }) {
+function AdminClientes({ clientes, setClientes, firebaseOk }) {
   const [view, setView] = useState("list");
   const [idx, setIdx] = useState(null);
   const [form, setForm] = useState({ nombre:"", tel:"", dir:"", historial:"", codigo:"" });
@@ -245,7 +258,16 @@ function AdminClientes({ clientes, setClientes, onSave }) {
     }
     
     setClientes(next);
-    await onSave("dp_clientes", next);
+    
+    // Guardar en Firebase
+    if (firebaseOk) {
+      await firebase.set("drparrilla/dp_clientes", next);
+    }
+    
+    // Guardar en localStorage como respaldo
+    try {
+      localStorage.setItem("dp_clientes", JSON.stringify(next));
+    } catch(e) {}
     
     setSaving(false);
     setView("list");
@@ -258,7 +280,15 @@ function AdminClientes({ clientes, setClientes, onSave }) {
     setSaving(true);
     const next = clientes.filter((_,j)=>j!==i);
     setClientes(next);
-    await onSave("dp_clientes", next);
+    
+    if (firebaseOk) {
+      await firebase.set("drparrilla/dp_clientes", next);
+    }
+    
+    try {
+      localStorage.setItem("dp_clientes", JSON.stringify(next));
+    } catch(e) {}
+    
     setSaving(false);
     setView("list");
   };
@@ -300,7 +330,7 @@ function AdminClientes({ clientes, setClientes, onSave }) {
           
           {error && <div style={{ fontSize:12, color:RED, fontFamily:"sans-serif" }}>❌ {error}</div>}
           
-          <SaveButton onClick={guardar} loading={saving} success={false} />
+          <SaveButton onClick={guardar} loading={saving} label={idx===null?"Crear Cliente":"Actualizar Cliente"} />
           
           {idx !== null && (
             <button onClick={() => eliminar(idx)} style={{ width:"100%", background:"none", border:`1px solid ${RED}`, color:RED, padding:"14px", borderRadius:10, fontSize:14, fontFamily:"sans-serif", cursor:"pointer" }}>
@@ -354,42 +384,40 @@ function AdminClientes({ clientes, setClientes, onSave }) {
   );
 }
 
-function AdminPedidos({ pedidos, setPedidos, clientes, onSave }) {
+function AdminPedidos() {
   return (
     <div style={{ padding:"20px", paddingBottom:100 }}>
       <Header title="Pedidos" subtitle="GESTIÓN DE PEDIDOS" />
-      <div style={{ color:GOLD, marginTop:20 }}>Próximamente: Sistema de pedidos con sincronización en tiempo real</div>
+      <div style={{ color:GOLD, marginTop:20 }}>📦 Próximamente: Sistema de pedidos con sincronización en tiempo real</div>
     </div>
   );
 }
 
-function AdminTickets({ tickets, setTickets, onSave }) {
+function AdminTickets() {
   return (
     <div style={{ padding:"20px", paddingBottom:100 }}>
       <Header title="Tickets" subtitle="SOPORTE TÉCNICO" />
-      <div style={{ color:GOLD, marginTop:20 }}>Próximamente: Sistema de tickets de soporte</div>
+      <div style={{ color:GOLD, marginTop:20 }}>💬 Próximamente: Sistema de tickets de soporte</div>
     </div>
   );
 }
 
-function AdminCatalog({ productos, setProductos, onSave }) {
+function AdminCatalog() {
   return (
     <div style={{ padding:"20px", paddingBottom:100 }}>
       <Header title="Catálogo" subtitle="GESTIÓN DE PRODUCTOS" />
-      <div style={{ color:GOLD, marginTop:20 }}>Próximamente: Gestión de productos</div>
+      <div style={{ color:GOLD, marginTop:20 }}>🔥 Próximamente: Gestión de productos</div>
     </div>
   );
 }
 
-function BottomNav({ active, setActive, isAdmin }) {
-  const items = isAdmin 
-    ? [
-        { id:"admin-clientes", label:"Clientes", icon:"👥" },
-        { id:"admin-orders", label:"Pedidos", icon:"📦" },
-        { id:"admin-tickets", label:"Tickets", icon:"💬" },
-        { id:"admin-catalog", label:"Catálogo", icon:"🔥" },
-      ]
-    : [];
+function BottomNav({ active, setActive }) {
+  const items = [
+    { id:"admin-clientes", label:"Clientes", icon:"👥" },
+    { id:"admin-orders", label:"Pedidos", icon:"📦" },
+    { id:"admin-tickets", label:"Tickets", icon:"💬" },
+    { id:"admin-catalog", label:"Catálogo", icon:"🔥" },
+  ];
   
   return (
     <div style={{ position:"fixed", bottom:0, left:0, right:0, background:DARK2, borderTop:`1px solid ${BORDER}`, display:"flex", justifyContent:"space-around", maxWidth:430, margin:"0 auto" }}>
@@ -406,90 +434,102 @@ function BottomNav({ active, setActive, isAdmin }) {
 // ── MAIN APP ───────────────────────────────────────────────────────────────
 export default function App() {
   const [logged, setLogged] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [adminUser, setAdminUser] = useState(null);
   const [active, setActive] = useState("admin-clientes");
-  const [pedidos, setPedidos] = useState([]);
-  const [tickets, setTickets] = useState([]);
   const [clientes, setClientes] = useState([]);
-  const [productos, setProductos] = useState([]);
-  const [storageReady, setStorageReady] = useState(false);
   const [firebaseOk, setFirebaseOk] = useState(false);
-  const [lastSave, setLastSave] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const unsubscribeRef = useRef(null);
 
-  // ── Load from storage on mount ──
+  // ── Load data on mount and setup realtime sync ──
   React.useEffect(() => {
-    const load = async () => {
-      console.log("🔄 Loading data from storage...");
-      const fbOk = await checkFirebase();
-      setFirebaseOk(fbOk);
+    const initializeApp = async () => {
+      console.log("🚀 Initializing Doctor Parrilla...");
       
-      try { 
-        const r1 = await appStorage.get("dp_clientes");  
-        if (r1) { 
-          const parsed = JSON.parse(r1);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setClientes(parsed);
-            console.log(`✅ Loaded ${parsed.length} clientes`);
+      // Check Firebase connection
+      try {
+        const response = await fetch(`${FIREBASE_URL}/.json?shallow=true`);
+        setFirebaseOk(response.ok);
+        console.log(`🔥 Firebase: ${response.ok ? "CONNECTED" : "DISCONNECTED"}`);
+      } catch(e) {
+        console.warn("⚠️ Firebase connection failed");
+        setFirebaseOk(false);
+      }
+      
+      // Load initial data
+      try {
+        const data = await firebase.get("drparrilla/dp_clientes");
+        if (data && Array.isArray(data)) {
+          setClientes(data);
+          localStorage.setItem("dp_clientes", JSON.stringify(data));
+          console.log(`✅ Loaded ${data.length} clientes`);
+        } else {
+          // Try localStorage
+          const stored = localStorage.getItem("dp_clientes");
+          if (stored) {
+            setClientes(JSON.parse(stored));
           }
         }
-      } catch(e) { console.error("Error loading clientes:", e); }
+      } catch(e) {
+        console.error("Error loading data:", e);
+      }
       
-      try { 
-        const r2 = await appStorage.get("dp_pedidos");   
-        if (r2) { 
-          const parsed = JSON.parse(r2);
-          if (Array.isArray(parsed) && parsed.length > 0) setPedidos(parsed);
+      setLoading(false);
+      
+      // Setup realtime polling
+      unsubscribeRef.current = firebase.poll("drparrilla/dp_clientes", (data) => {
+        if (Array.isArray(data)) {
+          console.log("🔄 Realtime update received:", data);
+          setClientes(data);
         }
-      } catch(e) { console.error("Error loading pedidos:", e); }
-      
-      try { 
-        const r3 = await appStorage.get("dp_tickets");   
-        if (r3) { 
-          const parsed = JSON.parse(r3);
-          if (Array.isArray(parsed) && parsed.length > 0) setTickets(parsed);
-        }
-      } catch(e) { console.error("Error loading tickets:", e); }
-      
-      setStorageReady(true);
-      console.log("✅ Storage ready");
+      }, 2000); // Poll every 2 seconds
     };
-    load();
+    
+    initializeApp();
+    
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+      }
+      firebase.stopAllListeners();
+    };
   }, []);
 
-  // ── Manual save function ──
-  const handleSave = async (key, data) => {
-    console.log(`💾 Saving ${key}...`);
-    const saved = await appStorage.set(key, JSON.stringify(data));
-    setLastSave({ key, saved, time: new Date().toLocaleTimeString() });
-    console.log(`✅ Save complete for ${key}`);
-  };
+  if (loading) {
+    return (
+      <div style={{ fontFamily:"Georgia, serif", background:DARK, color:"#F0F0F0", minHeight:"100vh", maxWidth:430, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontSize:48, marginBottom:16 }}>🔥</div>
+          <p style={{ color:GOLD }}>Cargando Doctor Parrilla...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!logged) return (
     <div style={{ fontFamily:"Georgia, serif", background:DARK, color:"#F0F0F0", minHeight:"100vh", maxWidth:430, margin:"0 auto" }}>
-      <LoginScreen clientes={clientes} onLogin={(admin, _, esAdmin) => {
+      <LoginScreen onLogin={(admin, _) => {
         setAdminUser(admin);
-        setIsAdmin(esAdmin);
         setLogged(true);
       }} />
     </div>
   );
 
   const screens = {
-    "admin-clientes": () => <AdminClientes clientes={clientes} setClientes={setClientes} onSave={handleSave} />,
-    "admin-orders": () => <AdminPedidos pedidos={pedidos} setPedidos={setPedidos} clientes={clientes} onSave={handleSave} />,
-    "admin-tickets": () => <AdminTickets tickets={tickets} setTickets={setTickets} onSave={handleSave} />,
-    "admin-catalog": () => <AdminCatalog productos={productos} setProductos={setProductos} onSave={handleSave} />,
+    "admin-clientes": () => <AdminClientes clientes={clientes} setClientes={setClientes} firebaseOk={firebaseOk} />,
+    "admin-orders": () => <AdminPedidos />,
+    "admin-tickets": () => <AdminTickets />,
+    "admin-catalog": () => <AdminCatalog />,
   };
   const Screen = screens[active] || screens["admin-clientes"];
 
   return (
     <div style={{ fontFamily:"Georgia, serif", background:DARK, color:"#F0F0F0", minHeight:"100vh", maxWidth:430, margin:"0 auto", position:"relative" }}>
       <div style={{ background:"#080808", padding:"10px 20px 6px", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:11, color:"#555", fontFamily:"sans-serif" }}>
-        <span style={{ fontSize:10, minWidth:50 }}>
+        <span style={{ fontSize:10 }}>
           {firebaseOk
-            ? <span style={{ color: GREEN }}>🔥 Firebase</span>
-            : <span style={{ color:"#E57373" }}>📵 Local</span>
+            ? <span style={{ color: GREEN }}>🔥 Firebase LIVE</span>
+            : <span style={{ color:"#E57373" }}>📵 Local Mode</span>
           }
         </span>
         <span style={{ fontSize:12 }}>🔥 Doctor Parrilla</span>
@@ -500,7 +540,7 @@ export default function App() {
         <div style={{ background:"#0D0500", padding:"10px 16px", fontSize:11, fontFamily:"sans-serif", letterSpacing:"1px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
           <span style={{ color:GOLD }}>👤 {adminUser.nombre}</span>
           <span style={{ color:"#666", fontSize:10 }}>
-            {lastSave ? `Última sincronización: ${lastSave.time}` : "Listo para guardar"}
+            {firebaseOk ? "🔄 Sincronizando en tiempo real..." : "📱 Modo local"}
           </span>
         </div>
       )}
@@ -509,7 +549,7 @@ export default function App() {
         {Screen()}
       </div>
       
-      <BottomNav active={active} setActive={setActive} isAdmin={isAdmin} />
+      <BottomNav active={active} setActive={setActive} />
     </div>
   );
 }
