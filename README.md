@@ -1,4 +1,4 @@
-# Dr. Parrilla — App de Gestión v2.0
+# Dr. Parrilla — App de Gestión
 ## Lista para producción ✅
 
 ---
