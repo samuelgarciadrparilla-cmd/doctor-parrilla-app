@@ -1047,11 +1047,23 @@ function AdminClientes({ clientes, setClientes }) {
   const guardar = () => {
     if (!form.nombre.trim()) { setError("El nombre es obligatorio."); return; }
     if (normalizePhone(form.tel).length < 7) { setError("Ingresá un número válido."); return; }
-    if (idx === null) setClientes([...clientes, { ...form, id:`C-${String(clientes.length+1).padStart(3,"0")}`, tel:normalizePhone(form.tel) }]);
-    else setClientes(clientes.map((c,i) => i===idx ? { ...form, tel:normalizePhone(form.tel) } : c));
+    if (idx === null) {
+      const next = [...clientes, { ...form, id:`C-${String(clientes.length+1).padStart(3,"0")}`, tel:normalizePhone(form.tel) }];
+      setClientes(next);
+      appStorage.set("dp_clientes", JSON.stringify(next));
+    } else {
+      const next = clientes.map((c,i) => i===idx ? { ...form, tel:normalizePhone(form.tel) } : c);
+      setClientes(next);
+      appStorage.set("dp_clientes", JSON.stringify(next));
+    }
     setView("list"); setError("");
   };
-  const eliminar = (i) => { setClientes(clientes.filter((_,j)=>j!==i)); setView("list"); };
+  const eliminar = (i) => {
+    const next = clientes.filter((_,j)=>j!==i);
+    setClientes(next);
+    appStorage.set("dp_clientes", JSON.stringify(next));
+    setView("list");
+  };
   if (view==="form") return (
     <div style={{ paddingBottom:80 }}>
       <Header title={idx===null?"Nuevo Cliente":"Editar Cliente"} subtitle="GESTIÓN DE CLIENTES" back onBack={() => { setView(idx===null?"list":"detail"); setError(""); }} />
@@ -1523,7 +1535,11 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
             <button
               onClick={() => {
                 if (window.confirm(`¿Eliminar el pedido ${p.id} de forma permanente? Esta acción no se puede deshacer.`)) {
-                  setPedidos(prev => prev.filter((_,j) => j !== selected));
+                  setPedidos(prev => {
+                    const next = prev.filter((_,j) => j !== selected);
+                    appStorage.set("dp_pedidos", JSON.stringify(next));
+                    return next;
+                  });
                   setSelected(null);
                   setNota("");
                 }
@@ -1625,7 +1641,11 @@ function AdminTickets({ tickets, setTickets, clientes }) {
             <button
               onClick={() => {
                 if (window.confirm(`¿Eliminar el ticket ${t.id} de forma permanente?`)) {
-                  setTickets(prev => prev.filter((_,j) => j !== selected));
+                  setTickets(prev => {
+                    const next = prev.filter((_,j) => j !== selected);
+                    appStorage.set("dp_tickets", JSON.stringify(next));
+                    return next;
+                  });
                   setSelected(null);
                 }
               }}
@@ -1989,16 +2009,8 @@ export default function App() {
   }, []);
 
   // ── Polling: sync from Firebase every 60 seconds (slower to avoid interrupting forms) ──
-  React.useEffect(() => {
-    if (!firebaseOk || !FIREBASE_URL) return;
-    const poll = setInterval(async () => {
-      // Only sync if user is on a list view, not editing forms
-      try { const r1 = await appStorage.get("dp_clientes");  if (r1) setClientes(JSON.parse(r1));  } catch(e) {}
-      try { const r2 = await appStorage.get("dp_pedidos");   if (r2) setPedidos(JSON.parse(r2));   } catch(e) {}
-      try { const r3 = await appStorage.get("dp_tickets");   if (r3) setTickets(JSON.parse(r3));   } catch(e) {}
-    }, 60000);
-    return () => clearInterval(poll);
-  }, [firebaseOk]);
+  React.// Poll disabled — autosave handles Firebase sync
+  // (polling caused state resets while editing)
 
   // ── Auto-save with 5s debounce ──
   React.useEffect(() => {
@@ -2011,7 +2023,7 @@ export default function App() {
       try { await appStorage.set("dp_productos", JSON.stringify(productos)); } catch(e) {}
       try { await appStorage.set("dp_visitas",  JSON.stringify(visitas));   } catch(e) {}
       setTimeout(() => setSavingIndicator(false), 800);
-    }, 45000); // 45 seconds — más tiempo para editar sin interrupciones
+    }, 20000); // 20 seconds — balance entre edición y persistencia
     return () => clearTimeout(timer);
   }, [clientes, pedidos, tickets, productos, visitas, storageReady]);
 
@@ -2062,7 +2074,7 @@ export default function App() {
         </div>
       )}
       <div style={{ overflowY:"auto",maxHeight:"calc(100vh - 120px)" }}>
-        <Screen />
+        {Screen()}
       </div>
       <BottomNav active={active} setActive={setActive} isAdmin={isAdmin} />
     </div>
