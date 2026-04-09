@@ -28,26 +28,51 @@ const GOOGLE_REVIEW_URL = "https://share.google/D7XEt1nQQzynvpxG5";
 
 
 // ── FIREBASE + LOCAL STORAGE ─────────────────────────────────────────────────
-// ── LOCAL STORAGE ONLY (Reliable Storage) ─────────────────────────────────────
+// Paste your Firebase Realtime Database URL here after creating the project
+// Example: "https://doctor-parrilla-default-rtdb.firebaseio.com"
+const FIREBASE_URL = "https://doctor-parrilla-clientes-default-rtdb.firebaseio.com";
+
 const appStorage = {
   async get(key) {
-    try { 
-      const data = localStorage.getItem(key);
-      return data ? data : null;
-    } catch(e) { 
-      return null; 
+    // 1. Try Firebase
+    if (FIREBASE_URL) {
+      try {
+        const r = await fetch(`${FIREBASE_URL}/drparrilla/${key}.json`);
+        if (r.ok) { const d = await r.json(); if (d !== null) return JSON.stringify(d); }
+      } catch(e) {}
     }
+    // 2. Try Claude artifact storage
+    try {
+      if (window.storage) { const r = await window.storage.get(key); return r ? r.value : null; }
+    } catch(e) {}
+    // 3. Fallback localStorage
+    try { return localStorage.getItem(key); } catch(e) { return null; }
   },
   async set(key, value) {
-    try { 
-      localStorage.setItem(key, value);
-    } catch(e) { }
+    // 1. Save to Firebase
+    if (FIREBASE_URL) {
+      try {
+        await fetch(`${FIREBASE_URL}/drparrilla/${key}.json`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: value
+        });
+      } catch(e) {}
+    }
+    // 2. Save to Claude artifact storage
+    try { if (window.storage) { await window.storage.set(key, value); } } catch(e) {}
+    // 3. Save to localStorage (backup)
+    try { localStorage.setItem(key, value); } catch(e) {}
   }
 };
 
-// Firebase connection status (always false - using localStorage only)
+// Firebase connection status
 async function checkFirebase() {
-  return false;
+  if (!FIREBASE_URL) return false;
+  try {
+    const r = await fetch(`${FIREBASE_URL}/.json?shallow=true`, { signal: AbortSignal.timeout(3000) });
+    return r.ok;
+  } catch(e) { return false; }
 }
 
 
@@ -1959,54 +1984,25 @@ export default function App() {
   const [adminUser, setAdminUser]     = useState(null);
   const [clienteUser, setClienteUser] = useState(null);
   const [active, setActive]           = useState("home");
-  const [pedidos, setPedidos]         = useState([]);
-  const [tickets, setTickets]         = useState([]);
-  const [clientes, setClientes]       = useState([]);
+  const [pedidos, setPedidos]         = useState(INITIAL_PEDIDOS);
+  const [tickets, setTickets]         = useState(INITIAL_TICKETS);
+  const [clientes, setClientes]       = useState(INITIAL_CLIENTES);
   const [productos, setProductos]     = useState(INITIAL_PRODUCTOS);
   const [storageReady, setStorageReady] = useState(false);
   const [savingIndicator, setSavingIndicator] = useState(false);
   const [firebaseOk, setFirebaseOk] = useState(false);
   const [visitas, setVisitas] = useState([]);
 
-  // ── Load from storage on mount ──
+  // ── Load from storage on mount + check Firebase ──
   React.useEffect(() => {
     const load = async () => {
-      setFirebaseOk(false);
-      try { 
-        const r1 = await appStorage.get("dp_clientes");  
-        if (r1) { 
-          const parsed = JSON.parse(r1);
-          if (Array.isArray(parsed) && parsed.length > 0) setClientes(parsed);
-        }
-      } catch(e) { console.error("Error loading clientes:", e); }
-      try { 
-        const r2 = await appStorage.get("dp_pedidos");   
-        if (r2) { 
-          const parsed = JSON.parse(r2);
-          if (Array.isArray(parsed) && parsed.length > 0) setPedidos(parsed);
-        }
-      } catch(e) { console.error("Error loading pedidos:", e); }
-      try { 
-        const r3 = await appStorage.get("dp_tickets");   
-        if (r3) { 
-          const parsed = JSON.parse(r3);
-          if (Array.isArray(parsed) && parsed.length > 0) setTickets(parsed);
-        }
-      } catch(e) { console.error("Error loading tickets:", e); }
-      try { 
-        const r4 = await appStorage.get("dp_productos"); 
-        if (r4) { 
-          const parsed = JSON.parse(r4);
-          if (Array.isArray(parsed) && parsed.length > 0) setProductos(parsed);
-        }
-      } catch(e) { console.error("Error loading productos:", e); }
-      try { 
-        const r5 = await appStorage.get("dp_visitas");   
-        if (r5) { 
-          const parsed = JSON.parse(r5);
-          if (Array.isArray(parsed) && parsed.length > 0) setVisitas(parsed);
-        }
-      } catch(e) { console.error("Error loading visitas:", e); }
+      const fbOk = await checkFirebase();
+      setFirebaseOk(fbOk);
+      try { const r1 = await appStorage.get("dp_clientes");  if (r1) setClientes(JSON.parse(r1));  } catch(e) {}
+      try { const r2 = await appStorage.get("dp_pedidos");   if (r2) setPedidos(JSON.parse(r2));   } catch(e) {}
+      try { const r3 = await appStorage.get("dp_tickets");   if (r3) setTickets(JSON.parse(r3));   } catch(e) {}
+      try { const r4 = await appStorage.get("dp_productos"); if (r4) setProductos(JSON.parse(r4)); } catch(e) {}
+      try { const r5 = await appStorage.get("dp_visitas");   if (r5) setVisitas(JSON.parse(r5));   } catch(e) {}
       setStorageReady(true);
     };
     load();
@@ -2016,18 +2012,18 @@ export default function App() {
   // Poll disabled — autosave handles Firebase sync
   // (polling caused state resets while editing)
 
-  // ── Auto-save with immediate save on change ──
+  // ── Auto-save with 5s debounce ──
   React.useEffect(() => {
     if (!storageReady) return;
-    setSavingIndicator(true);
     const timer = setTimeout(async () => {
-      try { if (clientes.length > 0) await appStorage.set("dp_clientes",  JSON.stringify(clientes)); } catch(e) {}
-      try { if (pedidos.length > 0) await appStorage.set("dp_pedidos",   JSON.stringify(pedidos)); } catch(e) {}
-      try { if (tickets.length > 0) await appStorage.set("dp_tickets",   JSON.stringify(tickets)); } catch(e) {}
-      try { if (productos.length > 0) await appStorage.set("dp_productos", JSON.stringify(productos)); } catch(e) {}
-      try { if (visitas.length > 0) await appStorage.set("dp_visitas",  JSON.stringify(visitas));   } catch(e) {}
-      setTimeout(() => setSavingIndicator(false), 500);
-    }, 1000); // 1 second debounce
+      setSavingIndicator(true);
+      try { await appStorage.set("dp_clientes",  JSON.stringify(clientes)); } catch(e) {}
+      try { await appStorage.set("dp_pedidos",   JSON.stringify(pedidos)); } catch(e) {}
+      try { await appStorage.set("dp_tickets",   JSON.stringify(tickets)); } catch(e) {}
+      try { await appStorage.set("dp_productos", JSON.stringify(productos)); } catch(e) {}
+      try { await appStorage.set("dp_visitas",  JSON.stringify(visitas));   } catch(e) {}
+      setTimeout(() => setSavingIndicator(false), 800);
+    }, 20000); // 20 seconds — balance entre edición y persistencia
     return () => clearTimeout(timer);
   }, [clientes, pedidos, tickets, productos, visitas, storageReady]);
 
