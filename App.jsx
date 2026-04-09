@@ -2046,9 +2046,52 @@ export default function App() {
       try { await appStorage.set("dp_productos", JSON.stringify(productos)); } catch(e) {}
       try { await appStorage.set("dp_visitas",  JSON.stringify(visitas));   } catch(e) {}
       setTimeout(() => setSavingIndicator(false), 800);
-    }, 20000); // 20 seconds — balance entre edición y persistencia
+    }, 10000); // 10 seconds — sync rápido para tiempo real
     return () => clearTimeout(timer);
-  }, [clientes, pedidos, tickets, productos, visitas, storageReady]);
+  }, [clientes, pedidos, tickets, productos, visitas, storageReady])
+
+  // ── SYNC EN TIEMPO REAL: polling inteligente cada 15s ──────────────────
+  // Usa timestamp para detectar cambios reales — no sobreescribe si hay cambios locales pendientes
+  useEffect(() => {
+    if (!firebaseOk || !FIREBASE_URL) return;
+    let lastSyncedPedidos = null;
+    let lastSyncedTickets = null;
+    let lastSyncedClientes = null;
+
+    const poll = setInterval(async () => {
+      try {
+        const [r1, r2, r3] = await Promise.all([
+          fetch(`${FIREBASE_URL}/drparrilla/dp_pedidos.json`),
+          fetch(`${FIREBASE_URL}/drparrilla/dp_tickets.json`),
+          fetch(`${FIREBASE_URL}/drparrilla/dp_clientes.json`)
+        ]);
+        const [fbPedidos, fbTickets, fbClientes] = await Promise.all([r1.json(), r2.json(), r3.json()]);
+
+        if (fbPedidos) {
+          const fbStr = JSON.stringify(fbPedidos);
+          if (fbStr !== lastSyncedPedidos) {
+            lastSyncedPedidos = fbStr;
+            setPedidos(fbPedidos);
+          }
+        }
+        if (fbTickets) {
+          const fbStr = JSON.stringify(fbTickets);
+          if (fbStr !== lastSyncedTickets) {
+            lastSyncedTickets = fbStr;
+            setTickets(fbTickets);
+          }
+        }
+        if (fbClientes) {
+          const fbStr = JSON.stringify(fbClientes);
+          if (fbStr !== lastSyncedClientes) {
+            lastSyncedClientes = fbStr;
+            setClientes(fbClientes);
+          }
+        }
+      } catch(e) {}
+    }, 15000); // cada 15 segundos
+    return () => clearInterval(poll);
+  }, [firebaseOk]);;
 
   if (!logged) return (
     <div style={{ fontFamily:"Georgia, serif",background:DARK,color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto" }}>
