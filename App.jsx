@@ -22,6 +22,7 @@ const GOLD_GRAD   = "linear-gradient(135deg, #9A7A3E 0%, #C8A96E 40%, #E2C98A 70
 const STEEL_CARD  = "linear-gradient(145deg, #0E1014 0%, #0B0D11 100%)";
 const FLAME_LOW   = "linear-gradient(0deg, rgba(180,80,0,0.1) 0%, rgba(200,120,0,0.04) 40%, transparent 100%)";
 const WA_NUMBER = "595994389932";
+const BUILD_TS = 1775762469075;
 // Link de reseña Google — reemplazá con el link de "Obtener más reseñas" de Google Business
 // Ir a business.google.com → tu perfil → "Obtener más reseñas" → copiar link
 const GOOGLE_REVIEW_URL = "https://share.google/D7XEt1nQQzynvpxG5";
