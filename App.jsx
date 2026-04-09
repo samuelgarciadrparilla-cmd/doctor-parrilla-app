@@ -1052,7 +1052,7 @@ function AdminClientes({ clientes, setClientes }) {
       setClientes(next);
       appStorage.set("dp_clientes", JSON.stringify(next));
     } else {
-      const next = clientes.map((c,i) => i===idx ? { ...form, tel:normalizePhone(form.tel) } : c);
+      const next = clientes.map((c,i) => i===idx ? { ...c, ...form, tel:normalizePhone(form.tel) } : c);
       setClientes(next);
       appStorage.set("dp_clientes", JSON.stringify(next));
     }
@@ -1984,9 +1984,9 @@ export default function App() {
   const [adminUser, setAdminUser]     = useState(null);
   const [clienteUser, setClienteUser] = useState(null);
   const [active, setActive]           = useState("home");
-  const [pedidos, setPedidos]         = useState(INITIAL_PEDIDOS);
-  const [tickets, setTickets]         = useState(INITIAL_TICKETS);
-  const [clientes, setClientes]       = useState(INITIAL_CLIENTES);
+  const [pedidos, setPedidos]         = useState([]);
+  const [tickets, setTickets]         = useState([]);
+  const [clientes, setClientes]       = useState([]);
   const [productos, setProductos]     = useState(INITIAL_PRODUCTOS);
   const [storageReady, setStorageReady] = useState(false);
   const [savingIndicator, setSavingIndicator] = useState(false);
@@ -2017,11 +2017,11 @@ export default function App() {
     if (!storageReady) return;
     const timer = setTimeout(async () => {
       setSavingIndicator(true);
-      try { await appStorage.set("dp_clientes",  JSON.stringify(clientes)); } catch(e) {}
-      try { await appStorage.set("dp_pedidos",   JSON.stringify(pedidos)); } catch(e) {}
-      try { await appStorage.set("dp_tickets",   JSON.stringify(tickets)); } catch(e) {}
-      try { await appStorage.set("dp_productos", JSON.stringify(productos)); } catch(e) {}
-      try { await appStorage.set("dp_visitas",  JSON.stringify(visitas));   } catch(e) {}
+      try { if (clientes.length > 0) await appStorage.set("dp_clientes",  JSON.stringify(clientes)); } catch(e) {}
+      try { if (pedidos.length > 0) await appStorage.set("dp_pedidos",   JSON.stringify(pedidos)); } catch(e) {}
+      try { if (tickets.length > 0) await appStorage.set("dp_tickets",   JSON.stringify(tickets)); } catch(e) {}
+      try { if (productos.length > 0) await appStorage.set("dp_productos", JSON.stringify(productos)); } catch(e) {}
+      try { if (visitas.length > 0) await appStorage.set("dp_visitas",  JSON.stringify(visitas));   } catch(e) {}
       setTimeout(() => setSavingIndicator(false), 800);
     }, 20000); // 20 seconds — balance entre edición y persistencia
     return () => clearTimeout(timer);
