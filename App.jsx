@@ -1285,7 +1285,7 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
   const getNombre = (tel) => { const c=clientes.find(x=>normalizePhone(x.tel)===normalizePhone(tel)); return c?c.nombre:tel; };
 
   const crearPedido = () => {
-    const cliente = clientes.find(c => normalizePhone(c.tel) === normalizePhone(newForm.clienteId));
+    const cliente = newForm.clienteId ? clientes.find(c => normalizePhone(c.tel) === normalizePhone(newForm.clienteId)) : null;
     if (!cliente || !newForm.modelo || !newForm.monto) return;
     const fecha = new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
     const num = String(pedidos.length + 1).padStart(3, "0");
@@ -1309,7 +1309,7 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
 
   // ── NEW ORDER FORM ──
   if (view === "new") {
-    const clienteSeleccionado = clientes.find(c => normalizePhone(c.tel) === normalizePhone(newForm.clienteId));
+    const clienteSeleccionado = newForm.clienteId ? clientes.find(c => normalizePhone(c.tel) === normalizePhone(newForm.clienteId)) : null;
     const formOk = newForm.clienteId && newForm.modelo && newForm.monto;
     return (
       <div style={{ paddingBottom:80 }}>
@@ -1322,13 +1322,13 @@ function AdminOrders({ pedidos, setPedidos, clientes, adminUser, productos }) {
             <div style={{ display:"flex", flexDirection:"column", gap:8, maxHeight:200, overflowY:"auto" }}>
               {clientes.map(c => (
                 <button key={c.id} onClick={() => setNewForm({...newForm, clienteId: c.tel})}
-                  style={{ background: normalizePhone(newForm.clienteId)===normalizePhone(c.tel) ? GOLD+"22" : CARD, border:`1px solid ${normalizePhone(newForm.clienteId)===normalizePhone(c.tel) ? GOLD : BORDER}`, borderRadius:10, padding:"12px 16px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:12 }}>
+                  style={{ background: (newForm.clienteId && normalizePhone(newForm.clienteId)===normalizePhone(c.tel)) ? GOLD+"22" : CARD, border:`1px solid ${(newForm.clienteId && normalizePhone(newForm.clienteId)===normalizePhone(c.tel)) ? GOLD : BORDER}`, borderRadius:10, padding:"12px 16px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:12 }}>
                   <div style={{ width:36, height:36, borderRadius:"50%", background:GOLD+"18", border:`1px solid ${GOLD}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>👤</div>
                   <div>
-                    <div style={{ fontSize:14, fontWeight:"bold", color: normalizePhone(newForm.clienteId)===normalizePhone(c.tel) ? GOLD : "#F0F0F0" }}>{c.nombre}</div>
+                    <div style={{ fontSize:14, fontWeight:"bold", color: (newForm.clienteId && normalizePhone(newForm.clienteId)===normalizePhone(c.tel)) ? GOLD : "#F0F0F0" }}>{c.nombre}</div>
                     <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>{c.tel}{c.codigo ? ` · ${c.codigo}` : ""}</div>
                   </div>
-                  {newForm.normalizePhone(newForm.clienteId)===normalizePhone(c.tel) && <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>✓</span>}
+                  {newForm.(newForm.clienteId && normalizePhone(newForm.clienteId)===normalizePhone(c.tel)) && <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>✓</span>}
                 </button>
               ))}
               {clientes.length === 0 && <div style={{ color:"#555", fontFamily:"sans-serif", fontSize:13, padding:"16px", textAlign:"center" }}>No hay clientes registrados aún</div>}
