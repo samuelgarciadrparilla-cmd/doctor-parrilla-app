@@ -759,25 +759,6 @@ return (
 <div style={{ fontSize:11, color:GOLD_DARK, fontFamily:"sans-serif", fontStyle:"italic", marginBottom:36, letterSpacing:"2px", textAlign:"center" }}>
 "La parrilla de tus sueños te espera"
 </div>
-{/* Países - Exportando calidad */}
-<div style={{ marginBottom:28,width:"100%",maxWidth:340 }}>
-<div style={{ display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,justifyItems:"center",marginBottom:14 }}>
-{[{f:"🇵🇾",n:"Paraguay"},{f:"🇦🇷",n:"Argentina"},{f:"🇧🇷",n:"Brasil"},{f:"🇺🇾",n:"Uruguay"},{f:"🇨🇴",n:"Colombia"},{f:"🇺🇸",n:"EE.UU."},{f:"🇪🇸",n:"España"},{f:"🇵🇦",n:"Panamá"},{f:"🇸🇻",n:"El Salvador"}].map((p,i) => (
-<div key={i} style={{ display:"flex",flexDirection:"column",alignItems:"center",gap:3 }}>
-<div style={{ width:40,height:40,borderRadius:"50%",background:"#1A1A1A",border:`1px solid ${BORDER}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22 }}>{p.f}</div>
-<span style={{ fontSize:8,color:"#666",fontFamily:"sans-serif" }}>{p.n}</span>
-</div>
-))}
-</div>
-<div style={{ textAlign:"center",lineHeight:1.4 }}>
-<span style={{ fontSize:14,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}>Exportando </span>
-<span style={{ fontSize:14,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>CALIDAD</span>
-<span style={{ fontSize:14,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}> de </span>
-<span style={{ fontSize:14,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>PARAGUAY</span>
-<span style={{ fontSize:14,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}> al </span>
-<span style={{ fontSize:14,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>MUNDO</span>
-</div>
-</div>
 {/* Form */}
 <div style={{ width:"100%", maxWidth:340 }}>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:8 }}>TELÉFONO</div>
@@ -828,7 +809,26 @@ style={{ width:"100%", background:phone.length>4?GOLD_GRAD:BORDER, border:"none"
 <div style={{ textAlign:"center", marginTop:16, fontSize:10, color:"#333", fontFamily:"sans-serif" }}>
 #ElFuegoNosUne🔥
 </div>
-<div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif", marginTop:6 }}>Dr. Parrilla · Sistema de Gestión v2.0 · #ElFuegoNosUne🔥
+{/* Países - Exportando calidad */}
+<div style={{ marginTop:24 }}>
+<div style={{ display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,justifyItems:"center",marginBottom:14 }}>
+{[{f:"🇵🇾",n:"Paraguay"},{f:"🇦🇷",n:"Argentina"},{f:"🇧🇷",n:"Brasil"},{f:"🇺🇾",n:"Uruguay"},{f:"🇨🇴",n:"Colombia"},{f:"🇺🇸",n:"EE.UU."},{f:"🇪🇸",n:"España"},{f:"🇵🇦",n:"Panamá"},{f:"🇸🇻",n:"El Salvador"},{f:"🇷🇸",n:"Serbia"}].map((p,i) => (
+<div key={i} style={{ display:"flex",flexDirection:"column",alignItems:"center",gap:3 }}>
+<div style={{ width:38,height:38,borderRadius:"50%",background:"#1A1A1A",border:`1px solid ${BORDER}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20 }}>{p.f}</div>
+<span style={{ fontSize:7,color:"#555",fontFamily:"sans-serif" }}>{p.n}</span>
+</div>
+))}
+</div>
+<div style={{ textAlign:"center",lineHeight:1.4 }}>
+<span style={{ fontSize:13,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}>Exportando </span>
+<span style={{ fontSize:13,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>CALIDAD</span>
+<span style={{ fontSize:13,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}> de </span>
+<span style={{ fontSize:13,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>PARAGUAY</span>
+<span style={{ fontSize:13,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}> al </span>
+<span style={{ fontSize:13,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>MUNDO</span>
+</div>
+</div>
+<div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif", marginTop:10 }}>Dr. Parrilla · Sistema de Gestión v2.0 · #ElFuegoNosUne🔥
 </div>
 </div>
 </div>
