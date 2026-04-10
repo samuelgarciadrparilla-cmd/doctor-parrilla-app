@@ -902,6 +902,7 @@ function CatalogoScreen({ productos }) {
 const [selected, setSelected] = useState(null);
 const [colorSel, setColorSel] = useState(null);
 const [done, setDone] = useState(false);
+const [carouselIdx, setCarouselIdx] = useState(0);
 if (done) return (
 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:"60vh", padding:32, textAlign:"center" }}>
 <div style={{ fontSize:60, marginBottom:16 }}>✅</div>
@@ -919,14 +920,8 @@ return (
 {(() => {
 const allFotos = p.fotos && p.fotos.length > 0 ? p.fotos : (p.foto ? [p.foto] : []);
 return allFotos.length > 0 ? (
-(() => {
-const carouselRef = React.createRef();
-const [activeIdx, setActiveIdx] = React.useState(0);
-const handleScroll = (e) => { const idx = Math.round(e.target.scrollLeft / e.target.offsetWidth); setActiveIdx(idx); };
-return (
 <div style={{ position:"relative" }}>
-<div ref={carouselRef} onScroll={handleScroll} style={{ display:"flex",overflowX:"auto",scrollSnapType:"x mandatory",WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none" }}>
-<style>{`div::-webkit-scrollbar{display:none}`}</style>
+<div onScroll={(e) => { const idx = Math.round(e.target.scrollLeft / e.target.offsetWidth); setCarouselIdx(idx); }} style={{ display:"flex",overflowX:"auto",scrollSnapType:"x mandatory",WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none" }}>
 {allFotos.map((foto,fi) => (
 <div key={fi} style={{ minWidth:"100%",height:320,scrollSnapAlign:"start",background:"linear-gradient(135deg,#1A1200,#0D0D0D)",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center" }}>
 <img src={foto} alt={`${p.nombre} ${fi+1}`} style={{ width:"100%",height:"100%",objectFit:"contain",display:"block" }} />
@@ -935,13 +930,11 @@ return (
 </div>
 {allFotos.length > 1 && <>
 <div style={{ position:"absolute",bottom:12,left:0,right:0,display:"flex",justifyContent:"center",gap:6 }}>
-{allFotos.map((_,fi) => <div key={fi} style={{ width:fi===activeIdx?20:8,height:8,borderRadius:4,background:fi===activeIdx?GOLD:"#FFFFFF44",transition:"all 0.3s" }} />)}
+{allFotos.map((_,fi) => <div key={fi} style={{ width:fi===carouselIdx?20:8,height:8,borderRadius:4,background:fi===carouselIdx?GOLD:"#FFFFFF44",transition:"all 0.3s" }} />)}
 </div>
-<div style={{ position:"absolute",top:12,right:12,background:"#00000088",borderRadius:12,padding:"4px 10px",fontSize:11,color:"#FFF",fontFamily:"sans-serif" }}>{activeIdx+1}/{allFotos.length}</div>
+<div style={{ position:"absolute",top:12,right:12,background:"#00000088",borderRadius:12,padding:"4px 10px",fontSize:11,color:"#FFF",fontFamily:"sans-serif" }}>{carouselIdx+1}/{allFotos.length}</div>
 </>}
 </div>
-);
-})()
 ) : (
 <div style={{ height:200,background:"linear-gradient(135deg,#1A1200,#0D0D0D)",display:"flex",alignItems:"center",justifyContent:"center" }}><span style={{ fontSize:88 }}>{p.emoji}</span></div>
 );
