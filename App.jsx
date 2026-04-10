@@ -759,6 +759,25 @@ return (
 <div style={{ fontSize:11, color:GOLD_DARK, fontFamily:"sans-serif", fontStyle:"italic", marginBottom:36, letterSpacing:"2px", textAlign:"center" }}>
 "La parrilla de tus sueños te espera"
 </div>
+{/* Países - Exportando calidad */}
+<div style={{ marginBottom:28,width:"100%",maxWidth:340 }}>
+<div style={{ display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,justifyItems:"center",marginBottom:14 }}>
+{[{f:"🇵🇾",n:"Paraguay"},{f:"🇦🇷",n:"Argentina"},{f:"🇧🇷",n:"Brasil"},{f:"🇺🇾",n:"Uruguay"},{f:"🇨🇴",n:"Colombia"},{f:"🇺🇸",n:"EE.UU."},{f:"🇪🇸",n:"España"},{f:"🇵🇦",n:"Panamá"},{f:"🇸🇻",n:"El Salvador"}].map((p,i) => (
+<div key={i} style={{ display:"flex",flexDirection:"column",alignItems:"center",gap:3 }}>
+<div style={{ width:40,height:40,borderRadius:"50%",background:"#1A1A1A",border:`1px solid ${BORDER}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22 }}>{p.f}</div>
+<span style={{ fontSize:8,color:"#666",fontFamily:"sans-serif" }}>{p.n}</span>
+</div>
+))}
+</div>
+<div style={{ textAlign:"center",lineHeight:1.4 }}>
+<span style={{ fontSize:14,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}>Exportando </span>
+<span style={{ fontSize:14,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>CALIDAD</span>
+<span style={{ fontSize:14,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}> de </span>
+<span style={{ fontSize:14,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>PARAGUAY</span>
+<span style={{ fontSize:14,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}> al </span>
+<span style={{ fontSize:14,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>MUNDO</span>
+</div>
+</div>
 {/* Form */}
 <div style={{ width:"100%", maxWidth:340 }}>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:8 }}>TELÉFONO</div>
@@ -1410,7 +1429,7 @@ if (view==="form") return (
 </div>
 : <div style={{ height:120,background:DARK3,border:`1px dashed ${BORDER}`,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10,fontSize:40 }}>{form.emoji}</div>
 }
-{(form.fotos||[]).length < 6 && <PhotoUploadButton multiple onPhoto={(srcs) => setForm(f=>{const nf=[...(f.fotos||[]),...(Array.isArray(srcs)?srcs:[srcs])].slice(0,6);return{...f,fotos:nf,foto:nf[0]};})} label={`📷 ${(form.fotos||[]).length===0?"Subir fotos del producto":"Agregar más fotos"} (${(form.fotos||[]).length}/6)`} style={{ width:"100%",justifyContent:"center",boxSizing:"border-box" }} />}
+{(form.fotos||[]).length < 6 && <PhotoUploadButton multiple onPhoto={(srcs) => { const newPhotos = Array.isArray(srcs) ? srcs : [srcs]; setForm(f => { const nf = [...(f.fotos||[]), ...newPhotos].slice(0,6); return {...f, fotos:nf, foto:nf[0]}; }); }} label={`📷 ${(form.fotos||[]).length===0?"Subir fotos del producto":"Agregar más fotos"} (${(form.fotos||[]).length}/6)`} style={{ width:"100%",justifyContent:"center",boxSizing:"border-box" }} />}
 </div>
 {[{label:"NOMBRE",key:"nombre",ph:"Ej: El Patrón 900"},{label:"PRECIO",key:"precio",ph:"Ej: Gs. 4.200.000"},{label:"ETIQUETA",key:"tag",ph:"Ej: MÁS VENDIDO"},{label:"LINK DE INSTAGRAM",key:"instagramUrl",ph:"Ej: https://www.instagram.com/p/xxx"}].map(f => (
 <div key={f.key}>
