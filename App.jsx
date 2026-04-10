@@ -100,14 +100,25 @@ function findCliente(phone, clientes) { const c = normalizePhone(phone); return 
 
 // ── DÍAS HÁBILES ──────────────────────────────────────────────────────────────
 const MESES = { Ene:0,Feb:1,Mar:2,Abr:3,May:4,Jun:5,Jul:6,Ago:7,Sep:8,Oct:9,Nov:10,Dic:11 };
+const MESES_LOWER = { ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11 };
 const MESES_NOMBRE = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
 function parseFecha(str) {
-// "05 Abr 2026"
 if (!str) return null;
-const p = str.trim().split(" ");
+const s = str.trim();
+// ISO format: "2026-04-09"
+if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+  const parts = s.split("-");
+  return new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+}
+// "05 Abr 2026" or "09 abr. 2026" or "09 Abr. 2026"
+const p = s.split(" ").filter(x => x.length > 0);
 if (p.length < 3) return null;
-const d = parseInt(p[0]); const m = MESES[p[1]]; const y = parseInt(p[2]);
+const d = parseInt(p[0]);
+const mesStr = p[1].replace(/\./g, ""); // Remove dots: "abr." -> "abr"
+const mesCapitalized = mesStr.charAt(0).toUpperCase() + mesStr.slice(1).toLowerCase();
+const m = MESES[mesCapitalized] !== undefined ? MESES[mesCapitalized] : MESES_LOWER[mesStr.toLowerCase()];
+const y = parseInt(p[2]);
 if (isNaN(d)||isNaN(y)||m===undefined) return null;
 return new Date(y, m, d);
 }
