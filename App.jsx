@@ -1210,36 +1210,53 @@ function SoporteScreen({ tickets, setTickets, clienteUser }) {
 const [form, setForm] = useState(false);
 const [tipo, setTipo] = useState("Mantenimiento");
 const [desc, setDesc] = useState("");
+const [fechaSolicitud, setFechaSolicitud] = useState("");
 const [ok, setOk] = useState(false);
 const misTickets = clienteUser ? tickets.filter(t => normalizePhone(t.tel)===normalizePhone(clienteUser.tel)) : [];
+const tratamiento = clienteUser?.tratamiento || "";
+const nombreFormal = tratamiento ? `${tratamiento} ${clienteUser?.nombre?.split(" ").slice(-1)[0]||""}` : clienteUser?.nombre?.split(" ")[0]||"Cliente";
 const submit = () => {
-if (desc.length<10||!clienteUser) return;
+if (desc.length<10||!clienteUser||!fechaSolicitud) return;
 const maxTNum = tickets.reduce((max, t) => { const m = t.id?.match(/T-(\d+)/); return m ? Math.max(max, parseInt(m[1])) : max; }, 0);
-setTickets([{ id:`T-${String(maxTNum+1).padStart(3,"0")}`, tel:clienteUser.tel, tipo, desc, fecha:new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"}), estado:"Abierto" }, ...tickets]);
+const ticketId = `T-${String(maxTNum+1).padStart(3,"0")}`;
+setTickets([{ id:ticketId, tel:clienteUser.tel, tipo, desc, fechaSolicitud, fecha:new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"}), estado:"Abierto" }, ...tickets]);
+const waMsg = `Estimado equipo de *Doctor Parrilla* 🔥\n\nSolicitud de *${tipo}* (${ticketId})\n\n*Cliente:* ${clienteUser?.nombre||""} (${clienteUser?.tel||""})\n*Fecha solicitada:* ${fechaSolicitud}\n*Descripción:* ${desc}\n\nAgradecemos su pronta atención.`;
+window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMsg)}`, "_blank");
 setOk(true);
 };
 if (ok) return (
 <div style={{ display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"60vh",padding:32,textAlign:"center" }}>
 <div style={{ fontSize:60,marginBottom:16 }}>✅</div>
-<div style={{ fontSize:22,fontWeight:"bold",marginBottom:8 }}>¡Ticket creado!</div>
-<div style={{ fontSize:14,color:"#888",fontFamily:"sans-serif",marginBottom:28 }}>Te respondemos en menos de 48hs. #ElFuegoNosUne🔥</div>
-<button onClick={() => { setForm(false);setOk(false);setDesc(""); }} style={{ background:`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`,border:"none",color:DARK,padding:"14px 32px",borderRadius:8,fontFamily:"sans-serif",fontWeight:"bold",fontSize:14,cursor:"pointer" }}>VER MIS TICKETS</button>
+<div style={{ fontSize:22,fontWeight:"bold",marginBottom:8 }}>¡Solicitud enviada!</div>
+<div style={{ fontSize:14,color:"#CCC",fontFamily:"sans-serif",marginBottom:12,lineHeight:1.6 }}>{nombreFormal}, agradecemos su preferencia y confianza en Doctor Parrilla.</div>
+<div style={{ fontSize:13,color:"#888",fontFamily:"sans-serif",marginBottom:28,lineHeight:1.6 }}>Estaremos atendiendo su solicitud lo antes posible. Nos comunicaremos con usted para confirmar el agendamiento.</div>
+<div style={{ fontSize:11,color:GOLD,fontFamily:"Georgia, serif",fontStyle:"italic",marginBottom:24 }}>#ElFuegoNosUne🔥</div>
+<button onClick={() => { setForm(false);setOk(false);setDesc("");setFechaSolicitud(""); }} style={{ background:`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`,border:"none",color:DARK,padding:"14px 32px",borderRadius:8,fontFamily:"sans-serif",fontWeight:"bold",fontSize:14,cursor:"pointer" }}>VER MIS SOLICITUDES</button>
 </div>
 );
 if (form) return (
 <div style={{ paddingBottom:80 }}>
 <Header title="Nueva Solicitud" back onBack={() => setForm(false)} />
 <div style={{ padding:"20px" }}>
-<div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif",letterSpacing:"1px",marginBottom:10 }}>TIPO</div>
+<div style={{ background:GOLD+"11",border:`1px solid ${GOLD}33`,borderRadius:10,padding:"14px 16px",marginBottom:20 }}>
+<div style={{ fontSize:12,color:GOLD,fontFamily:"sans-serif",fontWeight:"bold",marginBottom:4 }}>📋 Previo agendamiento</div>
+<div style={{ fontSize:11,color:"#999",fontFamily:"sans-serif",lineHeight:1.5 }}>Todos los servicios de mantenimiento, reclamos y consultas requieren agendamiento con un mínimo de <span style={{ color:GOLD,fontWeight:"bold" }}>una semana de anticipación</span>. Agradecemos su comprensión.</div>
+</div>
+<div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif",letterSpacing:"1px",marginBottom:10 }}>TIPO DE SOLICITUD</div>
 <div style={{ display:"flex",gap:8,marginBottom:20 }}>
-{["Mantenimiento","Consulta"].map(t => (
+{["Mantenimiento","Reclamo","Consulta"].map(t => (
 <button key={t} onClick={() => setTipo(t)} style={{ flex:1,padding:"10px 4px",borderRadius:8,border:`1px solid ${tipo===t?GOLD:BORDER}`,background:tipo===t?GOLD+"18":CARD,color:tipo===t?GOLD:"#888",fontFamily:"sans-serif",fontSize:12,cursor:"pointer",fontWeight:tipo===t?"bold":"normal" }}>{t}</button>
 ))}
 </div>
+<div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif",letterSpacing:"1px",marginBottom:10 }}>FECHA DESEADA PARA EL SERVICIO</div>
+<input type="date" value={fechaSolicitud} onChange={e => setFechaSolicitud(e.target.value)} min={new Date(Date.now()+7*24*60*60*1000).toISOString().split("T")[0]}
+style={{ width:"100%",background:CARD,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"14px 16px",borderRadius:8,fontSize:15,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box",marginBottom:6 }} />
+<div style={{ fontSize:10,color:"#555",fontFamily:"sans-serif",marginBottom:20 }}>Mínimo 7 días de anticipación desde la fecha actual</div>
 <div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif",letterSpacing:"1px",marginBottom:10 }}>DESCRIPCIÓN</div>
-<textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="Describí el problema o consulta..."
+<textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="Describí el problema, consulta o servicio que necesitás..."
 style={{ width:"100%",height:140,background:CARD,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"14px",borderRadius:10,fontSize:14,fontFamily:"sans-serif",outline:"none",resize:"none",boxSizing:"border-box",marginBottom:16 }} />
-<button onClick={submit} style={{ width:"100%",background:desc.length>10?`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`:BORDER,border:"none",color:desc.length>10?DARK:"#555",padding:"16px",borderRadius:10,fontSize:15,fontFamily:"sans-serif",fontWeight:"bold",letterSpacing:"2px",cursor:desc.length>10?"pointer":"default" }}>ENVIAR SOLICITUD</button>
+<button onClick={submit} style={{ width:"100%",background:desc.length>10&&fechaSolicitud?`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`:BORDER,border:"none",color:desc.length>10&&fechaSolicitud?DARK:"#555",padding:"16px",borderRadius:10,fontSize:15,fontFamily:"sans-serif",fontWeight:"bold",letterSpacing:"2px",cursor:desc.length>10&&fechaSolicitud?"pointer":"default" }}>ENVIAR SOLICITUD</button>
+<div style={{ fontSize:10,color:"#555",fontFamily:"sans-serif",textAlign:"center",marginTop:12,lineHeight:1.5 }}>Al enviar, se notificará automáticamente al equipo de Doctor Parrilla vía WhatsApp. Agradecemos su preferencia.</div>
 </div>
 </div>
 );
