@@ -837,7 +837,9 @@ style={{ width:"100%", background:phone.length>4?GOLD_GRAD:BORDER, border:"none"
 
 // ── CLIENT: HOME ──────────────────────────────────────────────────────────────: HOME ──────────────────────────────────────────────────────────────
 function HomeScreen({ setActive, clienteUser, pedidos, cupones }) {
-const nombre = clienteUser?.nombre?.split(" ")[0] || "";
+const tratamiento = clienteUser?.tratamiento || "";
+const nombreBase = clienteUser?.nombre?.split(" ")[0] || "";
+const nombre = tratamiento ? `${tratamiento} ${clienteUser?.nombre?.split(" ").slice(-1)[0] || nombreBase}` : nombreBase;
 const misPedidos = clienteUser ? pedidos.filter(p => normalizePhone(p.tel)===normalizePhone(clienteUser.tel) && p.estado < 4) : [];
 const urgente = misPedidos.find(p => {
 const base = parseFecha(p.fecha); if (!base||!p.diasHabiles) return false;
@@ -993,6 +995,10 @@ return (
 <div style={{ fontSize:17, color:GOLD, fontWeight:"bold" }}>{p.precio}</div>
 <span style={{ color:GOLD, fontSize:20 }}>›</span>
 </div>
+{p.instagramUrl && <a href={p.instagramUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} style={{ display:"flex",alignItems:"center",gap:6,textDecoration:"none",marginTop:10,padding:"8px 12px",borderRadius:8,background:"linear-gradient(135deg,#833AB4,#FD1D1D,#F77737)" }}>
+<svg viewBox="0 0 24 24" width="14" height="14" fill="#FFF"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+<span style={{ fontSize:11,color:"#FFF",fontFamily:"sans-serif",fontWeight:"bold" }}>Ver en Instagram</span>
+</a>}
 </div>
 </button>
 ))}
@@ -1266,7 +1272,7 @@ return (
 function AdminClientes({ clientes, setClientes }) {
 const [view, setView] = useState("list");
 const [idx, setIdx] = useState(null);
-const emptyForm = { nombre:"", tel:"", dir:"", historial:"" };
+const emptyForm = { nombre:"", tel:"", dir:"", historial:"", tratamiento:"" };
 const [form, setForm] = useState(emptyForm);
 const [error, setError] = useState("");
 const [search, setSearch] = useState("");
@@ -1309,6 +1315,14 @@ onChange={e => setForm({...form, codigo: e.target.value.toUpperCase()})}
 style={{ width:"100%", background:CARD, border:`1px solid ${GOLD}55`, color:GOLD, padding:"14px 16px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box", fontWeight:"bold", letterSpacing:"2px" }}
 />
 <div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Este código identifica al cliente en el sistema</div>
+</div>
+<div>
+<div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif",letterSpacing:"1px",marginBottom:8 }}>TRATAMIENTO</div>
+<div style={{ display:"flex",gap:8 }}>
+{["Sr.","Sra.","Srta."].map(t => (
+<button key={t} onClick={() => setForm({...form,tratamiento:t})} style={{ flex:1,padding:"12px",borderRadius:8,border:`2px solid ${form.tratamiento===t?GOLD:BORDER}`,background:form.tratamiento===t?GOLD+"18":CARD,cursor:"pointer",color:form.tratamiento===t?GOLD:"#888",fontSize:14,fontFamily:"sans-serif",fontWeight:form.tratamiento===t?"bold":"normal" }}>{t}</button>
+))}
+</div>
 </div>
 {[{label:"NOMBRE COMPLETO",key:"nombre",ph:"Ej: Juan Pérez",type:"text"},{label:"TELÉFONO",key:"tel",ph:"09XX XXX XXX",type:"tel"},{label:"DIRECCIÓN",key:"dir",ph:"Calle, ciudad...",type:"text"}].map(f => (
 <div key={f.key}>
@@ -1748,7 +1762,7 @@ return (
       <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:24 }}>
         {ESTADO_LABELS.map((est,i) => {
           const isCurrentState = p.estado===i;
-          const waMsg = `Hola ${cliente?.nombre?.split(" ")[0]||""} 👋! Somos de *Doctor Parrilla* 🔥\n\nTe informamos que tu parrilla *${p.modelo}* (Pedido ${p.id}) ahora está en: *${est}*\n\n${i===0?"Ya recibimos tu pedido. Nuestro equipo ya está planificando cada detalle.":i===1?"Manos expertas están forjando tu parrilla ahora mismo. ¡Cada soldadura es perfección!":i===2?"Tu parrilla está en control de calidad. Revisamos cada detalle para que sea perfecta. ¡Ya falta poco!":i===3?"¡Tu parrilla está lista para entrega! 🎉 Coordinaremos la entrega pronto. ¿Ya compraste la carne para el estreno?":"¡Tu parrilla ya fue entregada! 🎉 Disfrutala. Nos encantaría que nos dejes una reseña en Google."}\n\n#ElFuegoNosUne🔥 Gracias por confiar en Dr. Parrilla`;
+          const waMsg = `Hola ${cliente?.tratamiento ? cliente.tratamiento + " " + (cliente?.nombre?.split(" ").slice(-1)[0]||"") : cliente?.nombre?.split(" ")[0]||""} 👋! Somos de *Doctor Parrilla* 🔥\n\nTe informamos que tu parrilla *${p.modelo}* (Pedido ${p.id}) ahora está en: *${est}*\n\n${i===0?"Ya recibimos tu pedido. Nuestro equipo ya está planificando cada detalle.":i===1?"Manos expertas están forjando tu parrilla ahora mismo. ¡Cada soldadura es perfección!":i===2?"Tu parrilla está en control de calidad. Revisamos cada detalle para que sea perfecta. ¡Ya falta poco!":i===3?"¡Tu parrilla está lista para entrega! 🎉 Coordinaremos la entrega pronto. ¿Ya compraste la carne para el estreno?":"¡Tu parrilla ya fue entregada! 🎉 Disfrutala. Nos encantaría que nos dejes una reseña en Google."}\n\n#ElFuegoNosUne🔥 Gracias por confiar en Dr. Parrilla`;
           return (
           <button key={i} onClick={() => {
             const prevEstado = p.estado;
