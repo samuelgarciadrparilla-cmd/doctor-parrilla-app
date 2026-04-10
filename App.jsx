@@ -851,7 +851,7 @@ return (
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"28px 20px 24px", background:"linear-gradient(180deg, #1A0D00 0%, #111418 60%, #0A0A0A 100%)", borderBottom:`1px solid ${GOLD}22`, position:"relative", overflow:"hidden" }}>
 <Logo width={140} style={{ marginBottom:14, filter:"drop-shadow(0 0 12px #C9A84C44)" }} />
-<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:6 }}>BIENVENIDO</div>
+<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:6 }}>{tratamiento==="Sra."||tratamiento==="Srta."?"BIENVENIDA":"BIENVENIDO"}</div>
 <div style={{ fontSize:24, fontWeight:"bold", marginBottom:4 }}>Hola, {nombre} 👋</div>
 <div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif" }}>¿Qué necesitás hoy?</div>
 <div style={{ fontSize:12, color:GOLD, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:8, letterSpacing:1 }}>#ElFuegoNosUne🔥</div>
