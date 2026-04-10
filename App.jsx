@@ -1552,7 +1552,7 @@ const [nota, setNota] = useState("");
 const [view, setView] = useState("list"); // list | new
 const [filterStatus, setFilterStatus] = useState("all");
 const [newForm, setNewForm] = useState({
-clienteId:"", modelo:"", monto:"", nota:"", serie:"", diasHabiles:10
+clienteId:"", modelo:"", monto:"", nota:"", serie:"", diasHabiles:10, fechaInicio:""
 });
 const tc = { 0:"#888",1:GOLD,2:GOLD_LIGHT,3:"#4CAF50",4:"#4CAF50" };
 const getNombre = (tel) => { const c=clientes.find(x=>normalizePhone(x.tel)===normalizePhone(tel)); return c?c.nombre:tel; };
@@ -1574,10 +1574,11 @@ estado: 0,
 monto: newForm.monto,
 nota: newForm.nota,
 fotos: [],
-diasHabiles: newForm.diasHabiles
+diasHabiles: newForm.diasHabiles,
+fechaInicio: newForm.fechaInicio || ""
 };
 setPedidos([nuevo, ...pedidos]);
-setNewForm({ clienteId:"", modelo:"", monto:"", nota:"", serie:"", diasHabiles:10 });
+setNewForm({ clienteId:"", modelo:"", monto:"", nota:"", serie:"", diasHabiles:10, fechaInicio:"" });
 setView("list");
 };
 
@@ -1671,6 +1672,18 @@ return (
         </div>
       </div>
 
+      {/* Fecha de inicio de obra */}
+      <div>
+        <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>FECHA DE INICIO DE OBRA</div>
+        <input
+          type="date"
+          value={newForm.fechaInicio}
+          onChange={e => setNewForm({...newForm, fechaInicio: e.target.value})}
+          style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"14px 16px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
+        />
+        <div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Fecha en que se comienza a trabajar en el pedido</div>
+      </div>
+
       {/* Nota */}
       <div>
         <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>NOTA / OBSERVACIÓN</div>
@@ -1731,6 +1744,11 @@ return (
 <div><div style={{ fontSize:10,color:"#555",fontFamily:"sans-serif",marginBottom:3 }}>MODELO</div><div style={{ fontSize:13,color:"#CCC",fontFamily:"sans-serif" }}>{p.modelo}</div></div>
 <div><div style={{ fontSize:10,color:"#555",fontFamily:"sans-serif",marginBottom:3 }}>MONTO</div><div style={{ fontSize:15,color:GOLD,fontWeight:"bold" }}>{p.monto}</div></div>
 </div>
+<div style={{ height:1,background:BORDER,margin:"12px 0" }} />
+<div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+<div><div style={{ fontSize:10,color:"#555",fontFamily:"sans-serif",marginBottom:3 }}>FECHA PEDIDO</div><div style={{ fontSize:13,color:"#CCC",fontFamily:"sans-serif" }}>{p.fecha}</div></div>
+<div><div style={{ fontSize:10,color:"#555",fontFamily:"sans-serif",marginBottom:3 }}>INICIO DE OBRA</div><div style={{ fontSize:13,color:p.fechaInicio?GOLD:"#555",fontFamily:"sans-serif" }}>{p.fechaInicio||"Sin asignar"}</div></div>
+</div>
 </div>
 
       <div style={{ background:CARD, border:`1px solid ${GOLD}44`, borderRadius:12, padding:"16px", marginBottom:16 }}>
@@ -1743,6 +1761,18 @@ return (
         />
         <div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Visible para el cliente · Se guarda automáticamente</div>
       </div>
+
+      <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"16px", marginBottom:16 }}>
+        <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:10 }}>📅 FECHA DE INICIO DE OBRA</div>
+        <input
+          type="date"
+          value={p.fechaInicio || ""}
+          onChange={e => setPedidos(pedidos.map((x,i) => i===selected ? {...x, fechaInicio:e.target.value} : x))}
+          style={{ width:"100%", background:DARK3, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"12px 14px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
+        />
+        <div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Fecha en que se comienza a trabajar en este pedido</div>
+      </div>
+
       <div style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"16px",marginBottom:20 }}>
         <div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"2px",marginBottom:12 }}>⏱ DÍAS HÁBILES DE ENTREGA</div>
         <div style={{ fontSize:12,color:"#888",fontFamily:"sans-serif",marginBottom:10 }}>Desde fecha del pedido · Solo Lunes a Viernes</div>
@@ -1872,7 +1902,17 @@ return (
 ))}
 </div>
 <div style={{ padding:"0 16px",display:"flex",flexDirection:"column",gap:10 }}>
-{pedidos.filter(p => filterStatus==="all" || String(p.estado)===filterStatus).map((p,i) => {
+{pedidos.filter(p => filterStatus==="all" || String(p.estado)===filterStatus).slice().sort((a,b) => {
+if (a.estado >= 4 && b.estado < 4) return 1;
+if (a.estado < 4 && b.estado >= 4) return -1;
+const baseA = parseFecha(a.fecha), baseB = parseFecha(b.fecha);
+const limA = baseA && a.diasHabiles ? addDiasHabiles(baseA, a.diasHabiles) : null;
+const limB = baseB && b.diasHabiles ? addDiasHabiles(baseB, b.diasHabiles) : null;
+const dA = limA ? diasHabilesRestantes(limA) : 999;
+const dB = limB ? diasHabilesRestantes(limB) : 999;
+return dA - dB;
+}).map((p) => {
+const i = pedidos.indexOf(p);
 const base = parseFecha(p.fecha);
 const lim = base && p.diasHabiles ? addDiasHabiles(base, p.diasHabiles) : null;
 const dias = lim ? diasHabilesRestantes(lim) : null;
@@ -1887,10 +1927,11 @@ return (
 <div style={{ background:tc[p.estado]+"22",color:tc[p.estado],fontSize:11,padding:"3px 10px",borderRadius:20,fontFamily:"sans-serif",border:`1px solid ${tc[p.estado]}44` }}>{ESTADO_LABELS[p.estado]}</div>
 </div>
 <div style={{ fontSize:15,fontWeight:"bold",marginBottom:2, color:"#F5EDD6", letterSpacing:"0.3px" }}>{getNombre(p.tel)}</div>
-<div style={{ fontSize:13,color:"#888",fontFamily:"sans-serif",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+<div style={{ fontSize:13,color:"#888",fontFamily:"sans-serif",marginBottom:4,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
 <span>{p.modelo}</span>
 {dias !== null && p.estado < 4 && <CountdownBadge fecha={p.fecha} diasHabiles={p.diasHabiles} size="small" />}
 </div>
+{p.fechaInicio && <div style={{ fontSize:10,color:"#666",fontFamily:"sans-serif",marginBottom:8 }}>📅 Inicio obra: {p.fechaInicio}</div>}
 <div style={{ background:BORDER,borderRadius:4,height:3 }}>
 <div style={{ background:`linear-gradient(90deg,${GOLD},${GOLD_LIGHT})`,width:`${Math.round((p.estado/(ESTADO_LABELS.length-1))*100)}%`,height:"100%",borderRadius:4 }} />
 </div>
