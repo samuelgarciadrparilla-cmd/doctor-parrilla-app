@@ -22,7 +22,7 @@ const GOLD_GRAD   = "linear-gradient(135deg, #9A7A3E 0%, #C8A96E 40%, #E2C98A 70
 const STEEL_CARD  = "linear-gradient(145deg, #0E1014 0%, #0B0D11 100%)";
 const FLAME_LOW   = "linear-gradient(0deg, rgba(180,80,0,0.1) 0%, rgba(200,120,0,0.04) 40%, transparent 100%)";
 const WA_NUMBER = "595994389932";
-// Link de reseña Google -- reemplazá con el link de "Obtener más reseñas" de Google Business
+// Link de reseña Google - reemplazá con el link de "Obtener más reseñas" de Google Business
 // Ir a business.google.com → tu perfil → "Obtener más reseñas" → copiar link
 const GOOGLE_REVIEW_URL = "https://share.google/D7XEt1nQQzynvpxG5";
 
@@ -108,8 +108,8 @@ if (!str) return null;
 const s = str.trim();
 // ISO format: "2026-04-09"
 if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-  const parts = s.split("-");
-  return new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+const parts = s.split("-");
+return new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
 }
 // "05 Abr 2026" or "09 abr. 2026" or "09 Abr. 2026"
 const p = s.split(" ").filter(x => x.length > 0);
@@ -150,7 +150,7 @@ return cnt;
 }
 
 function formatFechaCorta(date) {
-if (!date) return "--";
+if (!date) return "-";
 return `${String(date.getDate()).padStart(2,"0")} ${MESES_NOMBRE[date.getMonth()]} ${date.getFullYear()}`;
 }
 
@@ -177,6 +177,7 @@ if (size === "small") return (
 </span>
 );
 return (
+
 <div style={{ background:color+"15", border:`1px solid ${color}44`, borderRadius:10, padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
 <div>
 <div style={{ fontSize:10, color:color, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:4 }}>DÍAS HÁBILES RESTANTES</div>
@@ -201,6 +202,7 @@ return dias !== null && dias <= 7;
 });
 if (urgentes.length === 0) return null;
 return (
+
 <div style={{ margin:"16px 16px 0", display:"flex", flexDirection:"column", gap:8 }}>
 <div style={{ fontSize:11, color:"#E53935", fontFamily:"sans-serif", letterSpacing:"2px", fontWeight:"bold" }}>⚠️ ALERTAS DE ENTREGA</div>
 {urgentes.map(p => {
@@ -253,26 +255,26 @@ const ESTADO_NEURO = [
 "Tu pedido está en nuestras manos. Los mejores artesanos del acero ya conocen tu nombre.",
 "Acabamos de recibir tu pedido. Nuestro equipo ya está planificando cada detalle de tu pieza única.",
 "Tu proyecto acaba de entrar al taller. Pronto el acero tomará la forma de tus sueños.",
-"Pedido confirmado. Cada obra maestra comienza con un primer paso -- el tuyo ya está en marcha.",
+"Pedido confirmado. Cada obra maestra comienza con un primer paso - el tuyo ya está en marcha.",
 "Bienvenido al proceso. Tu parrilla será creada con la misma pasión con la que vos disfrutás un buen asado.",
 "El acero ya te espera. Nuestros maestros soldadores están preparando todo para tu pieza exclusiva.",
 ],
 // Estado 1: En producción
 [
-"Manos expertas forjan tu parrilla ahora mismo. Cada corte, cada soldadura -- hecho para toda la vida.",
+"Manos expertas forjan tu parrilla ahora mismo. Cada corte, cada soldadura - hecho para toda la vida.",
 "El fuego del taller arde por tu pedido. Acero, precisión y pasión se unen en cada centímetro.",
 "Tu parrilla está tomando forma. Cada soldadura es un compromiso de calidad que dura generaciones.",
-"Ahora mismo, manos artesanas dan vida al acero. Tu parrilla no se fabrica -- se crea.",
-"El taller vibra con tu pedido. Corte, doblado, soldadura -- cada paso es perfección calculada.",
+"Ahora mismo, manos artesanas dan vida al acero. Tu parrilla no se fabrica - se crea.",
+"El taller vibra con tu pedido. Corte, doblado, soldadura - cada paso es perfección calculada.",
 "Tu pieza está en el corazón del proceso. Solo usamos acero premium porque tu asado lo merece.",
-"Artesanos con décadas de experiencia trabajan en tu pedido. No es producción en serie -- es arte.",
+"Artesanos con décadas de experiencia trabajan en tu pedido. No es producción en serie - es arte.",
 "El acero inoxidable 304 ya tiene tu nombre. Cada milímetro se mide, se corta, se perfecciona.",
 ],
 // Estado 2: Control de calidad
 [
 "Tu parrilla pasó por control de calidad. Solo lo perfecto llega a tu hogar.",
 "Inspección final en curso. Revisamos cada soldadura, cada acabado, cada detalle. Cero defectos.",
-"Tu parrilla está siendo examinada con lupa. Nuestro estándar es la perfección -- sin excepciones.",
+"Tu parrilla está siendo examinada con lupa. Nuestro estándar es la perfección - sin excepciones.",
 "Control de calidad premium: cada unión, cada superficie, cada ángulo debe ser impecable.",
 "Estamos verificando que tu pieza cumpla con los estándares europeos de calidad que nos definen.",
 "Tu parrilla casi está lista. Solo falta confirmar que cada detalle esté a la altura de tu expectativa.",
@@ -281,7 +283,7 @@ const ESTADO_NEURO = [
 [
 "Tu parrilla de ensueño está lista! Pronto el aroma del asado llenará tu espacio.",
 "Obra maestra terminada. Tu parrilla espera el momento de brillar en tu hogar.",
-"El acero ya tiene alma -- la tuya. Tu parrilla está lista para escribir historias inolvidables.",
+"El acero ya tiene alma - la tuya. Tu parrilla está lista para escribir historias inolvidables.",
 "Preparando el embalaje premium. Tu pieza viaja protegida como la joya que es.",
 "Tu parrilla está lista y ansiosa por conocer su nuevo hogar. El primer asado será legendario.",
 "Misión cumplida en el taller. Ahora solo falta que el fuego y la carne hagan su magia.",
@@ -298,7 +300,7 @@ const ESTADO_NEURO = [
 "Tu parrilla ya está en casa. Cada asado que hagas será una celebración de la vida.",
 "Entregada con orgullo. Cuidala y ella te dará décadas de asados perfectos.",
 "Tu inversión en calidad ya rinde frutos. Disfrutá cada momento alrededor del fuego.",
-"La parrilla llegó a destino. Ahora empieza la verdadera historia -- la que escribís vos con cada asado.",
+"La parrilla llegó a destino. Ahora empieza la verdadera historia - la que escribís vos con cada asado.",
 "Gracias por confiar en Dr. Parrilla. Tu satisfacción es nuestro mayor logro. #ElFuegoNosUne🔥",
 ],
 ];
@@ -310,8 +312,7 @@ const idx = (hourSeed + estado) % msgs.length;
 return msgs[idx];
 }
 
-
-// -- CUPON EXPIRY HELPER --
+// - CUPON EXPIRY HELPER -
 function isCuponExpirado(cupon) {
 if (!cupon.vence) return false;
 const vence = parseFecha(cupon.vence);
@@ -362,6 +363,7 @@ return <span style={{ background:color+"22", border:`1px solid ${color}55`, colo
 }
 function Header({ title, subtitle, back, onBack }) {
 return (
+
 <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}`, display:"flex", alignItems:"center", gap:12, background:"linear-gradient(135deg, #0E1015 0%, #0B0C0F 50%, #0D0C0B 100%)", boxShadow:"0 1px 0 rgba(200,169,110,0.08)" }}>
 {back && <button onClick={onBack} style={{ background:"none", border:"none", color:GOLD, fontSize:22, cursor:"pointer", padding:"0 4px 0 0" }}>←</button>}
 <div>
@@ -457,6 +459,7 @@ setStep(3);
 const [cuponCode] = useState(() => `DRP-${pedido.id.slice(-3)}-${Math.random().toString(36).slice(2,6).toUpperCase()}`);
 
 if (step === 3) return (
+
 <div style={{ background:CARD, border:`1px solid ${GOLD}44`, borderRadius:16, padding:24, textAlign:"center" }}>
 <div style={{ fontSize:48, marginBottom:12 }}>🎉</div>
 <div style={{ fontSize:20, fontWeight:"bold", marginBottom:8 }}>¡Gracias por tu reseña!</div>
@@ -485,6 +488,7 @@ Cerrar
 );
 
 if (step === 2) return (
+
 <div style={{ background:CARD, border:`1px solid ${GOLD}44`, borderRadius:16, padding:20 }}>
 <div style={{ display:"flex", justifyContent:"center", gap:6, marginBottom:12 }}>
 {[1,2,3,4,5].map(s => <span key={s} style={{ fontSize:28 }}>{s<=stars?"⭐":"☆"}</span>)}
@@ -506,6 +510,7 @@ ENVIAR RESEÑA
 // Step 1: Stars
 const labels = ["","Malo","Regular","Bueno","Muy bueno","Excelente"];
 return (
+
 <div style={{ background:CARD, border:`1px solid ${GOLD}44`, borderRadius:16, padding:20, textAlign:"center" }}>
 <div style={{ fontSize:36, marginBottom:8 }}>🔥</div>
 <div style={{ fontSize:18, fontWeight:"bold", marginBottom:4 }}>¡Tu parrilla fue entregada!</div>
@@ -531,6 +536,7 @@ CONTINUAR
 // ── CELEBRATION COMPONENT ────────────────────────────────────────────────────
 function CelebrationBanner({ modelo, onClose }) {
 return (
+
 <div style={{ background:"linear-gradient(135deg,#1A0D00,#0A0A0A)", border:`2px solid ${GOLD}`, borderRadius:16, padding:24, textAlign:"center", marginBottom:20, position:"relative" }}>
 <div style={{ fontSize:48, marginBottom:8 }}>🎉</div>
 <div style={{ fontSize:20, fontWeight:"bold", color:GOLD, marginBottom:6 }}>¡Tu parrilla está lista!</div>
@@ -574,6 +580,7 @@ function TipsSection() {
 const [tipIdx, setTipIdx] = useState(0);
 const tip = TIPS[tipIdx];
 return (
+
 <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"16px", marginBottom:16 }}>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>🔥 MIENTRAS ESPERAS -- TIPS DEL ASADOR</div>
 <div style={{ display:"flex", gap:12, alignItems:"flex-start", marginBottom:14 }}>
@@ -601,8 +608,8 @@ const COCINAR_IDEAS = [
 { emoji:"🍔", titulo:"Hamburguesas gourmet",      desc:"Smash burgers con sello de fuego perfecto. El sabor que ningún horno puede dar." },
 { emoji:"🥬", titulo:"Verduras a las brasas",     desc:"Morrones, berenjenas, zapallitos caramelizados. Sabor natural potenciado por el fuego." },
 { emoji:"🍖", titulo:"Costillar a la estaca",     desc:"Carne a la leña con cocción lenta tradicional. El asado más auténtico de Paraguay." },
-{ emoji:"♨️",  titulo:"Módulos desmontables",     desc:"Plancha, wok, disco -- versatilidad total. Tu parrilla se adapta a lo que quieras cocinar." },
-{ emoji:"🥚", titulo:"Desayuno a la parrilla",    desc:"Huevos, panceta, tostadas -- todo al fuego. Empezá el día con sabor a brasa." },
+{ emoji:"♨️",  titulo:"Módulos desmontables",     desc:"Plancha, wok, disco - versatilidad total. Tu parrilla se adapta a lo que quieras cocinar." },
+{ emoji:"🥚", titulo:"Desayuno a la parrilla",    desc:"Huevos, panceta, tostadas - todo al fuego. Empezá el día con sabor a brasa." },
 { emoji:"🍮", titulo:"Postres al fuego",          desc:"Banana con chocolate, piña caramelizada, manzanas asadas. El dulce cierre de un gran asado." },
 ];
 
@@ -610,6 +617,7 @@ function CocinarSection() {
 const [expanded, setExpanded] = useState(false);
 const items = expanded ? COCINAR_IDEAS : COCINAR_IDEAS.slice(0, 4);
 return (
+
 <div style={{ marginBottom:16 }}>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>🔥 ¿SABÍAS TODO LO QUE PODÉS COCINAR?</div>
 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
@@ -648,6 +656,7 @@ const PAISES = [
 
 function PaisesSection() {
 return (
+
 <div style={{ padding:"0 16px 20px" }}>
 <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:14, textAlign:"center" }}>
 🌎 DR. PARRILLA EN EL MUNDO
@@ -690,6 +699,7 @@ const mensajeRetraso = retrasado
 : null;
 
 return (
+
 <div style={{ background:`${color}11`, border:`1px solid ${color}33`, borderRadius:14, padding:"20px 16px", marginBottom:20 }}>
 <div style={{ display:"flex", alignItems:"center", gap:20 }}>
 {/* SVG Circle */}
@@ -757,6 +767,7 @@ setError("Número no registrado");
 };
 
 return (
+
 <div style={{ minHeight:"100vh", background:STEEL_BG, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:32, position:"relative", overflow:"hidden" }}>
 {/* Flame decoration */}
 <div style={{ position:"absolute", bottom:0, left:0, right:0, height:200, background:"linear-gradient(0deg, rgba(200,80,0,0.1) 0%, transparent 100%)", pointerEvents:"none" }}/>
@@ -839,8 +850,7 @@ style={{ width:"100%", background:phone.length>4?GOLD_GRAD:BORDER, border:"none"
 <span style={{ fontSize:13,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>MUNDO</span>
 </div>
 </div>
-<div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif", marginTop:10 }}>Dr. Parrilla · Sistema de Gestión v2.0 · #ElFuegoNosUne🔥
-</div>
+<div style={{ fontSize:7, color:"#2A2A2A", fontFamily:"sans-serif", marginTop:24, marginBottom:8, textAlign:"center", letterSpacing:2, opacity:0.6 }}>Dr. Parrilla · v2.0 · #ElFuegoNosUne 🔥</div>
 </div>
 </div>
 );
@@ -859,6 +869,7 @@ const d = diasHabilesRestantes(lim);
 return d !== null && d <= 7;
 });
 return (
+
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"28px 20px 24px", background:"linear-gradient(180deg, #1A0D00 0%, #111418 60%, #0A0A0A 100%)", borderBottom:`1px solid ${GOLD}22`, position:"relative", overflow:"hidden" }}>
 <Logo width={140} style={{ marginBottom:14, filter:"drop-shadow(0 0 12px #C9A84C44)" }} />
@@ -917,6 +928,7 @@ const [colorSel, setColorSel] = useState(null);
 const [done, setDone] = useState(false);
 const [carouselIdx, setCarouselIdx] = useState(0);
 if (done) return (
+
 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:"60vh", padding:32, textAlign:"center" }}>
 <div style={{ fontSize:60, marginBottom:16 }}>✅</div>
 <div style={{ fontSize:22, fontWeight:"bold", marginBottom:8 }}>¡Solicitud enviada!</div>
@@ -1038,6 +1050,7 @@ const pct = Math.round((p.estado/(ESTADO_LABELS.length-1))*100);
 const base = parseFecha(p.fecha);
 const lim = base && p.diasHabiles ? addDiasHabiles(base, p.diasHabiles) : null;
 return (
+
 <div style={{ paddingBottom:80 }}>
 <Header title={p.id} subtitle="DETALLE DE PEDIDO" back onBack={() => setSelected(null)} />
 <div style={{ padding:"20px" }}>
@@ -1236,6 +1249,7 @@ window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMsg)}`, "_bl
 setOk(true);
 };
 if (ok) return (
+
 <div style={{ display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"60vh",padding:32,textAlign:"center" }}>
 <div style={{ fontSize:60,marginBottom:16 }}>✅</div>
 <div style={{ fontSize:22,fontWeight:"bold",marginBottom:8 }}>¡Solicitud enviada!</div>
@@ -1331,6 +1345,7 @@ setClientes(next);
 setView("list");
 };
 if (view==="form") return (
+
 <div style={{ paddingBottom:80 }}>
 <Header title={idx===null?"Nuevo Cliente":"Editar Cliente"} subtitle="GESTIÓN DE CLIENTES" back onBack={() => { setView(idx===null?"list":"detail"); setError(""); }} />
 <div style={{ padding:"20px", display:"flex", flexDirection:"column", gap:16 }}>
@@ -1457,6 +1472,7 @@ else setProductos(productos.map((p,i)=>i===idx?{...p,...saveData}:p));
 setView("list");
 };
 if (view==="form") return (
+
 <div style={{ paddingBottom:80 }}>
 <Header title={idx===null?"Nuevo Producto":"Editar Producto"} subtitle="CATÁLOGO" back onBack={() => setView("list")} />
 <div style={{ padding:"20px", display:"flex", flexDirection:"column", gap:18 }}>
@@ -1598,121 +1614,123 @@ if (view === "new") {
 const clienteSeleccionado = newForm.clienteId ? clientes.find(c => normalizePhone(c.tel||"") === newForm.clienteId) : null;
 const formOk = newForm.clienteId && newForm.modelo && newForm.monto;
 return (
+
 <div style={{ paddingBottom:80 }}>
 <Header title="Nuevo Pedido" subtitle="CREAR PEDIDO" back onBack={() => setView("list")} />
 <div style={{ padding:"20px", display:"flex", flexDirection:"column", gap:16 }}>
 
-      {/* Select client */}
-      <div>
-        <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:10 }}>CLIENTE *</div>
-        <div style={{ display:"flex", flexDirection:"column", gap:8, maxHeight:200, overflowY:"auto" }}>
-          {clientes.map(c => (
-            <button key={c.tel||c.id} onClick={() => setNewForm({...newForm, clienteId: c.tel||""})}
-              style={{ background: (newForm.clienteId && c.tel === newForm.clienteId) ? GOLD+"22" : CARD, border:`1px solid ${(newForm.clienteId && c.tel === newForm.clienteId) ? GOLD : BORDER}`, borderRadius:10, padding:"12px 16px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:12 }}>
-              <div style={{ width:36, height:36, borderRadius:"50%", background:GOLD+"18", border:`1px solid ${GOLD}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>👤</div>
-              <div>
-                <div style={{ fontSize:14, fontWeight:"bold", color: (newForm.clienteId && c.tel === newForm.clienteId) ? GOLD : "#F0F0F0" }}>{c.nombre}</div>
-                <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>{c.tel}{c.codigo ? ` · ${c.codigo}` : ""}</div>
-              </div>
-              {(newForm.clienteId && c.tel === newForm.clienteId) && <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>✓</span>}
-            </button>
-          ))}
-          {clientes.length === 0 && <div style={{ color:"#555", fontFamily:"sans-serif", fontSize:13, padding:"16px", textAlign:"center" }}>No hay clientes registrados aún</div>}
-        </div>
-      </div>
-
-      {/* Select model */}
-      <div>
-        <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:10 }}>MODELO / PRODUCTO *</div>
-        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-          {productos.map(p => (
-            <button key={p.id} onClick={() => setNewForm({...newForm, modelo: p.nombre})}
-              style={{ background: newForm.modelo===p.nombre ? GOLD+"22" : CARD, border:`1px solid ${newForm.modelo===p.nombre ? GOLD : BORDER}`, borderRadius:10, padding:"12px 16px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:12 }}>
-              <span style={{ fontSize:24 }}>{p.emoji}</span>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:14, fontWeight:"bold", color: newForm.modelo===p.nombre ? GOLD : "#F0F0F0" }}>{p.nombre}</div>
-                <div style={{ fontSize:12, color:GOLD, fontFamily:"sans-serif" }}>{p.precio}</div>
-              </div>
-              {newForm.modelo===p.nombre && <span style={{ color:GOLD, fontSize:18 }}>✓</span>}
-            </button>
-          ))}
-          {/* Custom model option */}
+  {/* Select client */}
+  <div>
+    <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:10 }}>CLIENTE *</div>
+    <div style={{ display:"flex", flexDirection:"column", gap:8, maxHeight:200, overflowY:"auto" }}>
+      {clientes.map(c => (
+        <button key={c.tel||c.id} onClick={() => setNewForm({...newForm, clienteId: c.tel||""})}
+          style={{ background: (newForm.clienteId && c.tel === newForm.clienteId) ? GOLD+"22" : CARD, border:`1px solid ${(newForm.clienteId && c.tel === newForm.clienteId) ? GOLD : BORDER}`, borderRadius:10, padding:"12px 16px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:12 }}>
+          <div style={{ width:36, height:36, borderRadius:"50%", background:GOLD+"18", border:`1px solid ${GOLD}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>👤</div>
           <div>
-            <input
-              placeholder="O escribí un modelo personalizado..."
-              value={productos.some(p=>p.nombre===newForm.modelo) ? "" : newForm.modelo}
-              onChange={e => setNewForm({...newForm, modelo: e.target.value})}
-              style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"12px 14px", borderRadius:10, fontSize:14, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
-            />
+            <div style={{ fontSize:14, fontWeight:"bold", color: (newForm.clienteId && c.tel === newForm.clienteId) ? GOLD : "#F0F0F0" }}>{c.nombre}</div>
+            <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>{c.tel}{c.codigo ? ` · ${c.codigo}` : ""}</div>
           </div>
-        </div>
-      </div>
-
-      {/* Monto */}
-      <div>
-        <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>MONTO *</div>
-        <input
-          placeholder="Ej: Gs. 4.200.000"
-          value={newForm.monto}
-          onChange={e => setNewForm({...newForm, monto: e.target.value})}
-          style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"14px 16px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
-        />
-      </div>
-
-      {/* Serie */}
-      <div>
-        <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>N° DE SERIE (opcional)</div>
-        <input
-          placeholder="Ej: PED-2026-004 (se genera automático)"
-          value={newForm.serie}
-          onChange={e => setNewForm({...newForm, serie: e.target.value.toUpperCase()})}
-          style={{ width:"100%", background:CARD, border:`1px solid ${GOLD}44`, color:GOLD, padding:"14px 16px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box", fontWeight:"bold", letterSpacing:"1.5px" }}
-        />
-      </div>
-
-      {/* Días hábiles */}
-      <div>
-        <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:10 }}>DÍAS HÁBILES DE ENTREGA</div>
-        <div style={{ display:"flex", gap:8 }}>
-          {[5,8,10,15,20].map(n => (
-            <button key={n} onClick={() => setNewForm({...newForm, diasHabiles:n})}
-              style={{ flex:1, padding:"10px 4px", borderRadius:8, border:`1px solid ${newForm.diasHabiles===n?GOLD:BORDER}`, background:newForm.diasHabiles===n?GOLD+"18":CARD, color:newForm.diasHabiles===n?GOLD:"#888", fontFamily:"sans-serif", fontSize:13, cursor:"pointer", fontWeight:newForm.diasHabiles===n?"bold":"normal" }}>
-              {n}d
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Fecha de inicio de obra */}
-      <div>
-        <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>FECHA DE INICIO DE OBRA</div>
-        <input
-          type="date"
-          value={newForm.fechaInicio}
-          onChange={e => setNewForm({...newForm, fechaInicio: e.target.value})}
-          style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"14px 16px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
-        />
-        <div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Fecha en que se comienza a trabajar en el pedido</div>
-      </div>
-
-      {/* Nota */}
-      <div>
-        <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>NOTA / OBSERVACIÓN</div>
-        <input
-          placeholder="Ej: Entrega a domicilio, retira en taller..."
-          value={newForm.nota}
-          onChange={e => setNewForm({...newForm, nota: e.target.value})}
-          style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"14px 16px", borderRadius:8, fontSize:14, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
-        />
-      </div>
-
-      {!formOk && <div style={{ fontSize:12, color:"#E57373", fontFamily:"sans-serif", textAlign:"center" }}>* Seleccioná cliente, modelo y monto para continuar</div>}
-
-      <button onClick={crearPedido} disabled={!formOk}
-        style={{ width:"100%", background:formOk?`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`:BORDER, border:"none", color:formOk?DARK:"#555", padding:"16px", borderRadius:10, fontSize:15, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"2px", cursor:formOk?"pointer":"default" }}>
-        ✅ CREAR PEDIDO
-      </button>
+          {(newForm.clienteId && c.tel === newForm.clienteId) && <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>✓</span>}
+        </button>
+      ))}
+      {clientes.length === 0 && <div style={{ color:"#555", fontFamily:"sans-serif", fontSize:13, padding:"16px", textAlign:"center" }}>No hay clientes registrados aún</div>}
     </div>
+  </div>
+
+  {/* Select model */}
+  <div>
+    <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:10 }}>MODELO / PRODUCTO *</div>
+    <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+      {productos.map(p => (
+        <button key={p.id} onClick={() => setNewForm({...newForm, modelo: p.nombre})}
+          style={{ background: newForm.modelo===p.nombre ? GOLD+"22" : CARD, border:`1px solid ${newForm.modelo===p.nombre ? GOLD : BORDER}`, borderRadius:10, padding:"12px 16px", cursor:"pointer", textAlign:"left", display:"flex", alignItems:"center", gap:12 }}>
+          <span style={{ fontSize:24 }}>{p.emoji}</span>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:14, fontWeight:"bold", color: newForm.modelo===p.nombre ? GOLD : "#F0F0F0" }}>{p.nombre}</div>
+            <div style={{ fontSize:12, color:GOLD, fontFamily:"sans-serif" }}>{p.precio}</div>
+          </div>
+          {newForm.modelo===p.nombre && <span style={{ color:GOLD, fontSize:18 }}>✓</span>}
+        </button>
+      ))}
+      {/* Custom model option */}
+      <div>
+        <input
+          placeholder="O escribí un modelo personalizado..."
+          value={productos.some(p=>p.nombre===newForm.modelo) ? "" : newForm.modelo}
+          onChange={e => setNewForm({...newForm, modelo: e.target.value})}
+          style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"12px 14px", borderRadius:10, fontSize:14, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
+        />
+      </div>
+    </div>
+  </div>
+
+  {/* Monto */}
+  <div>
+    <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>MONTO *</div>
+    <input
+      placeholder="Ej: Gs. 4.200.000"
+      value={newForm.monto}
+      onChange={e => setNewForm({...newForm, monto: e.target.value})}
+      style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"14px 16px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
+    />
+  </div>
+
+  {/* Serie */}
+  <div>
+    <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>N° DE SERIE (opcional)</div>
+    <input
+      placeholder="Ej: PED-2026-004 (se genera automático)"
+      value={newForm.serie}
+      onChange={e => setNewForm({...newForm, serie: e.target.value.toUpperCase()})}
+      style={{ width:"100%", background:CARD, border:`1px solid ${GOLD}44`, color:GOLD, padding:"14px 16px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box", fontWeight:"bold", letterSpacing:"1.5px" }}
+    />
+  </div>
+
+  {/* Días hábiles */}
+  <div>
+    <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:10 }}>DÍAS HÁBILES DE ENTREGA</div>
+    <div style={{ display:"flex", gap:8 }}>
+      {[5,8,10,15,20].map(n => (
+        <button key={n} onClick={() => setNewForm({...newForm, diasHabiles:n})}
+          style={{ flex:1, padding:"10px 4px", borderRadius:8, border:`1px solid ${newForm.diasHabiles===n?GOLD:BORDER}`, background:newForm.diasHabiles===n?GOLD+"18":CARD, color:newForm.diasHabiles===n?GOLD:"#888", fontFamily:"sans-serif", fontSize:13, cursor:"pointer", fontWeight:newForm.diasHabiles===n?"bold":"normal" }}>
+          {n}d
+        </button>
+      ))}
+    </div>
+  </div>
+
+  {/* Fecha de inicio de obra */}
+  <div>
+    <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>FECHA DE INICIO DE OBRA</div>
+    <input
+      type="date"
+      value={newForm.fechaInicio}
+      onChange={e => setNewForm({...newForm, fechaInicio: e.target.value})}
+      style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"14px 16px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
+    />
+    <div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Fecha en que se comienza a trabajar en el pedido</div>
+  </div>
+
+  {/* Nota */}
+  <div>
+    <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>NOTA / OBSERVACIÓN</div>
+    <input
+      placeholder="Ej: Entrega a domicilio, retira en taller..."
+      value={newForm.nota}
+      onChange={e => setNewForm({...newForm, nota: e.target.value})}
+      style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"14px 16px", borderRadius:8, fontSize:14, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
+    />
+  </div>
+
+  {!formOk && <div style={{ fontSize:12, color:"#E57373", fontFamily:"sans-serif", textAlign:"center" }}>* Seleccioná cliente, modelo y monto para continuar</div>}
+
+  <button onClick={crearPedido} disabled={!formOk}
+    style={{ width:"100%", background:formOk?`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`:BORDER, border:"none", color:formOk?DARK:"#555", padding:"16px", borderRadius:10, fontSize:15, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"2px", cursor:formOk?"pointer":"default" }}>
+    ✅ CREAR PEDIDO
+  </button>
+</div>
+
   </div>
 );
 
@@ -1735,6 +1753,7 @@ setPedidos(pedidos.map((x,i)=>i===selected?{...x,diasHabiles:num}:x));
 const base = parseFecha(p.fecha);
 const lim  = base && p.diasHabiles ? addDiasHabiles(base, p.diasHabiles) : null;
 return (
+
 <div style={{ paddingBottom:80 }}>
 <Header title={p.id} subtitle="GESTIÓN DE PEDIDO" back onBack={() => { setSelected(null); setNota(""); }} />
 <div style={{ padding:"20px" }}>
@@ -1762,123 +1781,124 @@ return (
 </div>
 </div>
 
-      <div style={{ background:CARD, border:`1px solid ${GOLD}44`, borderRadius:12, padding:"16px", marginBottom:16 }}>
-        <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:10 }}>📋 NÚMERO DE SERIE</div>
-        <input
-          placeholder="Ej: PED-2026-001"
-          value={p.serie || ""}
-          onChange={e => setPedidos(pedidos.map((x,i) => i===selected ? {...x, serie:e.target.value.toUpperCase()} : x))}
-          style={{ width:"100%", background:DARK3, border:`1px solid ${GOLD}55`, color:GOLD, padding:"12px 14px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box", fontWeight:"bold", letterSpacing:"2px" }}
-        />
-        <div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Visible para el cliente · Se guarda automáticamente</div>
-      </div>
+  <div style={{ background:CARD, border:`1px solid ${GOLD}44`, borderRadius:12, padding:"16px", marginBottom:16 }}>
+    <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:10 }}>📋 NÚMERO DE SERIE</div>
+    <input
+      placeholder="Ej: PED-2026-001"
+      value={p.serie || ""}
+      onChange={e => setPedidos(pedidos.map((x,i) => i===selected ? {...x, serie:e.target.value.toUpperCase()} : x))}
+      style={{ width:"100%", background:DARK3, border:`1px solid ${GOLD}55`, color:GOLD, padding:"12px 14px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box", fontWeight:"bold", letterSpacing:"2px" }}
+    />
+    <div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Visible para el cliente · Se guarda automáticamente</div>
+  </div>
 
-      <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"16px", marginBottom:16 }}>
-        <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:10 }}>📅 FECHA DE INICIO DE OBRA</div>
-        <input
-          type="date"
-          value={p.fechaInicio || ""}
-          onChange={e => setPedidos(pedidos.map((x,i) => i===selected ? {...x, fechaInicio:e.target.value} : x))}
-          style={{ width:"100%", background:DARK3, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"12px 14px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
-        />
-        <div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Fecha en que se comienza a trabajar en este pedido</div>
-      </div>
+  <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"16px", marginBottom:16 }}>
+    <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:10 }}>📅 FECHA DE INICIO DE OBRA</div>
+    <input
+      type="date"
+      value={p.fechaInicio || ""}
+      onChange={e => setPedidos(pedidos.map((x,i) => i===selected ? {...x, fechaInicio:e.target.value} : x))}
+      style={{ width:"100%", background:DARK3, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"12px 14px", borderRadius:8, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}
+    />
+    <div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Fecha en que se comienza a trabajar en este pedido</div>
+  </div>
 
-      <div style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"16px",marginBottom:20 }}>
-        <div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"2px",marginBottom:12 }}>⏱ DÍAS HÁBILES DE ENTREGA</div>
-        <div style={{ fontSize:12,color:"#888",fontFamily:"sans-serif",marginBottom:10 }}>Desde fecha del pedido · Solo Lunes a Viernes</div>
-        <div style={{ display:"flex",gap:8,alignItems:"center",marginBottom:12 }}>
-          <button onClick={() => setDiasHabiles((p.diasHabiles||10)-1)} style={{ width:40,height:40,background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",borderRadius:8,fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>−</button>
-          <div style={{ flex:1,textAlign:"center" }}>
-            <div style={{ fontSize:32,fontWeight:"bold",color:GOLD }}>{p.diasHabiles||10}</div>
-            <div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif" }}>días hábiles</div>
-          </div>
-          <button onClick={() => setDiasHabiles((p.diasHabiles||10)+1)} style={{ width:40,height:40,background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",borderRadius:8,fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>+</button>
-        </div>
-        <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
-          {[5,8,10,15,20].map(n => (
-            <button key={n} onClick={() => setDiasHabiles(n)} style={{ flex:1,minWidth:50,padding:"8px 4px",borderRadius:8,border:`1px solid ${(p.diasHabiles||10)===n?GOLD:BORDER}`,background:(p.diasHabiles||10)===n?GOLD+"18":DARK3,color:(p.diasHabiles||10)===n?GOLD:"#888",fontFamily:"sans-serif",fontSize:13,cursor:"pointer",fontWeight:(p.diasHabiles||10)===n?"bold":"normal" }}>{n}d</button>
-          ))}
-        </div>
-        {lim && <div style={{ marginTop:12,padding:"10px 14px",background:DARK3,borderRadius:8,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-          <div style={{ fontSize:12,color:"#888",fontFamily:"sans-serif" }}>Fecha límite calculada</div>
-          <div style={{ fontSize:14,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>{formatFechaCorta(lim)}</div>
-        </div>}
+  <div style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"16px",marginBottom:20 }}>
+    <div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"2px",marginBottom:12 }}>⏱ DÍAS HÁBILES DE ENTREGA</div>
+    <div style={{ fontSize:12,color:"#888",fontFamily:"sans-serif",marginBottom:10 }}>Desde fecha del pedido · Solo Lunes a Viernes</div>
+    <div style={{ display:"flex",gap:8,alignItems:"center",marginBottom:12 }}>
+      <button onClick={() => setDiasHabiles((p.diasHabiles||10)-1)} style={{ width:40,height:40,background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",borderRadius:8,fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>−</button>
+      <div style={{ flex:1,textAlign:"center" }}>
+        <div style={{ fontSize:32,fontWeight:"bold",color:GOLD }}>{p.diasHabiles||10}</div>
+        <div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif" }}>días hábiles</div>
       </div>
-
-      <div style={{ background:`${GOLD}11`,border:`1px solid ${GOLD}22`,borderRadius:12,padding:"16px",marginBottom:20 }}>
-        <div style={{ display:"flex",justifyContent:"space-between",marginBottom:10 }}>
-          <div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"2px" }}>PROGRESO</div>
-          <div style={{ fontSize:13,color:GOLD,fontWeight:"bold" }}>{pct}%</div>
-        </div>
-        <div style={{ background:"#1A1A1A",borderRadius:6,height:8,overflow:"hidden" }}>
-          <div style={{ background:`linear-gradient(90deg,${GOLD},${GOLD_LIGHT})`,width:`${pct}%`,height:"100%",borderRadius:6,boxShadow:`0 0 8px ${GOLD}66` }} />
-        </div>
-      </div>
-
-      <div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"2px",marginBottom:12 }}>CAMBIAR ESTADO</div>
-      <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:24 }}>
-        {ESTADO_LABELS.map((est,i) => {
-          const isCurrentState = p.estado===i;
-          const waMsg = `Hola ${cliente?.tratamiento ? cliente.tratamiento + " " + (cliente?.nombre?.split(" ").slice(-1)[0]||"") : cliente?.nombre?.split(" ")[0]||""} 👋! Somos de *Doctor Parrilla* 🔥\n\nTe informamos que tu parrilla *${p.modelo}* (Pedido ${p.id}) ahora está en: *${est}*\n\n${i===0?"Ya recibimos tu pedido. Nuestro equipo ya está planificando cada detalle.":i===1?"Manos expertas están forjando tu parrilla ahora mismo. ¡Cada soldadura es perfección!":i===2?"Tu parrilla está en control de calidad. Revisamos cada detalle para que sea perfecta. ¡Ya falta poco!":i===3?"¡Tu parrilla está lista para entrega! 🎉 Coordinaremos la entrega pronto. ¿Ya compraste la carne para el estreno?":"¡Tu parrilla ya fue entregada! 🎉 Disfrutala. Nos encantaría que nos dejes una reseña en Google."}\n\n#ElFuegoNosUne🔥 Gracias por confiar en Dr. Parrilla`;
-          return (
-          <button key={i} onClick={() => {
-            const prevEstado = p.estado;
-            setPedidos(pedidos.map((x,j)=>j===selected?{...x,estado:i}:x));
-            if (i !== prevEstado) {
-              const telClean = (p.tel||"").replace(/\D/g,"").replace(/^0/,"");
-              window.open(`https://wa.me/595${telClean}?text=${encodeURIComponent(waMsg)}`, "_blank");
-            }
-          }}
-            style={{ padding:"12px 16px",borderRadius:10,border:`1px solid ${isCurrentState?GOLD:BORDER}`,background:isCurrentState?GOLD+"18":CARD,cursor:"pointer",display:"flex",alignItems:"center",gap:12,textAlign:"left" }}>
-            <span style={{ fontSize:18 }}>{ESTADO_ICONS[i]}</span>
-            <span style={{ fontSize:14,color:isCurrentState?GOLD:"#AAA",fontFamily:"sans-serif",fontWeight:isCurrentState?"bold":"normal",flex:1 }}>{est}</span>
-            {isCurrentState && <span style={{ fontSize:12,color:GOLD }}>✓ Actual</span>}
-            {!isCurrentState && <span style={{ fontSize:10,color:"#4CAF50",fontFamily:"sans-serif" }}>💬 WhatsApp</span>}
-          </button>
-          );
-        })}
-      </div>
-
-      <div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"2px",marginBottom:12 }}>📸 FOTOS DE PRODUCCIÓN</div>
-      <div style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"16px",marginBottom:20 }}>
-        <div style={{ fontSize:12,color:"#888",fontFamily:"sans-serif",marginBottom:8 }}>Nota para esta foto (opcional)</div>
-        <input placeholder="Ej: Soldadura terminada..." value={nota} onChange={e=>setNota(e.target.value)}
-          style={{ width:"100%",background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"12px 14px",borderRadius:8,fontSize:14,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box",marginBottom:12 }} />
-        <PhotoUploadButton onPhoto={addFoto} label="📷 Subir foto del progreso" style={{ width:"100%",justifyContent:"center",boxSizing:"border-box" }} />
-        {p.fotos?.length > 0 && (
-          <div style={{ marginTop:14,display:"flex",flexDirection:"column",gap:10 }}>
-            {p.fotos.map((f,i) => (
-              <div key={i} style={{ borderRadius:10,overflow:"hidden",border:`1px solid ${BORDER}` }}>
-                <img src={f.src} alt="Progreso" style={{ width:"100%",maxHeight:180,objectFit:"cover",display:"block" }} />
-                <div style={{ padding:"8px 12px",background:DARK3 }}>
-                  {f.nota && <div style={{ fontSize:13,color:"#CCC",fontFamily:"sans-serif",marginBottom:4 }}>{f.nota}</div>}
-                  <div style={{ fontSize:11,color:"#555",fontFamily:"sans-serif" }}>{ESTADO_LABELS[f.etapa]} · {f.fecha} · {f.autor}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      <a href={`https://wa.me/595${p.tel.replace(/\D/g,"").replace(/^0/,"")}?text=Hola ${cliente?.nombre?.split(" ")[0]||""}! Tu pedido ${p.id} está en: ${ESTADO_LABELS[p.estado]}`} target="_blank" rel="noreferrer"
-        style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#0A1F0A",border:"1px solid #1A3A1A",borderRadius:10,padding:"14px",textDecoration:"none",color:"#4CAF50",fontFamily:"sans-serif",fontSize:14 }}>
-        💬 Notificar al cliente por WhatsApp
-      </a>
-      {p.estado === 4 && (
-        <button
-          onClick={() => {
-            if (window.confirm(`¿Eliminar el pedido ${p.id} de forma permanente? Esta acción no se puede deshacer.`)) {
-              const next = pedidos.filter((_,j) => j !== selected);
-              setPedidos(next);
-              setSelected(null);
-              setNota("");
-            }
-          }}
-          style={{ width:"100%", marginTop:10, background:"#180000", border:"1px solid #C0392B44", color:"#E57373", padding:"13px", borderRadius:10, fontSize:13, fontFamily:"sans-serif", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-          🗑️ Eliminar pedido entregado
-        </button>
-      )}
+      <button onClick={() => setDiasHabiles((p.diasHabiles||10)+1)} style={{ width:40,height:40,background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",borderRadius:8,fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>+</button>
     </div>
+    <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+      {[5,8,10,15,20].map(n => (
+        <button key={n} onClick={() => setDiasHabiles(n)} style={{ flex:1,minWidth:50,padding:"8px 4px",borderRadius:8,border:`1px solid ${(p.diasHabiles||10)===n?GOLD:BORDER}`,background:(p.diasHabiles||10)===n?GOLD+"18":DARK3,color:(p.diasHabiles||10)===n?GOLD:"#888",fontFamily:"sans-serif",fontSize:13,cursor:"pointer",fontWeight:(p.diasHabiles||10)===n?"bold":"normal" }}>{n}d</button>
+      ))}
+    </div>
+    {lim && <div style={{ marginTop:12,padding:"10px 14px",background:DARK3,borderRadius:8,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+      <div style={{ fontSize:12,color:"#888",fontFamily:"sans-serif" }}>Fecha límite calculada</div>
+      <div style={{ fontSize:14,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>{formatFechaCorta(lim)}</div>
+    </div>}
+  </div>
+
+  <div style={{ background:`${GOLD}11`,border:`1px solid ${GOLD}22`,borderRadius:12,padding:"16px",marginBottom:20 }}>
+    <div style={{ display:"flex",justifyContent:"space-between",marginBottom:10 }}>
+      <div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"2px" }}>PROGRESO</div>
+      <div style={{ fontSize:13,color:GOLD,fontWeight:"bold" }}>{pct}%</div>
+    </div>
+    <div style={{ background:"#1A1A1A",borderRadius:6,height:8,overflow:"hidden" }}>
+      <div style={{ background:`linear-gradient(90deg,${GOLD},${GOLD_LIGHT})`,width:`${pct}%`,height:"100%",borderRadius:6,boxShadow:`0 0 8px ${GOLD}66` }} />
+    </div>
+  </div>
+
+  <div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"2px",marginBottom:12 }}>CAMBIAR ESTADO</div>
+  <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:24 }}>
+    {ESTADO_LABELS.map((est,i) => {
+      const isCurrentState = p.estado===i;
+      const waMsg = `Hola ${cliente?.tratamiento ? cliente.tratamiento + " " + (cliente?.nombre?.split(" ").slice(-1)[0]||"") : cliente?.nombre?.split(" ")[0]||""} 👋! Somos de *Doctor Parrilla* 🔥\n\nTe informamos que tu parrilla *${p.modelo}* (Pedido ${p.id}) ahora está en: *${est}*\n\n${i===0?"Ya recibimos tu pedido. Nuestro equipo ya está planificando cada detalle.":i===1?"Manos expertas están forjando tu parrilla ahora mismo. ¡Cada soldadura es perfección!":i===2?"Tu parrilla está en control de calidad. Revisamos cada detalle para que sea perfecta. ¡Ya falta poco!":i===3?"¡Tu parrilla está lista para entrega! 🎉 Coordinaremos la entrega pronto. ¿Ya compraste la carne para el estreno?":"¡Tu parrilla ya fue entregada! 🎉 Disfrutala. Nos encantaría que nos dejes una reseña en Google."}\n\n#ElFuegoNosUne🔥 Gracias por confiar en Dr. Parrilla`;
+      return (
+      <button key={i} onClick={() => {
+        const prevEstado = p.estado;
+        setPedidos(pedidos.map((x,j)=>j===selected?{...x,estado:i}:x));
+        if (i !== prevEstado) {
+          const telClean = (p.tel||"").replace(/\D/g,"").replace(/^0/,"");
+          window.open(`https://wa.me/595${telClean}?text=${encodeURIComponent(waMsg)}`, "_blank");
+        }
+      }}
+        style={{ padding:"12px 16px",borderRadius:10,border:`1px solid ${isCurrentState?GOLD:BORDER}`,background:isCurrentState?GOLD+"18":CARD,cursor:"pointer",display:"flex",alignItems:"center",gap:12,textAlign:"left" }}>
+        <span style={{ fontSize:18 }}>{ESTADO_ICONS[i]}</span>
+        <span style={{ fontSize:14,color:isCurrentState?GOLD:"#AAA",fontFamily:"sans-serif",fontWeight:isCurrentState?"bold":"normal",flex:1 }}>{est}</span>
+        {isCurrentState && <span style={{ fontSize:12,color:GOLD }}>✓ Actual</span>}
+        {!isCurrentState && <span style={{ fontSize:10,color:"#4CAF50",fontFamily:"sans-serif" }}>💬 WhatsApp</span>}
+      </button>
+      );
+    })}
+  </div>
+
+  <div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"2px",marginBottom:12 }}>📸 FOTOS DE PRODUCCIÓN</div>
+  <div style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"16px",marginBottom:20 }}>
+    <div style={{ fontSize:12,color:"#888",fontFamily:"sans-serif",marginBottom:8 }}>Nota para esta foto (opcional)</div>
+    <input placeholder="Ej: Soldadura terminada..." value={nota} onChange={e=>setNota(e.target.value)}
+      style={{ width:"100%",background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"12px 14px",borderRadius:8,fontSize:14,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box",marginBottom:12 }} />
+    <PhotoUploadButton onPhoto={addFoto} label="📷 Subir foto del progreso" style={{ width:"100%",justifyContent:"center",boxSizing:"border-box" }} />
+    {p.fotos?.length > 0 && (
+      <div style={{ marginTop:14,display:"flex",flexDirection:"column",gap:10 }}>
+        {p.fotos.map((f,i) => (
+          <div key={i} style={{ borderRadius:10,overflow:"hidden",border:`1px solid ${BORDER}` }}>
+            <img src={f.src} alt="Progreso" style={{ width:"100%",maxHeight:180,objectFit:"cover",display:"block" }} />
+            <div style={{ padding:"8px 12px",background:DARK3 }}>
+              {f.nota && <div style={{ fontSize:13,color:"#CCC",fontFamily:"sans-serif",marginBottom:4 }}>{f.nota}</div>}
+              <div style={{ fontSize:11,color:"#555",fontFamily:"sans-serif" }}>{ESTADO_LABELS[f.etapa]} · {f.fecha} · {f.autor}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+  <a href={`https://wa.me/595${p.tel.replace(/\D/g,"").replace(/^0/,"")}?text=Hola ${cliente?.nombre?.split(" ")[0]||""}! Tu pedido ${p.id} está en: ${ESTADO_LABELS[p.estado]}`} target="_blank" rel="noreferrer"
+    style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#0A1F0A",border:"1px solid #1A3A1A",borderRadius:10,padding:"14px",textDecoration:"none",color:"#4CAF50",fontFamily:"sans-serif",fontSize:14 }}>
+    💬 Notificar al cliente por WhatsApp
+  </a>
+  {p.estado === 4 && (
+    <button
+      onClick={() => {
+        if (window.confirm(`¿Eliminar el pedido ${p.id} de forma permanente? Esta acción no se puede deshacer.`)) {
+          const next = pedidos.filter((_,j) => j !== selected);
+          setPedidos(next);
+          setSelected(null);
+          setNota("");
+        }
+      }}
+      style={{ width:"100%", marginTop:10, background:"#180000", border:"1px solid #C0392B44", color:"#E57373", padding:"13px", borderRadius:10, fontSize:13, fontFamily:"sans-serif", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+      🗑️ Eliminar pedido entregado
+    </button>
+  )}
+</div>
+
   </div>
 );
 
@@ -1891,6 +1911,7 @@ const stats = [
 { label:"Entregados",     value:pedidos.filter(p=>p.estado===4).length,               color:"#4CAF50", icon:"✅" },
 ];
 return (
+
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
 <div>
@@ -1967,6 +1988,7 @@ const getNombre = (tel) => { const c=clientes.find(x=>normalizePhone(x.tel)===no
 if (selected !== null) {
 const t = tickets[selected];
 return (
+
 <div style={{ paddingBottom:80 }}>
 <Header title={t.id} subtitle="DETALLE DE TICKET" back onBack={() => setSelected(null)} />
 <div style={{ padding:"20px" }}>
@@ -2034,14 +2056,14 @@ return (
 );
 }
 
-
-// -- CLIENT: MIS CUPONES --
+// - CLIENT: MIS CUPONES -
 function MisCuponesScreen({ cupones, clienteUser }) {
 const misCupones = cupones.filter(c => c.clienteTel && normalizePhone(c.clienteTel) === normalizePhone(clienteUser?.tel||""));
 const activos = misCupones.filter(c => c.estado === "activo" && !isCuponExpirado(c));
 const expiradosOUsados = misCupones.filter(c => c.estado === "usado" || isCuponExpirado(c));
 
 return (
+
 <div style={{ paddingBottom:80 }}>
 <Header title="Mis Cupones" subtitle="DESCUENTOS EXCLUSIVOS" />
 {activos.length > 0 && (
@@ -2152,6 +2174,7 @@ c.tel.includes(search)
 ) : [];
 
 return (
+
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}` }}>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>PANEL DE GESTIÓN</div>
@@ -2307,7 +2330,7 @@ return { ...p.resena, cliente: cliente?.nombre || p.tel, modelo: p.modelo, pedid
 
 const avg = resenas.length > 0
 ? (resenas.reduce((s,r) => s+r.stars, 0) / resenas.length).toFixed(1)
-: "--";
+: "-";
 
 const dist = [5,4,3,2,1].map(s => ({
 stars: s,
@@ -2318,6 +2341,7 @@ pct: resenas.length > 0 ? Math.round(resenas.filter(r=>r.stars===s).length/resen
 const starColor = (s) => s>=4?"#4CAF50":s===3?GOLD:"#E57373";
 
 return (
+
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}` }}>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>PANEL DE GESTIÓN</div>
@@ -2325,7 +2349,8 @@ return (
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 
-  {/* Summary */}
+{/* Summary */}
+
   <div style={{ padding:"16px", display:"grid", gridTemplateColumns:"1fr 2fr", gap:12, marginBottom:4 }}>
     <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"20px", textAlign:"center" }}>
       <div style={{ fontSize:42, fontWeight:"bold", color:GOLD }}>{avg}</div>
@@ -2346,7 +2371,8 @@ return (
     </div>
   </div>
 
-  {/* Google Reviews CTA for admin */}
+{/* Google Reviews CTA for admin */}
+
   <div style={{ margin:"0 16px 16px" }}>
     <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noreferrer"
       style={{ display:"flex", alignItems:"center", gap:12, background:"#0A0F1F", border:"1px solid #1A2A4A", borderRadius:12, padding:"14px 16px", textDecoration:"none" }}>
@@ -2359,7 +2385,8 @@ return (
     </a>
   </div>
 
-  {/* Individual reviews */}
+{/* Individual reviews */}
+
   <div style={{ padding:"0 16px", display:"flex", flexDirection:"column", gap:10 }}>
     {resenas.length === 0 && (
       <div style={{ textAlign:"center", padding:"40px 20px", color:"#555", fontFamily:"sans-serif" }}>
@@ -2429,6 +2456,7 @@ setStep(4);
 };
 
 if (step === 4) return (
+
 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:"60vh", padding:32, textAlign:"center" }}>
 <div style={{ fontSize:52, marginBottom:16 }}>✅</div>
 <div style={{ fontSize:22, fontWeight:"bold", marginBottom:8 }}>¡Visita agendada!</div>
@@ -2452,6 +2480,7 @@ Agendar otra visita
 );
 
 return (
+
 <div style={{ paddingBottom:80 }}>
 <Header title="Agendar Visita" subtitle="SHOWROOM DR. PARRILLA"/>
 <div style={{ padding:"16px 20px 0" }}>
@@ -2465,63 +2494,64 @@ return (
 ))}
 </div>
 
-    {step === 1 && (
-      <div>
-        <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:14 }}>ELEGÍ UN DÍA</div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, marginBottom:20 }}>
-          {dias.map((d,i) => (
-            <button key={i} onClick={() => { setFecha(d.fecha); setStep(2); }}
-              style={{ background:fecha===d.fecha?`${GOLD}22`:CARD, border:`1px solid ${fecha===d.fecha?GOLD:BORDER}`, borderRadius:10, padding:"12px 6px", cursor:"pointer", textAlign:"center" }}>
-              <div style={{ fontSize:10, color:fecha===d.fecha?GOLD:"#888", fontFamily:"sans-serif", marginBottom:4 }}>{d.diaNombre}</div>
-              <div style={{ fontSize:18, fontWeight:"bold", color:fecha===d.fecha?GOLD:CREAM }}>{d.diaNum}</div>
-              <div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif" }}>{d.mes}</div>
-            </button>
-          ))}
-        </div>
-        <div style={{ background:`${GOLD}08`, border:`1px solid ${GOLD}22`, borderRadius:10, padding:"12px 14px", fontSize:12, color:"#888", fontFamily:"sans-serif" }}>
-          📍 Showroom: Lambaré, Paraguay · Lun-Vie 9:00-17:00 · #ElFuegoNosUne🔥
-        </div>
-      </div>
-    )}
-
-    {step === 2 && (
-      <div>
-        <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>DÍA SELECCIONADO</div>
-        <div style={{ fontSize:16, fontWeight:"bold", color:GOLD, marginBottom:16 }}>{fecha}</div>
-        <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:14 }}>ELEGÍ UN HORARIO</div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8, marginBottom:16 }}>
-          {HORARIOS.map(h => (
-            <button key={h} onClick={() => { setHora(h); setStep(3); }}
-              style={{ background:hora===h?`${GOLD}22`:CARD, border:`1px solid ${hora===h?GOLD:BORDER}`, borderRadius:10, padding:"14px", cursor:"pointer", textAlign:"center", fontSize:15, fontWeight:"bold", color:hora===h?GOLD:CREAM, fontFamily:"sans-serif" }}>
-              {h}
-            </button>
-          ))}
-        </div>
-        <button onClick={() => setStep(1)} style={{ background:"none", border:"none", color:GOLD_DARK, fontSize:13, fontFamily:"sans-serif", cursor:"pointer" }}>← Cambiar fecha</button>
-      </div>
-    )}
-
-    {step === 3 && (
-      <div>
-        <div style={{ background:`${GOLD}11`, border:`1px solid ${GOLD}33`, borderRadius:12, padding:"20px", marginBottom:16 }}>
-          <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>RESUMEN DE VISITA</div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:14 }}>
-            <div><div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif", marginBottom:4 }}>FECHA</div><div style={{ fontSize:14, fontWeight:"bold" }}>{fecha}</div></div>
-            <div><div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif", marginBottom:4 }}>HORARIO</div><div style={{ fontSize:14, fontWeight:"bold", color:GOLD }}>{hora}</div></div>
-          </div>
-          <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>📍 Showroom Dr. Parrilla · Lambaré · #ElFuegoNosUne🔥</div>
-        </div>
-        <div style={{ fontSize:10, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>NOTA OPCIONAL</div>
-        <input value={nota} onChange={e => setNota(e.target.value)}
-          placeholder="¿Qué modelo te interesa ver? ¿Tenés alguna consulta específica?"
-          style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:CREAM, padding:"12px 14px", borderRadius:8, fontSize:13, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box", marginBottom:16 }}/>
-        <button onClick={confirmar}
-          style={{ width:"100%", background:GOLD_GRAD, border:"none", color:DARK, padding:"16px", borderRadius:10, fontSize:15, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"2px", cursor:"pointer", marginBottom:8 }}>
-          CONFIRMAR VISITA
+{step === 1 && (
+  <div>
+    <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:14 }}>ELEGÍ UN DÍA</div>
+    <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, marginBottom:20 }}>
+      {dias.map((d,i) => (
+        <button key={i} onClick={() => { setFecha(d.fecha); setStep(2); }}
+          style={{ background:fecha===d.fecha?`${GOLD}22`:CARD, border:`1px solid ${fecha===d.fecha?GOLD:BORDER}`, borderRadius:10, padding:"12px 6px", cursor:"pointer", textAlign:"center" }}>
+          <div style={{ fontSize:10, color:fecha===d.fecha?GOLD:"#888", fontFamily:"sans-serif", marginBottom:4 }}>{d.diaNombre}</div>
+          <div style={{ fontSize:18, fontWeight:"bold", color:fecha===d.fecha?GOLD:CREAM }}>{d.diaNum}</div>
+          <div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif" }}>{d.mes}</div>
         </button>
-        <button onClick={() => setStep(2)} style={{ width:"100%", background:"none", border:"none", color:GOLD_DARK, fontSize:13, fontFamily:"sans-serif", cursor:"pointer" }}>← Cambiar horario</button>
+      ))}
+    </div>
+    <div style={{ background:`${GOLD}08`, border:`1px solid ${GOLD}22`, borderRadius:10, padding:"12px 14px", fontSize:12, color:"#888", fontFamily:"sans-serif" }}>
+      📍 Showroom: Lambaré, Paraguay · Lun-Vie 9:00-17:00 · #ElFuegoNosUne🔥
+    </div>
+  </div>
+)}
+
+{step === 2 && (
+  <div>
+    <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>DÍA SELECCIONADO</div>
+    <div style={{ fontSize:16, fontWeight:"bold", color:GOLD, marginBottom:16 }}>{fecha}</div>
+    <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:14 }}>ELEGÍ UN HORARIO</div>
+    <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8, marginBottom:16 }}>
+      {HORARIOS.map(h => (
+        <button key={h} onClick={() => { setHora(h); setStep(3); }}
+          style={{ background:hora===h?`${GOLD}22`:CARD, border:`1px solid ${hora===h?GOLD:BORDER}`, borderRadius:10, padding:"14px", cursor:"pointer", textAlign:"center", fontSize:15, fontWeight:"bold", color:hora===h?GOLD:CREAM, fontFamily:"sans-serif" }}>
+          {h}
+        </button>
+      ))}
+    </div>
+    <button onClick={() => setStep(1)} style={{ background:"none", border:"none", color:GOLD_DARK, fontSize:13, fontFamily:"sans-serif", cursor:"pointer" }}>← Cambiar fecha</button>
+  </div>
+)}
+
+{step === 3 && (
+  <div>
+    <div style={{ background:`${GOLD}11`, border:`1px solid ${GOLD}33`, borderRadius:12, padding:"20px", marginBottom:16 }}>
+      <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>RESUMEN DE VISITA</div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:14 }}>
+        <div><div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif", marginBottom:4 }}>FECHA</div><div style={{ fontSize:14, fontWeight:"bold" }}>{fecha}</div></div>
+        <div><div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif", marginBottom:4 }}>HORARIO</div><div style={{ fontSize:14, fontWeight:"bold", color:GOLD }}>{hora}</div></div>
       </div>
-    )}
+      <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>📍 Showroom Dr. Parrilla · Lambaré · #ElFuegoNosUne🔥</div>
+    </div>
+    <div style={{ fontSize:10, color:"#888", fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:8 }}>NOTA OPCIONAL</div>
+    <input value={nota} onChange={e => setNota(e.target.value)}
+      placeholder="¿Qué modelo te interesa ver? ¿Tenés alguna consulta específica?"
+      style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:CREAM, padding:"12px 14px", borderRadius:8, fontSize:13, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box", marginBottom:16 }}/>
+    <button onClick={confirmar}
+      style={{ width:"100%", background:GOLD_GRAD, border:"none", color:DARK, padding:"16px", borderRadius:10, fontSize:15, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"2px", cursor:"pointer", marginBottom:8 }}>
+      CONFIRMAR VISITA
+    </button>
+    <button onClick={() => setStep(2)} style={{ width:"100%", background:"none", border:"none", color:GOLD_DARK, fontSize:13, fontFamily:"sans-serif", cursor:"pointer" }}>← Cambiar horario</button>
+  </div>
+)}
+
   </div>
 </div>
 
@@ -2539,6 +2569,7 @@ const stats = [
 ];
 
 return (
+
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
 <div>
@@ -2721,7 +2752,16 @@ fetch(`${FIREBASE_URL}/drparrilla/dp_visitas.json`),
 fetch(`${FIREBASE_URL}/drparrilla/dp_cupones.json`)
 ]);
 const [fbPedidos, fbTickets, fbClientes, fbProductos, fbVisitas, fbCupones] = await Promise.all([r1.json(), r2.json(), r3.json(), r4.json(), r5.json(), r6.json()]);
-if (fbPedidos) setPedidos(prev => JSON.stringify(prev)===JSON.stringify(fbPedidos) ? prev : fbPedidos);
+if (fbPedidos) setPedidos(prev => {
+if (JSON.stringify(prev)===JSON.stringify(fbPedidos)) return prev;
+// Preserve resena (reviews) from local state -- never overwrite with Firebase if local has review
+const merged = fbPedidos.map(fbP => {
+const localP = prev.find(p => p.id === fbP.id);
+if (localP?.resena && !fbP.resena) return { ...fbP, resena: localP.resena };
+return fbP;
+});
+return merged;
+});
 if (fbTickets) setTickets(prev => JSON.stringify(prev)===JSON.stringify(fbTickets) ? prev : fbTickets);
 if (fbClientes) setClientes(prev => {
 if (JSON.stringify(prev)===JSON.stringify(fbClientes)) return prev;
@@ -2734,7 +2774,16 @@ return merged;
 }
 return fbClientes;
 });
-if (fbProductos) setProductos(prev => JSON.stringify(prev)===JSON.stringify(fbProductos) ? prev : fbProductos);
+if (fbProductos) setProductos(prev => {
+if (JSON.stringify(prev)===JSON.stringify(fbProductos)) return prev;
+// Preserve foto (catalog images) from local state -- never overwrite uploaded photos
+const merged = fbProductos.map(fbProd => {
+const localProd = prev.find(p => p.id === fbProd.id);
+if (localProd?.foto && !fbProd.foto) return { ...fbProd, foto: localProd.foto };
+return fbProd;
+});
+return merged;
+});
 if (fbVisitas) setVisitas(prev => JSON.stringify(prev)===JSON.stringify(fbVisitas) ? prev : fbVisitas);
 if (fbCupones) setCupones(prev => JSON.stringify(prev)===JSON.stringify(fbCupones) ? prev : fbCupones);
 } catch(e) {}
@@ -2743,6 +2792,7 @@ return () => clearInterval(poll);
 }, [firebaseOk]);
 
 if (!logged) return (
+
 <div style={{ fontFamily:"Georgia, serif",background:DARK,color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto" }}>
 <LoginScreen clientes={clientes} onLogin={(admin,cliente,esAdmin) => { setAdminUser(admin); setClienteUser(cliente); setIsAdmin(esAdmin); setActive(esAdmin?"admin-orders":"home"); setLogged(true); }} />
 </div>
@@ -2766,6 +2816,7 @@ soporte:          () => <SoporteScreen tickets={tickets} setTickets={saveTickets
 const Screen = screens[active] || screens["home"];
 
 return (
+
 <div style={{ fontFamily:"Georgia, serif",background:"linear-gradient(180deg, #0B0D10 0%, #09090B 15%, #080808 40%, #080A08 70%, #0A0808 100%)",color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto",position:"relative" }}>
 <div style={{ background:"#080808", padding:"10px 20px 6px", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:11, color:"#555", fontFamily:"sans-serif" }}>
 <span style={{ fontSize:10, minWidth:50, fontFamily:"sans-serif" }}>
