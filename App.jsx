@@ -30,6 +30,7 @@ const GOOGLE_REVIEW_URL = "https://share.google/D7XEt1nQQzynvpxG5";
 // Paste your Firebase Realtime Database URL here after creating the project
 // Example: "https://doctor-parrilla-default-rtdb.firebaseio.com"
 const FIREBASE_URL = "https://doctor-parrilla-clientes-default-rtdb.firebaseio.com";
+const FIREBASE_STORAGE_BUCKET = "doctor-parrilla-clientes.firebasestorage.app";
 
 const appStorage = {
 async get(key) {
@@ -403,7 +404,9 @@ if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
 canvas.width = w; canvas.height = h;
 const ctx = canvas.getContext('2d');
 ctx.drawImage(img, 0, 0, w, h);
-resolve(canvas.toDataURL('image/jpeg', quality));
+canvas.toBlob((blob) => {
+resolve(blob);
+}, 'image/jpeg', quality);
 };
 img.src = ev.target.result;
 };
@@ -411,24 +414,73 @@ reader.readAsDataURL(file);
 });
 }
 
+// ── Subir imagen a Firebase Storage y devolver URL pública ──
+async function uploadToFirebaseStorage(blob, path) {
+if (!FIREBASE_STORAGE_BUCKET) {
+// Fallback a base64 si no hay bucket configurado
+return new Promise((resolve) => {
+const reader = new FileReader();
+reader.onload = () => resolve(reader.result);
+reader.readAsDataURL(blob);
+});
+}
+try {
+const encodedPath = encodeURIComponent(path);
+const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodedPath}`;
+const res = await fetch(uploadUrl, {
+method: 'POST',
+headers: { 'Content-Type': 'image/jpeg' },
+body: blob
+});
+if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+const data = await res.json();
+// Construir URL de descarga pública
+const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodedPath}?alt=media&token=${data.downloadTokens || ''}`;
+return downloadUrl;
+} catch (e) {
+console.warn('Firebase Storage upload failed, falling back to base64:', e.message);
+// Fallback a base64 si falla la subida
+return new Promise((resolve) => {
+const reader = new FileReader();
+reader.onload = () => resolve(reader.result);
+reader.readAsDataURL(blob);
+});
+}
+}
+
 function PhotoUploadButton({ onPhoto, multiple = false, label = "📷 Subir foto", style = {} }) {
 const ref = useRef();
+const [uploading, setUploading] = useState(false);
 const handle = async (e) => {
 const files = Array.from(e.target.files); if (!files.length) return;
+setUploading(true);
+try {
 if (multiple) {
 const results = [];
-for (const file of files) { results.push(await compressImage(file)); }
+for (const file of files) {
+const blob = await compressImage(file);
+const path = `catalogo/${Date.now()}_${Math.random().toString(36).slice(2,8)}.jpg`;
+const url = await uploadToFirebaseStorage(blob, path);
+results.push(url);
+}
 onPhoto(results);
 } else {
-const compressed = await compressImage(files[0]);
-onPhoto(compressed);
+const blob = await compressImage(files[0]);
+const path = `fotos/${Date.now()}_${Math.random().toString(36).slice(2,8)}.jpg`;
+const url = await uploadToFirebaseStorage(blob, path);
+onPhoto(url);
+}
+} catch (err) {
+console.warn('Error uploading photo:', err);
+} finally {
+setUploading(false);
 }
 e.target.value = "";
 };
 return (
 <>
 <input type="file" accept="image/*" multiple={multiple} ref={ref} onChange={handle} style={{ display:"none" }} />
-<button onClick={() => ref.current?.click()} style={{ background:CARD, border:`1px solid ${BORDER}`, color:"#CCC", padding:"12px 16px", borderRadius:10, fontFamily:"sans-serif", fontSize:13, cursor:"pointer", display:"flex", alignItems:"center", gap:8, ...style }}>{label}</button>
+<button onClick={() => !uploading && ref.current?.click()} style={{ background:CARD, border:`1px solid ${BORDER}`, color: uploading ? GOLD : "#CCC", padding:"12px 16px", borderRadius:10, fontFamily:"sans-serif", fontSize:13, cursor: uploading ? "wait" : "pointer", display:"flex", alignItems:"center", gap:8, opacity: uploading ? 0.7 : 1, ...style }}>{uploading ? "⏳ Subiendo..." : label}</button>
 </>
 );
 }
@@ -2820,12 +2872,13 @@ return (
 <div style={{ fontFamily:"Georgia, serif",background:"linear-gradient(180deg, #0B0D10 0%, #09090B 15%, #080808 40%, #080A08 70%, #0A0808 100%)",color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto",position:"relative" }}>
 <div style={{ background:"#080808", padding:"10px 20px 6px", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:11, color:"#555", fontFamily:"sans-serif" }}>
 <span style={{ fontSize:10, minWidth:50, fontFamily:"sans-serif" }}>
-{savingIndicator
+{isAdmin ? (
+savingIndicator
 ? <span style={{ color:GOLD }}>💾 ...</span>
 : FIREBASE_URL
 ? <span style={{ color: firebaseOk ? "#4CAF50" : "#E57373" }}>{firebaseOk ? "🔥 sync" : "📵 local"}</span>
 : <span style={{ color:"#555" }}>📵 local</span>
-}
+) : null}
 </span>
 <LogoIcon size={20} />
 <span onClick={() => { setLogged(false);setActive("home");setAdminUser(null);setClienteUser(null);setIsAdmin(false); }} style={{ cursor:"pointer", color:"#E57373" }}>Salir</span>
