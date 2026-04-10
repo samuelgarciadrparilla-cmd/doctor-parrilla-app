@@ -398,17 +398,23 @@ reader.readAsDataURL(file);
 });
 }
 
-function PhotoUploadButton({ onPhoto, label = "📷 Subir foto", style = {} }) {
+function PhotoUploadButton({ onPhoto, multiple = false, label = "📷 Subir foto", style = {} }) {
 const ref = useRef();
 const handle = async (e) => {
-const file = e.target.files[0]; if (!file) return;
-const compressed = await compressImage(file);
+const files = Array.from(e.target.files); if (!files.length) return;
+if (multiple) {
+const results = [];
+for (const file of files) { results.push(await compressImage(file)); }
+onPhoto(results);
+} else {
+const compressed = await compressImage(files[0]);
 onPhoto(compressed);
+}
 e.target.value = "";
 };
 return (
 <>
-<input type="file" accept="image/*" ref={ref} onChange={handle} style={{ display:"none" }} />
+<input type="file" accept="image/*" multiple={multiple} ref={ref} onChange={handle} style={{ display:"none" }} />
 <button onClick={() => ref.current?.click()} style={{ background:CARD, border:`1px solid ${BORDER}`, color:"#CCC", padding:"12px 16px", borderRadius:10, fontFamily:"sans-serif", fontSize:13, cursor:"pointer", display:"flex", alignItems:"center", gap:8, ...style }}>{label}</button>
 </>
 );
@@ -891,9 +897,25 @@ const curColor = colorSel || ((p.colores||[])[0]||"");
 return (
 <div style={{ paddingBottom:100 }}>
 <Header title={p.nombre} back onBack={() => { setSelected(null); setColorSel(null); }} />
-<div style={{ height:200, background:"linear-gradient(135deg,#1A1200,#0D0D0D)", display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
-{p.foto ? <img src={p.foto} alt={p.nombre} style={{ width:"100%", height:"100%", objectFit:"cover", opacity:0.9 }} /> : <span style={{ fontSize:88 }}>{p.emoji}</span>}
+{(() => {
+const allFotos = p.fotos && p.fotos.length > 0 ? p.fotos : (p.foto ? [p.foto] : []);
+return allFotos.length > 0 ? (
+<div style={{ position:"relative" }}>
+<div style={{ display:"flex",overflowX:"auto",scrollSnapType:"x mandatory",WebkitOverflowScrolling:"touch" }}>
+{allFotos.map((foto,fi) => (
+<div key={fi} style={{ minWidth:"100%",height:240,scrollSnapAlign:"start",background:"linear-gradient(135deg,#1A1200,#0D0D0D)",flexShrink:0 }}>
+<img src={foto} alt={`${p.nombre} ${fi+1}`} style={{ width:"100%",height:"100%",objectFit:"cover",opacity:0.9,display:"block" }} />
 </div>
+))}
+</div>
+{allFotos.length > 1 && <div style={{ position:"absolute",bottom:10,left:0,right:0,display:"flex",justifyContent:"center",gap:6 }}>
+{allFotos.map((_,fi) => <div key={fi} style={{ width:8,height:8,borderRadius:"50%",background:fi===0?GOLD:"#FFFFFF55" }} />)}
+</div>}
+</div>
+) : (
+<div style={{ height:200,background:"linear-gradient(135deg,#1A1200,#0D0D0D)",display:"flex",alignItems:"center",justifyContent:"center" }}><span style={{ fontSize:88 }}>{p.emoji}</span></div>
+);
+})()}
 <div style={{ padding:"20px" }}>
 <div style={{ display:"flex", gap:8, marginBottom:12 }}><Tag label={p.tag} /></div>
 <div style={{ fontSize:22, fontWeight:"bold", marginBottom:6 }}>{p.nombre}</div>
@@ -929,8 +951,8 @@ return (
 <div style={{ padding:"16px", display:"flex", flexDirection:"column", gap:12 }}>
 {productos.map(p => (
 <button key={p.id} onClick={() => setSelected(p.id)} style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:0, cursor:"pointer", textAlign:"left", overflow:"hidden" }}>
-<div style={{ height:120, background:"linear-gradient(135deg,#1A1200,#0D0D0D)", display:"flex", alignItems:"center", justifyContent:"center", borderBottom:`1px solid ${BORDER}`, overflow:"hidden" }}>
-{p.foto ? <img src={p.foto} alt={p.nombre} style={{ width:"100%", height:"100%", objectFit:"cover", opacity:0.85 }} /> : <span style={{ fontSize:60 }}>{p.emoji}</span>}
+<div style={{ height:120, background:"linear-gradient(135deg,#1A1200,#0D0D0D)", display:"flex", alignItems:"center", justifyContent:"center", borderBottom:`1px solid ${BORDER}`, overflow:"hidden", position:"relative" }}>
+{(p.fotos && p.fotos.length > 0 ? p.fotos[0] : p.foto) ? <><img src={p.fotos && p.fotos.length > 0 ? p.fotos[0] : p.foto} alt={p.nombre} style={{ width:"100%", height:"100%", objectFit:"cover", opacity:0.85 }} />{(p.fotos||[]).length > 1 && <div style={{ position:"absolute",bottom:6,right:8,background:"#000000AA",borderRadius:12,padding:"2px 8px",fontSize:10,color:"#FFF",fontFamily:"sans-serif" }}>\U0001f4f7 {(p.fotos||[]).length}</div>}</> : <span style={{ fontSize:60 }}>{p.emoji}</span>}
 </div>
 <div style={{ padding:"14px 16px" }}>
 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6 }}>
@@ -1329,19 +1351,20 @@ return (
 function AdminCatalog({ productos, setProductos }) {
 const [view, setView] = useState("list");
 const [idx, setIdx] = useState(null);
-const emptyForm = { nombre:"", precio:"", desc:"", specs:[], colores:[], foto:null, tag:"", emoji:"🔥" };
+const emptyForm = { nombre:"", precio:"", desc:"", specs:[], colores:[], foto:null, fotos:[], tag:"", emoji:"🔥" };
 const [form, setForm] = useState(emptyForm);
 const [newSpec, setNewSpec] = useState("");
 const COLORES_OPT = ["Grill","Negro"];
-const openEdit = (i) => { setForm({ ...productos[i], specs:[...(productos[i].specs||[])], colores:[...(productos[i].colores||[])] }); setIdx(i); setView("form"); };
+const openEdit = (i) => { setForm({ ...productos[i], specs:[...(productos[i].specs||[])], colores:[...(productos[i].colores||[])], fotos:[...(productos[i].fotos||( productos[i].foto ? [productos[i].foto] : []))] }); setIdx(i); setView("form"); };
 const openAdd  = () => { setForm(emptyForm); setIdx(null); setView("form"); };
 const toggleColor = (c) => setForm(f => ({ ...f, colores: f.colores.includes(c)?f.colores.filter(x=>x!==c):[...f.colores,c] }));
 const addSpec = () => { if (newSpec.trim()) { setForm(f=>({...f,specs:[...f.specs,newSpec.trim()]})); setNewSpec(""); } };
 const removeSpec = (i) => setForm(f=>({...f,specs:f.specs.filter((_,j)=>j!==i)}));
 const guardar = () => {
 if (!form.nombre.trim()) return;
-if (idx===null) setProductos([...productos,{...form,id:Date.now()}]);
-else setProductos(productos.map((p,i)=>i===idx?{...p,...form}:p));
+const saveData = { ...form, foto: (form.fotos||[])[0] || form.foto || null, fotos: form.fotos || (form.foto ? [form.foto] : []) };
+if (idx===null) setProductos([...productos,{...saveData,id:Date.now()}]);
+else setProductos(productos.map((p,i)=>i===idx?{...p,...saveData}:p));
 setView("list");
 };
 if (view==="form") return (
@@ -1349,12 +1372,24 @@ if (view==="form") return (
 <Header title={idx===null?"Nuevo Producto":"Editar Producto"} subtitle="CATÁLOGO" back onBack={() => setView("list")} />
 <div style={{ padding:"20px", display:"flex", flexDirection:"column", gap:18 }}>
 <div>
-<div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif",letterSpacing:"1px",marginBottom:10 }}>FOTO DEL PRODUCTO</div>
-{form.foto
-? <div style={{ position:"relative",borderRadius:12,overflow:"hidden",marginBottom:10 }}><img src={form.foto} alt="producto" style={{ width:"100%",height:180,objectFit:"cover",display:"block" }} /><button onClick={() => setForm(f=>({...f,foto:null}))} style={{ position:"absolute",top:8,right:8,background:"#000000AA",border:"none",color:"#FFF",borderRadius:"50%",width:32,height:32,cursor:"pointer",fontSize:16 }}>✕</button></div>
+<div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif",letterSpacing:"1px",marginBottom:10 }}>FOTOS DEL PRODUCTO <span style={{ color:"#666",fontSize:10 }}>(mín. 1, máx. 6)</span></div>
+{(form.fotos||[]).length > 0
+? <div style={{ display:"flex",flexDirection:"column",gap:10,marginBottom:10 }}>
+{(form.fotos||[]).map((foto,fi) => (
+<div key={fi} style={{ position:"relative",borderRadius:12,overflow:"hidden",border:`1px solid ${fi===0?GOLD:BORDER}` }}>
+<img src={foto} alt={`producto-${fi+1}`} style={{ width:"100%",height:150,objectFit:"cover",display:"block" }} />
+<div style={{ position:"absolute",top:8,left:8,background:fi===0?"#D4A017":"#000000AA",color:fi===0?"#000":"#FFF",borderRadius:20,padding:"2px 10px",fontSize:11,fontFamily:"sans-serif",fontWeight:"bold" }}>{fi===0?"PRINCIPAL":`Foto ${fi+1}`}</div>
+<div style={{ position:"absolute",top:8,right:8,display:"flex",gap:6 }}>
+{fi > 0 && <button onClick={() => setForm(f=>{const nf=[...f.fotos];[nf[fi-1],nf[fi]]=[nf[fi],nf[fi-1]];return{...f,fotos:nf,foto:nf[0]};})} style={{ background:"#000000AA",border:"none",color:"#FFF",borderRadius:"50%",width:32,height:32,cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center" }}>⬆</button>}
+{fi < (form.fotos||[]).length-1 && <button onClick={() => setForm(f=>{const nf=[...f.fotos];[nf[fi],nf[fi+1]]=[nf[fi+1],nf[fi]];return{...f,fotos:nf,foto:nf[0]};})} style={{ background:"#000000AA",border:"none",color:"#FFF",borderRadius:"50%",width:32,height:32,cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center" }}>⬇</button>}
+<button onClick={() => setForm(f=>{const nf=f.fotos.filter((_,j)=>j!==fi);return{...f,fotos:nf,foto:nf[0]||null};})} style={{ background:"#000000AA",border:"none",color:"#FF5252",borderRadius:"50%",width:32,height:32,cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center" }}>✕</button>
+</div>
+</div>
+))}
+</div>
 : <div style={{ height:120,background:DARK3,border:`1px dashed ${BORDER}`,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10,fontSize:40 }}>{form.emoji}</div>
 }
-<PhotoUploadButton onPhoto={(src) => setForm(f=>({...f,foto:src}))} label="📷 Subir foto del producto" style={{ width:"100%",justifyContent:"center",boxSizing:"border-box" }} />
+{(form.fotos||[]).length < 6 && <PhotoUploadButton multiple onPhoto={(srcs) => setForm(f=>{const nf=[...(f.fotos||[]),...(Array.isArray(srcs)?srcs:[srcs])].slice(0,6);return{...f,fotos:nf,foto:nf[0]};})} label={`📷 ${(form.fotos||[]).length===0?"Subir fotos del producto":"Agregar más fotos"} (${(form.fotos||[]).length}/6)`} style={{ width:"100%",justifyContent:"center",boxSizing:"border-box" }} />}
 </div>
 {[{label:"NOMBRE",key:"nombre",ph:"Ej: El Patrón 900"},{label:"PRECIO",key:"precio",ph:"Ej: Gs. 4.200.000"},{label:"ETIQUETA",key:"tag",ph:"Ej: MÁS VENDIDO"}].map(f => (
 <div key={f.key}>
@@ -1415,9 +1450,9 @@ return (
 </button>
 {productos.map((p,i) => (
 <div key={p.id} style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,overflow:"hidden" }}>
-{p.foto && <img src={p.foto} alt={p.nombre} style={{ width:"100%",height:110,objectFit:"cover",display:"block",borderBottom:`1px solid ${BORDER}` }} />}
+{(p.fotos && p.fotos.length > 0 ? p.fotos[0] : p.foto) && <div style={{ position:"relative" }}><img src={p.fotos && p.fotos.length > 0 ? p.fotos[0] : p.foto} alt={p.nombre} style={{ width:"100%",height:110,objectFit:"cover",display:"block",borderBottom:`1px solid ${BORDER}` }} />{(p.fotos||[]).length > 1 && <div style={{ position:"absolute",bottom:6,right:8,background:"#000000AA",borderRadius:12,padding:"2px 8px",fontSize:10,color:"#FFF",fontFamily:"sans-serif" }}>\U0001f4f7 {(p.fotos||[]).length} fotos</div>}</div>}
 <div style={{ padding:"14px 16px",display:"flex",alignItems:"center",gap:14 }}>
-{!p.foto && <div style={{ width:48,height:48,background:"#1A1200",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0 }}>{p.emoji}</div>}
+{!(p.fotos && p.fotos.length > 0 ? p.fotos[0] : p.foto) && <div style={{ width:48,height:48,background:"#1A1200",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0 }}>{p.emoji}</div>}
 <div style={{ flex:1 }}>
 <div style={{ display:"flex",justifyContent:"space-between",marginBottom:4 }}><div style={{ fontSize:15,fontWeight:"bold" }}>{p.nombre}</div><Tag label={p.tag} /></div>
 <div style={{ fontSize:14,color:GOLD,fontFamily:"sans-serif",marginBottom:4 }}>{p.precio}</div>
