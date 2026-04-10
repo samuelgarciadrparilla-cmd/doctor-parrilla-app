@@ -1905,20 +1905,24 @@ return (
 {pedidos.filter(p => filterStatus==="all" || String(p.estado)===filterStatus).slice().sort((a,b) => {
 if (a.estado >= 4 && b.estado < 4) return 1;
 if (a.estado < 4 && b.estado >= 4) return -1;
+if (a.estado >= 4 && b.estado >= 4) return 0;
 const baseA = parseFecha(a.fecha), baseB = parseFecha(b.fecha);
-const limA = baseA && a.diasHabiles ? addDiasHabiles(baseA, a.diasHabiles) : null;
-const limB = baseB && b.diasHabiles ? addDiasHabiles(baseB, b.diasHabiles) : null;
+const limA = baseA && (a.diasHabiles||10) ? addDiasHabiles(baseA, a.diasHabiles||10) : null;
+const limB = baseB && (b.diasHabiles||10) ? addDiasHabiles(baseB, b.diasHabiles||10) : null;
 const dA = limA ? diasHabilesRestantes(limA) : 999;
 const dB = limB ? diasHabilesRestantes(limB) : 999;
 return dA - dB;
 }).map((p) => {
 const i = pedidos.indexOf(p);
 const base = parseFecha(p.fecha);
-const lim = base && p.diasHabiles ? addDiasHabiles(base, p.diasHabiles) : null;
+const dh = p.diasHabiles || 10;
+const lim = base ? addDiasHabiles(base, dh) : null;
 const dias = lim ? diasHabilesRestantes(lim) : null;
 const alertColor = dias !== null && p.estado < 4 ? getAlertaColor(dias) : null;
+const cardBg = p.estado >= 4 ? CARD : alertColor === "#E53935" ? "#2A0A0A" : alertColor === GOLD ? "#2A2000" : alertColor === "#4CAF50" ? "#0A2A0A" : CARD;
+const cardBorder = alertColor || (p.estado >= 4 ? "#4CAF5044" : BORDER);
 return (
-<button key={p.id} onClick={() => setSelected(i)} style={{ background:CARD,border:`1px solid ${alertColor||BORDER}`,borderRadius:12,padding:"16px",cursor:"pointer",textAlign:"left" }}>
+<button key={p.id} onClick={() => setSelected(i)} style={{ background:cardBg,border:`2px solid ${cardBorder}`,borderRadius:12,padding:"16px",cursor:"pointer",textAlign:"left" }}>
 <div style={{ display:"flex",justifyContent:"space-between",marginBottom:6 }}>
 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
 <div style={{ fontSize:13, color:GOLD, fontFamily:"sans-serif", fontWeight:"bold" }}>{p.id}</div>
