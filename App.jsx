@@ -299,6 +299,16 @@ const idx = (hourSeed + estado) % msgs.length;
 return msgs[idx];
 }
 
+
+// -- CUPON EXPIRY HELPER --
+function isCuponExpirado(cupon) {
+if (!cupon.vence) return false;
+const vence = parseFecha(cupon.vence);
+if (!vence) return false;
+const hoy = new Date(); hoy.setHours(0,0,0,0);
+return hoy > vence;
+}
+
 const INITIAL_PEDIDOS = [
 { id:"DP-2024-089", tel:"0981234567", modelo:"El Patrón 900",      fecha:"28 Mar 2026", estado:3, monto:"Gs. 4.200.000", nota:"Entrega a domicilio Lambaré", fotos:[], diasHabiles:10 },
 { id:"DP-2024-072", tel:"0991876543", modelo:"Viking Pro 1200",    fecha:"10 Feb 2026", estado:4, monto:"Gs. 8.500.000", nota:"Retira en taller",            fotos:[], diasHabiles:10 },
@@ -353,7 +363,7 @@ return (
 function BottomNav({ active, setActive, isAdmin }) {
 const items = isAdmin
 ? [{ key:"admin-orders",label:"Pedidos",icon:"📦" },{ key:"admin-tickets",label:"Soporte",icon:"🔧" },{ key:"admin-cupones",label:"Cupones",icon:"🎟️" },{ key:"admin-clientes",label:"Clientes",icon:"👥" },{ key:"admin-catalog",label:"Catálogo",icon:"🔥" },{ key:"admin-visitas",label:"Visitas",icon:"📅" },{ key:"admin-resenas",label:"Reseñas",icon:"⭐" }]
-: [{ key:"home",label:"Inicio",icon:"⌂" },{ key:"catalogo",label:"Catálogo",icon:"🔥" },{ key:"pedidos",label:"Pedidos",icon:"📦" },{ key:"agendar",label:"Visita",icon:"📅" },{ key:"soporte",label:"Soporte",icon:"🔧" }];
+: [{ key:"home",label:"Inicio",icon:"⌂" },{ key:"catalogo",label:"Catálogo",icon:"🔥" },{ key:"pedidos",label:"Pedidos",icon:"📦" },{ key:"cupones",label:"Cupones",icon:"🎟️" },{ key:"agendar",label:"Visita",icon:"📅" },{ key:"soporte",label:"Soporte",icon:"🔧" }];
 return (
 <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", maxWidth:430, background:"linear-gradient(0deg,#080C10,#0D0D0D)", borderTop:`1px solid ${GOLD}22`, display:"flex", zIndex:100 }}>
 {items.map(it => (
@@ -405,7 +415,7 @@ return (
 }
 
 // ── REVIEW COMPONENT ─────────────────────────────────────────────────────────
-function ReviewFlow({ pedido, onSave, onClose }) {
+function ReviewFlow({ pedido, onSave, onClose, cupones, setCupones }) {
 const [step, setStep] = useState(1); // 1=stars, 2=comment, 3=done
 const [stars, setStars] = useState(0);
 const [comment, setComment] = useState("");
@@ -413,11 +423,21 @@ const [comment, setComment] = useState("");
 const submit = () => {
 if (stars === 0) return;
 onSave({ stars, comment, fecha: new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"}) });
+if (setCupones) {
+const fecha = new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
+const venceDate = new Date(Date.now() + 3*30*24*60*60*1000);
+const vence = venceDate.toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
+setCupones(prev => [{
+id: cuponCode, cliente: pedido.tel, clienteTel: pedido.tel,
+descuento: 15, motivo: "Reseña en Google - " + pedido.modelo,
+estado: "activo", fecha, vence, tipo: "resena", duracionMeses: 3
+}, ...(prev||[])]);
+}
 setStep(3);
 };
 
 // Generar código de cupón único basado en el pedido
-const cuponCode = `DRP-${pedido.id.slice(-3)}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+const [cuponCode] = useState(() => `DRP-${pedido.id.slice(-3)}-${Math.random().toString(36).slice(2,6).toUpperCase()}`);
 
 if (step === 3) return (
 <div style={{ background:CARD, border:`1px solid ${GOLD}44`, borderRadius:16, padding:24, textAlign:"center" }}>
@@ -435,7 +455,7 @@ Dejá tu reseña en Google y ganá un <span style={{ color:GOLD, fontWeight:"bol
 <div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif", marginBottom:4 }}>TU CÓDIGO DE CUPÓN</div>
 <div style={{ fontSize:22, fontWeight:"bold", color:GOLD, fontFamily:"monospace", letterSpacing:"3px" }}>{cuponCode}</div>
 </div>
-<div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif" }}>Válido por 6 meses · Presentá este código al hacer tu próximo pedido</div>
+<div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif" }}>Válido por 3 meses · Presentá este código al hacer tu próximo pedido</div>
 </div>
 <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noreferrer"
 style={{ display:"block", width:"100%", background:"linear-gradient(135deg,#4285F4,#34A853)", border:"none", color:"#FFF", padding:"14px", borderRadius:10, fontSize:15, fontFamily:"sans-serif", fontWeight:"bold", cursor:"pointer", textDecoration:"none", textAlign:"center", boxSizing:"border-box", marginBottom:10 }}>
@@ -791,7 +811,7 @@ style={{ width:"100%", background:phone.length>4?GOLD_GRAD:BORDER, border:"none"
 }
 
 // ── CLIENT: HOME ──────────────────────────────────────────────────────────────: HOME ──────────────────────────────────────────────────────────────
-function HomeScreen({ setActive, clienteUser, pedidos }) {
+function HomeScreen({ setActive, clienteUser, pedidos, cupones }) {
 const nombre = clienteUser?.nombre?.split(" ")[0] || "";
 const misPedidos = clienteUser ? pedidos.filter(p => normalizePhone(p.tel)===normalizePhone(clienteUser.tel) && p.estado < 4) : [];
 const urgente = misPedidos.find(p => {
@@ -830,6 +850,7 @@ return (
 <div style={{ padding:"16px 20px 0", display:"flex", flexDirection:"column", gap:12 }}>
 {[{key:"catalogo",icon:"🔥",title:"Catálogo",desc:"Explorá todos nuestros modelos"},
 {key:"pedidos",icon:"📦",title:"Mis Pedidos",desc: misPedidos.length > 0 ? `${misPedidos.length} pedido${misPedidos.length>1?"s":""} activo${misPedidos.length>1?"s":""}` : "Seguí el estado de tu pedido"},
+{key:"cupones",icon:"🎟️",title:"Mis Cupones",desc: (() => { const mc = cupones ? cupones.filter(c => c.clienteTel && normalizePhone(c.clienteTel) === normalizePhone(clienteUser?.tel||"")) : []; const a = mc.filter(c => c.estado === "activo"); return a.length > 0 ? `${a.length} cupón${a.length>1?"es":""} disponible${a.length>1?"s":""}` : "Ver tus descuentos"; })()},
 {key:"soporte",icon:"🔧",title:"Soporte",desc:"Reclamos y mantenimiento"}
 ].map(c => (
 <button key={c.key} onClick={() => setActive(c.key)} style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"20px", display:"flex", alignItems:"center", gap:16, cursor:"pointer", textAlign:"left" }}>
@@ -932,7 +953,7 @@ return (
 }
 
 // ── CLIENT: PEDIDOS ───────────────────────────────────────────────────────────
-function PedidosScreen({ pedidos, setPedidos, clienteUser }) {
+function PedidosScreen({ pedidos, setPedidos, clienteUser, cupones, setCupones }) {
 const [selected, setSelected] = useState(null);
 const [reviewData, setReviewData] = useState(null);
 const [showCelebration, setShowCelebration] = useState(true);
@@ -1034,6 +1055,8 @@ Tambien dejar resena en Google →
 ) : (
 <ReviewFlow
 pedido={p}
+cupones={cupones}
+setCupones={setCupones}
 onSave={(resena) => setReviewData({pedidoId: p.id, resena})}
 onClose={() => setSelected(null)}
 />
@@ -1842,28 +1865,122 @@ return (
 );
 }
 
+
+// -- CLIENT: MIS CUPONES --
+function MisCuponesScreen({ cupones, clienteUser }) {
+const misCupones = cupones.filter(c => c.clienteTel && normalizePhone(c.clienteTel) === normalizePhone(clienteUser?.tel||""));
+const activos = misCupones.filter(c => c.estado === "activo" && !isCuponExpirado(c));
+const expiradosOUsados = misCupones.filter(c => c.estado === "usado" || isCuponExpirado(c));
+
+return (
+<div style={{ paddingBottom:80 }}>
+<Header title="Mis Cupones" subtitle="DESCUENTOS EXCLUSIVOS" />
+{activos.length > 0 && (
+<div style={{ padding:"16px", display:"flex", flexDirection:"column", gap:12 }}>
+<div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px" }}>CUPONES DISPONIBLES</div>
+{activos.map(c => (
+<div key={c.id} style={{ background:"linear-gradient(135deg,#1A0800,#0A0A0A)", border:`2px solid ${GOLD}66`, borderRadius:16, padding:"20px", position:"relative", overflow:"hidden" }}>
+<div style={{ position:"absolute", top:0, right:0, width:80, height:80, background:`radial-gradient(circle at top right, ${GOLD}22, transparent)`, pointerEvents:"none" }} />
+<div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+<div style={{ background:"#4CAF5022", color:"#4CAF50", fontSize:11, padding:"4px 12px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold" }}>ACTIVO</div>
+<div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>{c.fecha}</div>
+</div>
+<div style={{ background:DARK, border:`2px dashed ${GOLD}66`, borderRadius:10, padding:"14px", marginBottom:12, textAlign:"center" }}>
+<div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif", marginBottom:4 }}>TU CÓDIGO DE CUPÓN</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:GOLD, fontFamily:"monospace", letterSpacing:"3px" }}>{c.id}</div>
+</div>
+<div style={{ fontSize:28, fontWeight:"bold", color:GOLD, textAlign:"center", marginBottom:8 }}>{c.descuento}% DESCUENTO</div>
+{c.motivo && <div style={{ fontSize:13, color:"#AAA", fontFamily:"sans-serif", textAlign:"center", marginBottom:8, fontStyle:"italic" }}>{c.motivo}</div>}
+<div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", borderTop:`1px solid ${BORDER}`, paddingTop:10 }}>
+<div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>Vence: {c.vence}</div>
+<div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif" }}>Presentá este código</div>
+</div>
+</div>
+))}
+</div>
+)}
+{activos.length === 0 && (
+<div style={{ textAlign:"center", padding:"60px 20px" }}>
+<div style={{ fontSize:56, marginBottom:16 }}>{"🎟️"}</div>
+<div style={{ fontSize:18, fontWeight:"bold", marginBottom:8 }}>No tenés cupones activos</div>
+<div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif", lineHeight:1.6 }}>Los cupones se generan cuando dejás una reseña o cuando el equipo de Dr. Parrilla te asigna uno. #ElFuegoNosUne{"🔥"}</div>
+</div>
+)}
+{expiradosOUsados.length > 0 && (
+<div style={{ padding:"16px", display:"flex", flexDirection:"column", gap:10 }}>
+<div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif", letterSpacing:"2px" }}>CUPONES ANTERIORES</div>
+{expiradosOUsados.map(c => (
+<div key={c.id} style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"14px", opacity:0.6 }}>
+<div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
+<div style={{ fontSize:14, fontWeight:"bold", color:"#888", fontFamily:"monospace", letterSpacing:"2px" }}>{c.id}</div>
+<div style={{ background:"#88888822", color:"#888", fontSize:10, padding:"3px 10px", borderRadius:20, fontFamily:"sans-serif" }}>{isCuponExpirado(c) ? "EXPIRADO" : "USADO"}</div>
+</div>
+<div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif" }}>{c.descuento}% descuento</div>
+{c.fechaUso && <div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Usado: {c.fechaUso}</div>}
+</div>
+))}
+</div>
+)}
+</div>
+);
+}
+
 // ── ADMIN: CUPONES ─────────────────────────────────────────────────────────────────
 function AdminCupones({ cupones, setCupones, clientes, pedidos }) {
 const [showNew, setShowNew] = useState(false);
-const [newCupon, setNewCupon] = useState({ cliente:"", descuento:"15", motivo:"" });
+const [newCupon, setNewCupon] = useState({ clienteTel:"", descuento:"15", motivo:"", duracion:"3" });
+const [search, setSearch] = useState("");
+const [confirmDelete, setConfirmDelete] = useState(null);
 
-const activos = cupones.filter(c => c.estado === "activo");
+const activos = cupones.filter(c => c.estado === "activo" && !isCuponExpirado(c));
+const expirados = cupones.filter(c => c.estado === "activo" && isCuponExpirado(c));
 const usados = cupones.filter(c => c.estado === "usado");
 
 const crearCuponManual = () => {
 if (!newCupon.motivo) return;
-const code = `DRP-MANUAL-${String(cupones.length+1).padStart(3,"0")}`;
+const code = `DRP-${String(cupones.length+1).padStart(3,"0")}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
 const fecha = new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
-const vence = new Date(Date.now() + 180*24*60*60*1000).toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
-setCupones([{ id: code, cliente: newCupon.cliente || "General", descuento: parseInt(newCupon.descuento)||15, motivo: newCupon.motivo, estado:"activo", fecha, vence, tipo:"manual" }, ...cupones]);
-setNewCupon({ cliente:"", descuento:"15", motivo:"" });
+const meses = parseInt(newCupon.duracion) || 3;
+const venceDate = new Date(Date.now() + meses*30*24*60*60*1000);
+const vence = venceDate.toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
+const clienteInfo = clientes.find(c => normalizePhone(c.tel) === normalizePhone(newCupon.clienteTel));
+const cuponObj = {
+id: code,
+cliente: clienteInfo ? clienteInfo.nombre : (newCupon.clienteTel ? newCupon.clienteTel : "General"),
+clienteTel: newCupon.clienteTel ? normalizePhone(newCupon.clienteTel) : "",
+descuento: parseInt(newCupon.descuento)||15,
+motivo: newCupon.motivo,
+estado:"activo",
+fecha,
+vence,
+tipo:"manual",
+duracionMeses: meses
+};
+setCupones([cuponObj, ...cupones]);
+setNewCupon({ clienteTel:"", descuento:"15", motivo:"", duracion:"3" });
 setShowNew(false);
+setSearch("");
+if (newCupon.clienteTel) {
+const tel = newCupon.clienteTel.replace(/^0/, "");
+const msg = encodeURIComponent(`🎉 *Dr. Parrilla - Cupón de Descuento*\n\n🎟️ Código: *${code}*\n💰 Descuento: *${cuponObj.descuento}%*\n📝 Motivo: ${cuponObj.motivo}\n⏳ Vence: ${vence}\n\n_Presentá este código al hacer tu próximo pedido._\n\n🔥 #ElFuegoNosUne`);
+window.open(`https://wa.me/595${tel}?text=${msg}`, "_blank");
+}
 };
 
 const marcarUsado = (id) => {
 const fecha = new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
 setCupones(cupones.map(c => c.id===id ? {...c, estado:"usado", fechaUso:fecha} : c));
 };
+
+const eliminarCupon = (id) => {
+setCupones(cupones.filter(c => c.id !== id));
+setConfirmDelete(null);
+};
+
+const clientesFiltrados = search.length >= 2 ? clientes.filter(c =>
+c.nombre.toLowerCase().includes(search.toLowerCase()) ||
+c.tel.includes(search)
+) : [];
 
 return (
 <div style={{ paddingBottom:80 }}>
@@ -1872,77 +1989,143 @@ return (
 <div style={{ fontSize:22, fontWeight:"bold" }}>Cupones 🎟️</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
-
-  {/* Summary */}
-  <div style={{ padding:"16px", display:"flex", gap:10, marginBottom:4 }}>
-    <div style={{ flex:1, background:CARD, border:`1px solid ${BORDER}`, borderRadius:10, padding:"14px", textAlign:"center" }}>
-      <div style={{ fontSize:24, fontWeight:"bold", color:"#4CAF50" }}>{activos.length}</div>
-      <div style={{ fontSize:10, color:"#888", fontFamily:"sans-serif" }}>Activos</div>
+  <div style={{ padding:"16px", display:"flex", gap:8, marginBottom:4 }}>
+    <div style={{ flex:1, background:CARD, border:`1px solid ${BORDER}`, borderRadius:10, padding:"12px", textAlign:"center" }}>
+      <div style={{ fontSize:22, fontWeight:"bold", color:"#4CAF50" }}>{activos.length}</div>
+      <div style={{ fontSize:9, color:"#888", fontFamily:"sans-serif" }}>Activos</div>
     </div>
-    <div style={{ flex:1, background:CARD, border:`1px solid ${BORDER}`, borderRadius:10, padding:"14px", textAlign:"center" }}>
-      <div style={{ fontSize:24, fontWeight:"bold", color:"#888" }}>{usados.length}</div>
-      <div style={{ fontSize:10, color:"#888", fontFamily:"sans-serif" }}>Usados</div>
+    <div style={{ flex:1, background:CARD, border:`1px solid ${BORDER}`, borderRadius:10, padding:"12px", textAlign:"center" }}>
+      <div style={{ fontSize:22, fontWeight:"bold", color:"#E57373" }}>{expirados.length}</div>
+      <div style={{ fontSize:9, color:"#888", fontFamily:"sans-serif" }}>Expirados</div>
     </div>
-    <div style={{ flex:1, background:CARD, border:`1px solid ${BORDER}`, borderRadius:10, padding:"14px", textAlign:"center" }}>
-      <div style={{ fontSize:24, fontWeight:"bold", color:GOLD }}>{cupones.length}</div>
-      <div style={{ fontSize:10, color:"#888", fontFamily:"sans-serif" }}>Total</div>
+    <div style={{ flex:1, background:CARD, border:`1px solid ${BORDER}`, borderRadius:10, padding:"12px", textAlign:"center" }}>
+      <div style={{ fontSize:22, fontWeight:"bold", color:"#888" }}>{usados.length}</div>
+      <div style={{ fontSize:9, color:"#888", fontFamily:"sans-serif" }}>Usados</div>
+    </div>
+    <div style={{ flex:1, background:CARD, border:`1px solid ${BORDER}`, borderRadius:10, padding:"12px", textAlign:"center" }}>
+      <div style={{ fontSize:22, fontWeight:"bold", color:GOLD }}>{cupones.length}</div>
+      <div style={{ fontSize:9, color:"#888", fontFamily:"sans-serif" }}>Total</div>
     </div>
   </div>
-
-  {/* Create button */}
   <div style={{ padding:"0 16px 16px" }}>
     <button onClick={() => setShowNew(!showNew)} style={{ width:"100%", background:`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, border:"none", color:DARK, padding:"14px", borderRadius:10, fontSize:14, fontFamily:"sans-serif", fontWeight:"bold", cursor:"pointer", letterSpacing:"1px" }}>
-      + CREAR CUPÓN MANUAL
+      + CREAR CUPÓN
     </button>
   </div>
-
-  {/* New coupon form */}
   {showNew && (
     <div style={{ margin:"0 16px 16px", background:CARD, border:`1px solid ${GOLD}44`, borderRadius:12, padding:"16px" }}>
       <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"1px", marginBottom:10 }}>NUEVO CUPÓN</div>
-      <input placeholder="Cliente (opcional)" value={newCupon.cliente} onChange={e=>setNewCupon({...newCupon,cliente:e.target.value})}
-        style={{ width:"100%",background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"12px",borderRadius:8,fontSize:13,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box",marginBottom:10 }} />
-      <div style={{ display:"flex", gap:10, marginBottom:10 }}>
-        <input placeholder="% Descuento" value={newCupon.descuento} onChange={e=>setNewCupon({...newCupon,descuento:e.target.value})}
-          style={{ flex:1,background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"12px",borderRadius:8,fontSize:13,fontFamily:"sans-serif",outline:"none" }} />
+      <div style={{ fontSize:10, color:"#888", fontFamily:"sans-serif", marginBottom:6 }}>ASIGNAR A CLIENTE</div>
+      <input placeholder="Buscar cliente por nombre o teléfono..." value={search}
+        onChange={e => { setSearch(e.target.value); }}
+        style={{ width:"100%",background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"12px",borderRadius:8,fontSize:13,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box",marginBottom:4 }} />
+      {search.length >= 2 && clientesFiltrados.length > 0 && (
+        <div style={{ background:DARK3, border:`1px solid ${BORDER}`, borderRadius:8, marginBottom:10, maxHeight:150, overflowY:"auto" }}>
+          {clientesFiltrados.map(c => (
+            <button key={c.id} onClick={() => { setNewCupon({...newCupon, clienteTel:c.tel}); setSearch(c.nombre + " - " + c.tel); }}
+              style={{ width:"100%", background:"none", border:"none", borderBottom:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"10px 12px", textAlign:"left", cursor:"pointer", fontFamily:"sans-serif", fontSize:13 }}>
+              <span style={{ color:GOLD }}>{c.nombre}</span> <span style={{ color:"#666" }}>- {c.tel}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {!search && (
+        <input placeholder="O ingresá teléfono directo (09XX...)" value={newCupon.clienteTel}
+          onChange={e=>setNewCupon({...newCupon,clienteTel:e.target.value})}
+          style={{ width:"100%",background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"12px",borderRadius:8,fontSize:13,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box",marginBottom:10 }} />
+      )}
+      <div style={{ display:"flex", gap:10, marginBottom:10, marginTop:10 }}>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:10, color:"#888", fontFamily:"sans-serif", marginBottom:4 }}>% DESCUENTO</div>
+          <input placeholder="15" value={newCupon.descuento} onChange={e=>setNewCupon({...newCupon,descuento:e.target.value})}
+            style={{ width:"100%",background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"12px",borderRadius:8,fontSize:13,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box" }} />
+        </div>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:10, color:"#888", fontFamily:"sans-serif", marginBottom:4 }}>DURACIÓN</div>
+          <select value={newCupon.duracion} onChange={e=>setNewCupon({...newCupon,duracion:e.target.value})}
+            style={{ width:"100%",background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"12px",borderRadius:8,fontSize:13,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box" }}>
+            <option value="1">1 mes</option>
+            <option value="2">2 meses</option>
+            <option value="3">3 meses</option>
+            <option value="6">6 meses</option>
+            <option value="12">12 meses</option>
+          </select>
+        </div>
       </div>
       <input placeholder="Motivo (ej: Promoción especial, Fidelidad...)" value={newCupon.motivo} onChange={e=>setNewCupon({...newCupon,motivo:e.target.value})}
         style={{ width:"100%",background:DARK3,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"12px",borderRadius:8,fontSize:13,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box",marginBottom:12 }} />
-      <button onClick={crearCuponManual} style={{ width:"100%",background:`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`,border:"none",color:DARK,padding:"12px",borderRadius:8,fontSize:13,fontFamily:"sans-serif",fontWeight:"bold",cursor:"pointer" }}>CREAR CUPÓN</button>
+      <button onClick={crearCuponManual} style={{ width:"100%",background:`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`,border:"none",color:DARK,padding:"12px",borderRadius:8,fontSize:13,fontFamily:"sans-serif",fontWeight:"bold",cursor:"pointer" }}>
+        {newCupon.clienteTel ? "CREAR CUPÓN Y ENVIAR POR WHATSAPP" : "CREAR CUPÓN"}
+      </button>
     </div>
   )}
-
-  {/* Coupon list */}
   <div style={{ padding:"0 16px", display:"flex", flexDirection:"column", gap:10 }}>
     {cupones.length === 0 && (
       <div style={{ textAlign:"center", padding:"40px 20px" }}>
         <div style={{ fontSize:48, marginBottom:12 }}>🎟️</div>
         <div style={{ fontSize:16, fontWeight:"bold", marginBottom:6 }}>No hay cupones aún</div>
-        <div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif" }}>Los cupones se generan automáticamente cuando un cliente deja una reseña, o podés crear uno manual. #ElFuegoNosUne🔥</div>
+        <div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif" }}>Creá un cupón manual o esperá a que un cliente deje una reseña. #ElFuegoNosUne🔥</div>
       </div>
     )}
-    {cupones.map(c => (
-      <div key={c.id} style={{ background:CARD, border:`1px solid ${c.estado==="activo"?GOLD+"66":BORDER}`, borderRadius:12, padding:"16px" }}>
+    {activos.length > 0 && <div style={{ fontSize:11, color:"#4CAF50", fontFamily:"sans-serif", letterSpacing:"2px", marginTop:8 }}>ACTIVOS</div>}
+    {activos.map(c => (
+      <div key={c.id} style={{ background:CARD, border:`1px solid ${GOLD}66`, borderRadius:12, padding:"16px" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-          <div style={{ fontSize:18, fontWeight:"bold", color:GOLD, fontFamily:"monospace", letterSpacing:"2px" }}>{c.id}</div>
-          <div style={{ background:c.estado==="activo"?"#4CAF50"+"22":"#888"+"22", color:c.estado==="activo"?"#4CAF50":"#888", fontSize:11, padding:"3px 10px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold" }}>{c.estado.toUpperCase()}</div>
+          <div style={{ fontSize:16, fontWeight:"bold", color:GOLD, fontFamily:"monospace", letterSpacing:"2px" }}>{c.id}</div>
+          <div style={{ background:"#4CAF5022", color:"#4CAF50", fontSize:11, padding:"3px 10px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold" }}>ACTIVO</div>
         </div>
         <div style={{ fontSize:13, color:"#CCC", fontFamily:"sans-serif", marginBottom:4 }}>{c.cliente}</div>
+        {c.clienteTel && <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif", marginBottom:4 }}>Tel: {c.clienteTel}</div>}
         <div style={{ fontSize:14, color:GOLD, fontWeight:"bold", marginBottom:4 }}>{c.descuento}% descuento</div>
         {c.motivo && <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif", marginBottom:4, fontStyle:"italic" }}>{c.motivo}</div>}
-        <div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif", marginBottom:8 }}>
-          {c.estado==="activo" ? `Vence: ${c.vence}` : `Usado: ${c.fechaUso}`}
+        <div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif", marginBottom:8 }}>Vence: {c.vence} ({c.duracionMeses || 3} meses)</div>
+        <div style={{ display:"flex", gap:8 }}>
+          <button onClick={() => marcarUsado(c.id)} style={{ flex:1,background:"none",border:`1px solid ${GOLD}44`,color:GOLD,padding:"10px",borderRadius:8,fontSize:12,fontFamily:"sans-serif",cursor:"pointer" }}>Marcar como usado</button>
+          {c.clienteTel && (
+            <button onClick={() => {
+              const tel = c.clienteTel.replace(/^0/, "");
+              const msg = encodeURIComponent(`🎉 *Recordatorio*\n\n🎟️ Código: *${c.id}*\n💰 ${c.descuento}%\n⏳ Vence: ${c.vence}\n\n🔥 #ElFuegoNosUne`);
+              window.open(`https://wa.me/595${tel}?text=${msg}`, "_blank");
+            }} style={{ background:"#0A1F0A",border:"1px solid #1A3A1A",color:"#4CAF50",padding:"10px 14px",borderRadius:8,fontSize:12,fontFamily:"sans-serif",cursor:"pointer" }}>
+              WhatsApp
+            </button>
+          )}
         </div>
-        {c.estado==="activo" && (
-          <button onClick={() => marcarUsado(c.id)} style={{ width:"100%",background:"none",border:`1px solid ${GOLD}44`,color:GOLD,padding:"10px",borderRadius:8,fontSize:12,fontFamily:"sans-serif",cursor:"pointer" }}>
-            Marcar como usado
-          </button>
+      </div>
+    ))}
+    {expirados.length > 0 && <div style={{ fontSize:11, color:"#E57373", fontFamily:"sans-serif", letterSpacing:"2px", marginTop:12 }}>EXPIRADOS</div>}
+    {expirados.map(c => (
+      <div key={c.id} style={{ background:CARD, border:"1px solid #E5737344", borderRadius:12, padding:"16px", opacity:0.7 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+          <div style={{ fontSize:16, fontWeight:"bold", color:"#E57373", fontFamily:"monospace", letterSpacing:"2px" }}>{c.id}</div>
+          <div style={{ background:"#E5737322", color:"#E57373", fontSize:11, padding:"3px 10px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold" }}>EXPIRADO</div>
+        </div>
+        <div style={{ fontSize:13, color:"#888", fontFamily:"sans-serif" }}>{c.cliente} - {c.descuento}%</div>
+        <div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Venció: {c.vence}</div>
+        <button onClick={() => eliminarCupon(c.id)} style={{ marginTop:8,width:"100%",background:"none",border:"1px solid #E5737344",color:"#E57373",padding:"8px",borderRadius:8,fontSize:12,fontFamily:"sans-serif",cursor:"pointer" }}>Eliminar cupón expirado</button>
+      </div>
+    ))}
+    {usados.length > 0 && <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", letterSpacing:"2px", marginTop:12 }}>USADOS</div>}
+    {usados.map(c => (
+      <div key={c.id} style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"16px", opacity:0.6 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+          <div style={{ fontSize:16, fontWeight:"bold", color:"#888", fontFamily:"monospace", letterSpacing:"2px" }}>{c.id}</div>
+          <div style={{ background:"#88888822", color:"#888", fontSize:11, padding:"3px 10px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold" }}>USADO</div>
+        </div>
+        <div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif" }}>{c.cliente} - {c.descuento}%</div>
+        <div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif", marginTop:4 }}>Usado: {c.fechaUso}</div>
+        {confirmDelete === c.id ? (
+          <div style={{ marginTop:8, display:"flex", gap:8 }}>
+            <button onClick={() => eliminarCupon(c.id)} style={{ flex:1,background:"#E57373",border:"none",color:"#FFF",padding:"10px",borderRadius:8,fontSize:12,fontFamily:"sans-serif",cursor:"pointer",fontWeight:"bold" }}>Confirmar eliminar</button>
+            <button onClick={() => setConfirmDelete(null)} style={{ flex:1,background:"none",border:`1px solid ${BORDER}`,color:"#888",padding:"10px",borderRadius:8,fontSize:12,fontFamily:"sans-serif",cursor:"pointer" }}>Cancelar</button>
+          </div>
+        ) : (
+          <button onClick={() => setConfirmDelete(c.id)} style={{ marginTop:8,width:"100%",background:"none",border:`1px solid ${BORDER}`,color:"#888",padding:"8px",borderRadius:8,fontSize:12,fontFamily:"sans-serif",cursor:"pointer" }}>Eliminar cupón usado</button>
         )}
       </div>
     ))}
   </div>
 </div>
-
 );
 }
 
@@ -2303,7 +2486,26 @@ return data;
 const saveClientes = useCallback((next) => {
 setClientes(prev => {
 const data = typeof next === 'function' ? next(prev) : next;
+if (FIREBASE_URL) {
+fetch(`${FIREBASE_URL}/drparrilla/dp_clientes.json`)
+.then(r => r.json())
+.then(fbData => {
+if (fbData && Array.isArray(fbData)) {
+const newIds = new Set(data.map(c => c.id));
+const fbOnly = fbData.filter(c => !newIds.has(c.id));
+if (fbOnly.length > 0) {
+const merged = [...data, ...fbOnly];
+appStorage.set("dp_clientes", JSON.stringify(merged));
+setClientes(merged);
+return;
+}
+}
+appStorage.set("dp_clientes", JSON.stringify(data));
+})
+.catch(() => appStorage.set("dp_clientes", JSON.stringify(data)));
+} else {
 saveNow("dp_clientes", data);
+}
 return data;
 });
 }, [saveNow]);
@@ -2352,7 +2554,17 @@ fetch(`${FIREBASE_URL}/drparrilla/dp_cupones.json`)
 const [fbPedidos, fbTickets, fbClientes, fbProductos, fbVisitas, fbCupones] = await Promise.all([r1.json(), r2.json(), r3.json(), r4.json(), r5.json(), r6.json()]);
 if (fbPedidos) setPedidos(prev => JSON.stringify(prev)===JSON.stringify(fbPedidos) ? prev : fbPedidos);
 if (fbTickets) setTickets(prev => JSON.stringify(prev)===JSON.stringify(fbTickets) ? prev : fbTickets);
-if (fbClientes) setClientes(prev => JSON.stringify(prev)===JSON.stringify(fbClientes) ? prev : fbClientes);
+if (fbClientes) setClientes(prev => {
+if (JSON.stringify(prev)===JSON.stringify(fbClientes)) return prev;
+const fbIds = new Set(fbClientes.map(c => c.id));
+const localOnly = prev.filter(c => !fbIds.has(c.id));
+if (localOnly.length > 0) {
+const merged = [...fbClientes, ...localOnly];
+appStorage.set("dp_clientes", JSON.stringify(merged));
+return merged;
+}
+return fbClientes;
+});
 if (fbProductos) setProductos(prev => JSON.stringify(prev)===JSON.stringify(fbProductos) ? prev : fbProductos);
 if (fbVisitas) setVisitas(prev => JSON.stringify(prev)===JSON.stringify(fbVisitas) ? prev : fbVisitas);
 if (fbCupones) setCupones(prev => JSON.stringify(prev)===JSON.stringify(fbCupones) ? prev : fbCupones);
@@ -2368,9 +2580,9 @@ if (!logged) return (
 );
 
 const screens = {
-home:             () => <HomeScreen setActive={setActive} clienteUser={clienteUser} pedidos={pedidos} />,
+home:             () => <HomeScreen setActive={setActive} clienteUser={clienteUser} pedidos={pedidos} cupones={cupones} />,
 catalogo:         () => <CatalogoScreen productos={productos} />,
-pedidos:          () => <PedidosScreen setPedidos={savePedidos} pedidos={pedidos} clienteUser={clienteUser} />,
+pedidos:          () => <PedidosScreen setPedidos={savePedidos} pedidos={pedidos} clienteUser={clienteUser} cupones={cupones} setCupones={saveCupones} />,
 soporte:          () => <SoporteScreen tickets={tickets} setTickets={saveTickets} clienteUser={clienteUser} />,
 "admin-orders":   () => <AdminOrders pedidos={pedidos} setPedidos={savePedidos} clientes={clientes} adminUser={adminUser} productos={productos} />,
 "admin-tickets":  () => <AdminTickets tickets={tickets} setTickets={saveTickets} clientes={clientes} />,
@@ -2379,6 +2591,7 @@ soporte:          () => <SoporteScreen tickets={tickets} setTickets={saveTickets
 "admin-cupones":  () => <AdminCupones cupones={cupones} setCupones={saveCupones} clientes={clientes} pedidos={pedidos} />,
 "admin-resenas":  () => <AdminResenas pedidos={pedidos} clientes={clientes} />,
 "admin-visitas":  () => <AdminVisitas visitas={visitas} setVisitas={saveVisitas} />,
+"cupones":        () => <MisCuponesScreen cupones={cupones} clienteUser={clienteUser} />,
 "agendar":        () => <AgendarVisitaScreen visitas={visitas} setVisitas={saveVisitas} clienteUser={clienteUser} />,
 };
 const Screen = screens[active] || screens["home"];
