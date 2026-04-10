@@ -377,7 +377,7 @@ return (
 function BottomNav({ active, setActive, isAdmin }) {
 const items = isAdmin
 ? [{ key:"admin-orders",label:"Pedidos",icon:"📦" },{ key:"admin-tickets",label:"Soporte",icon:"🔧" },{ key:"admin-cupones",label:"Cupones",icon:"🎟️" },{ key:"admin-clientes",label:"Clientes",icon:"👥" },{ key:"admin-catalog",label:"Catálogo",icon:"🔥" },{ key:"admin-visitas",label:"Visitas",icon:"📅" },{ key:"admin-resenas",label:"Reseñas",icon:"⭐" }]
-: [{ key:"home",label:"Inicio",icon:"⌂" },{ key:"catalogo",label:"Catálogo",icon:"🔥" },{ key:"pedidos",label:"Pedidos",icon:"📦" },{ key:"cupones",label:"Cupones",icon:"🎟️" },{ key:"agendar",label:"Visita",icon:"📅" },{ key:"soporte",label:"Soporte",icon:"🔧" }];
+: [{ key:"home",label:"Inicio",icon:"⌂" },{ key:"catalogo",label:"Catálogo",icon:"🔥" },{ key:"pedidos",label:"Pedidos",icon:"📦" },{ key:"cupones",label:"Cupones",icon:"🎟️" },{ key:"resenas",label:"Reseñas",icon:"⭐" },{ key:"agendar",label:"Visita",icon:"📅" },{ key:"soporte",label:"Soporte",icon:"🔧" }];
 return (
 <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", maxWidth:430, background:"linear-gradient(0deg,#080C10,#0D0D0D)", borderTop:`1px solid ${GOLD}22`, display:"flex", zIndex:100 }}>
 {items.map(it => (
@@ -2373,6 +2373,150 @@ return (
 );
 }
 
+// ── CLIENTE: RESENAS ──────────────────────────────────────────────────────
+function ClienteResenasScreen({ pedidos, clientes, clienteUser, cupones, setCupones, setPedidos }) {
+const [showReviewForm, setShowReviewForm] = useState(false);
+
+// Todas las reseñas de todos los pedidos
+const resenas = pedidos.filter(p => p.resena).map(p => {
+const cliente = clientes.find(c => normalizePhone(c.tel||"")===normalizePhone(p.tel));
+return { ...p.resena, cliente: cliente?.nombre || p.tel, modelo: p.modelo, pedidoId: p.id, tel: p.tel };
+});
+
+// Mis pedidos entregados sin reseña
+const misPedidosSinResena = clienteUser ? pedidos.filter(p => 
+normalizePhone(p.tel)===normalizePhone(clienteUser.tel) && p.estado === 4 && !p.resena
+) : [];
+
+const avg = resenas.length > 0
+? (resenas.reduce((s,r) => s+r.stars, 0) / resenas.length).toFixed(1)
+: "-";
+
+const dist = [5,4,3,2,1].map(s => ({
+stars: s,
+count: resenas.filter(r=>r.stars===s).length,
+pct: resenas.length > 0 ? Math.round(resenas.filter(r=>r.stars===s).length/resenas.length*100) : 0
+}));
+
+const starColor = (s) => s>=4?"#4CAF50":s===3?GOLD:"#E57373";
+
+
+return (
+<div style={{ paddingBottom:80 }}>
+<div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}` }}>
+<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>OPINIONES DE CLIENTES</div>
+<div style={{ fontSize:22, fontWeight:"bold" }}>Reseñas</div>
+<div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
+</div>
+
+{/* Summary */}
+<div style={{ padding:"16px", display:"grid", gridTemplateColumns:"1fr 2fr", gap:12, marginBottom:4 }}>
+<div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"20px", textAlign:"center" }}>
+<div style={{ fontSize:42, fontWeight:"bold", color:GOLD }}>{avg}</div>
+<div style={{ fontSize:24, marginBottom:4 }}>⭐</div>
+<div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>{resenas.length} reseñas</div>
+</div>
+<div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"16px" }}>
+{dist.map(d => (
+<div key={d.stars} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+<span style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", minWidth:12 }}>{d.stars}</span>
+<span style={{ fontSize:11 }}>⭐</span>
+<div style={{ flex:1, background:BORDER, borderRadius:4, height:8, overflow:"hidden" }}>
+<div style={{ background:starColor(d.stars), width:`${d.pct}%`, height:"100%", borderRadius:4 }}/>
+</div>
+<span style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", minWidth:24 }}>{d.count}</span>
+</div>
+))}
+</div>
+</div>
+
+{/* CTA: Dejar reseña en Google */}
+<div style={{ margin:"0 16px 12px" }}>
+<a href={GOOGLE_REVIEW_URL} target="_blank" rel="noreferrer"
+style={{ display:"flex", alignItems:"center", gap:12, background:"linear-gradient(135deg,#0A1428,#0A0F1F)", border:"1px solid #1A2A4A", borderRadius:12, padding:"14px 16px", textDecoration:"none" }}>
+<span style={{ fontSize:24 }}>⭐</span>
+<div>
+<div style={{ fontSize:13, fontWeight:"bold", color:"#4285F4" }}>Dejá tu reseña en Google</div>
+<div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>Ayudanos a que más familias nos conozcan</div>
+</div>
+<span style={{ marginLeft:"auto", color:"#4285F4", fontSize:18 }}>›</span>
+</a>
+</div>
+
+{/* CTA: Dejar reseña interna si tiene pedidos entregados sin reseña */}
+{misPedidosSinResena.length > 0 && !showReviewForm && (
+<div style={{ margin:"0 16px 16px" }}>
+<button onClick={() => setShowReviewForm(true)}
+style={{ width:"100%", display:"flex", alignItems:"center", gap:12, background:`linear-gradient(135deg,${GOLD}15,${GOLD}08)`, border:`1px solid ${GOLD}44`, borderRadius:12, padding:"14px 16px", cursor:"pointer" }}>
+<span style={{ fontSize:24 }}>🔥</span>
+<div style={{ textAlign:"left" }}>
+<div style={{ fontSize:13, fontWeight:"bold", color:GOLD }}>Contá tu experiencia</div>
+<div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>Tenés {misPedidosSinResena.length} pedido{misPedidosSinResena.length>1?"s":""} sin calificar</div>
+</div>
+<span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>›</span>
+</button>
+</div>
+)}
+
+{/* Review form */}
+{showReviewForm && misPedidosSinResena.length > 0 && (
+<div style={{ margin:"0 16px 16px" }}>
+{misPedidosSinResena.length > 1 && (
+<div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", marginBottom:8, textAlign:"center" }}>Calificá tu pedido más reciente:</div>
+)}
+<ReviewFlow
+pedido={misPedidosSinResena[0]}
+cupones={cupones}
+setCupones={setCupones}
+onSave={(resena) => {
+const pedidoId = misPedidosSinResena[0].id;
+if (setPedidos) {
+setPedidos(prev => prev.map(p => p.id===pedidoId ? {...p, resena} : p));
+}
+setShowReviewForm(false);
+}}
+onClose={() => setShowReviewForm(false)}
+/>
+</div>
+)}
+
+{/* Lista de reseñas */}
+<div style={{ padding:"0 16px", display:"flex", flexDirection:"column", gap:10 }}>
+{resenas.length === 0 && (
+<div style={{ textAlign:"center", padding:"40px 20px", color:"#555", fontFamily:"sans-serif" }}>
+<div style={{ fontSize:40, marginBottom:12 }}>⭐</div>
+<div style={{ fontSize:14, marginBottom:8 }}>Aún no hay reseñas</div>
+<div style={{ fontSize:12, color:"#444" }}>Sé el primero en compartir tu experiencia con Dr. Parrilla</div>
+</div>
+)}
+{resenas.sort((a,b) => b.stars-a.stars).map((r,i) => {
+const esMia = clienteUser && normalizePhone(r.tel||"")=== normalizePhone(clienteUser.tel);
+return (
+<div key={i} style={{ background:CARD, border:`1px solid ${esMia ? GOLD+'66' : starColor(r.stars)+'44'}`, borderRadius:12, padding:"16px", position:"relative" }}>
+{esMia && <div style={{ position:"absolute", top:8, right:12, fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"1px", background:`${GOLD}15`, padding:"2px 8px", borderRadius:10 }}>TU RESEÑA</div>}
+<div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+<div>
+<div style={{ fontSize:14, fontWeight:"bold", marginBottom:2 }}>{r.cliente}</div>
+<div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>{r.modelo}</div>
+</div>
+<div style={{ display:"flex", gap:2 }}>
+{[1,2,3,4,5].map(s => <span key={s} style={{ fontSize:16 }}>{s<=r.stars?"⭐":"☆"}</span>)}
+</div>
+</div>
+{r.comment && (
+<div style={{ fontSize:13, color:"#AAA", fontFamily:"sans-serif", fontStyle:"italic", lineHeight:1.6, padding:"10px 12px", background:DARK3, borderRadius:8, marginBottom:8 }}>
+"{r.comment}"
+</div>
+)}
+<div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif" }}>{r.fecha}</div>
+</div>
+);
+})}
+</div>
+</div>
+);
+}
+
 // ── ADMIN: RESENAS─────────────────────────────────────────────────────────
 function AdminResenas({ pedidos, clientes }) {
 const resenas = pedidos.filter(p => p.resena).map(p => {
@@ -2863,6 +3007,7 @@ soporte:          () => <SoporteScreen tickets={tickets} setTickets={saveTickets
 "admin-resenas":  () => <AdminResenas pedidos={pedidos} clientes={clientes} />,
 "admin-visitas":  () => <AdminVisitas visitas={visitas} setVisitas={saveVisitas} />,
 "cupones":        () => <MisCuponesScreen cupones={cupones} clienteUser={clienteUser} />,
+"resenas":        () => <ClienteResenasScreen pedidos={pedidos} clientes={clientes} clienteUser={clienteUser} cupones={cupones} setCupones={saveCupones} setPedidos={savePedidos} />,
 "agendar":        () => <AgendarVisitaScreen visitas={visitas} setVisitas={saveVisitas} clienteUser={clienteUser} />,
 };
 const Screen = screens[active] || screens["home"];
