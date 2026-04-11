@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.drparrilla.paraguay",
+    "sha256_cert_fingerprints": [
+      "44:7B:67:5F:41:49:3F:3C:8B:C0:AE:B6:A7:AC:63:27:83:6B:B0:2B:71:05:1A:64:E0:18:FA:AE:E8:55:47:EB"
+    ]
+  }
+}]

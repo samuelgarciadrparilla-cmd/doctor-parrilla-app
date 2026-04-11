@@ -1,246 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-const _useState = useState;
-const _useEffect = useEffect;
-const _useRef = useRef;
-
-// ── PREMIUM ANIMATIONS CSS ────────────────────────────────────────────────────
-const PREMIUM_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
-  @keyframes confetti-fall {
-    0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
-    80%  { opacity: 1; }
-    100% { transform: translateY(100vh) rotate(720deg) scale(0.5); opacity: 0; }
-  }
-  @keyframes confetti-sway {
-    0%,100% { margin-left: 0; }
-    25%      { margin-left: 30px; }
-    75%      { margin-left: -30px; }
-  }
-  @keyframes card-enter {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .card-stagger { animation: card-enter 0.4s ease forwards; opacity: 0; }
-  @keyframes timeline-light {
-    from { opacity: 0; transform: translateX(-8px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-  .timeline-step { animation: timeline-light 0.4s ease forwards; opacity: 0; }
-  @keyframes dot-pulse {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-    40%            { transform: scale(1);   opacity: 1; }
-  }
-  .dot-1 { animation: dot-pulse 1.2s ease-in-out infinite; }
-  .dot-2 { animation: dot-pulse 1.2s ease-in-out 0.2s infinite; }
-  .dot-3 { animation: dot-pulse 1.2s ease-in-out 0.4s infinite; }
-  @keyframes blur-in {
-    from { backdrop-filter: blur(0px); background: rgba(0,0,0,0); }
-    to   { backdrop-filter: blur(12px); background: rgba(0,0,0,0.6); }
-  }
-  .blur-overlay { animation: blur-in 0.3s ease forwards; backdrop-filter: blur(12px); background: rgba(0,0,0,0.6); }
-  @keyframes slide-in-right {
-    from { transform: translateX(30px); opacity: 0; }
-    to   { transform: translateX(0);    opacity: 1; }
-  }
-  @keyframes slide-in-left {
-    from { transform: translateX(-30px); opacity: 0; }
-    to   { transform: translateX(0);     opacity: 1; }
-  }
-  .slide-in-right { animation: slide-in-right 0.28s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
-  .slide-in-left  { animation: slide-in-left  0.28s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
-  .sparkline-path { stroke-dasharray: 200; stroke-dashoffset: 200; animation: sparkline-draw 1.2s ease forwards 0.3s; }
-  @keyframes sparkline-draw { to { stroke-dashoffset: 0; } }
-  @keyframes shimmer-gold {
-    0%   { background-position: -200% center; }
-    100% { background-position: 200% center; }
-  }
-  .shimmer-text {
-    background: linear-gradient(90deg, #9A7A3E 0%, #E2C98A 40%, #C8A96E 60%, #9A7A3E 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: shimmer-gold 3s linear infinite;
-  }
-  @keyframes ember-rise {
-    0%   { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.9; }
-    40%  { transform: translateY(-35px) scale(.75) rotate(12deg) translateX(6px); opacity: .55; }
-    100% { transform: translateY(-90px) scale(.2) rotate(-8deg) translateX(-4px); opacity: 0; }
-  }
-  @keyframes orb-float {
-    0%,100% { transform: translate(0,0) scale(1); opacity: 0.08; }
-    33%      { transform: translate(15px,-10px) scale(1.08); opacity: 0.14; }
-    66%      { transform: translate(-10px,8px) scale(0.94); opacity: 0.06; }
-  }
-  @keyframes progress-wave {
-    0%   { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
-  }
-  .progress-wave {
-    background: linear-gradient(90deg, #9A7A3E, #E2C98A, #C8A96E, #9A7A3E);
-    background-size: 200% 100%;
-    animation: progress-wave 2s linear infinite;
-  }
-  @keyframes kpi-glow {
-    0%, 100% { box-shadow: 0 0 8px rgba(200,169,110,0.2); }
-    50%       { box-shadow: 0 0 22px rgba(200,169,110,0.45); }
-  }
-  .kpi-card { animation: kpi-glow 3s ease-in-out infinite; }
-  @keyframes count-up {
-    from { opacity: 0; transform: scale(0.85); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-  .counter-animate { animation: count-up 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-  .cursor-blink { animation: blink 1s step-end infinite; }
-  @keyframes orb-float {
-    0%,100% { transform: translate(0,0) scale(1); }
-    33%      { transform: translate(15px,-10px) scale(1.05); }
-    66%      { transform: translate(-10px,8px) scale(0.95); }
-  }
-  .orb { animation: orb-float var(--dur,8s) ease-in-out infinite; }
-  @keyframes ripple-btn { to { transform: scale(4); opacity: 0; } }
-`;
-
-function InjectPremiumStyles() {
-  _useEffect(() => {
-    const el = document.createElement('style');
-    el.textContent = PREMIUM_CSS;
-    document.head.appendChild(el);
-    return () => { try { document.head.removeChild(el); } catch(e){} };
-  }, []);
-  return null;
-}
-
-// ── EMBER PARTICLE SYSTEM (v2 physics) ──────────────────────────────────────
-const T_EMBER = {
-  spark:"#F07830", flame:"#E05010", amber:"#E8C472", gold:"#D4A84B",
-};
-function EmberSystem({ count = 14, bottom = 0, spread = 90 }) {
-  const particles = Array.from({length:count}, (_,i) => ({
-    id: i,
-    left: `${5 + (i / count) * spread}%`,
-    size: 1.5 + (i % 4) * 0.8,
-    delay: `${(i * 0.28) % 2.5}s`,
-    dur: `${1.8 + (i % 4) * 0.7}s`,
-    color: [T_EMBER.spark, T_EMBER.flame, T_EMBER.amber, T_EMBER.gold][i % 4],
-  }));
-  return (
-    <div style={{position:"absolute",bottom,left:0,right:0,height:90,pointerEvents:"none",overflow:"hidden",zIndex:0}}>
-      {particles.map(p => (
-        <div key={p.id} style={{
-          position:"absolute", bottom:0, left:p.left,
-          width:p.size, height:p.size, borderRadius:"50%",
-          background:p.color,
-          boxShadow:`0 0 ${p.size*4}px ${p.color}`,
-          animation:`ember-rise ${p.dur} ${p.delay} ease-in infinite`,
-        }}/>
-      ))}
-    </div>
-  );
-}
-
-// ── AMBIENT ORB ───────────────────────────────────────────────────────────────
-function AmbientOrb({x,y,size,color,delay="0s"}) {
-  return (
-    <div style={{
-      position:"absolute", left:x, top:y,
-      width:size, height:size, borderRadius:"50%",
-      background:`radial-gradient(circle, ${color} 0%, transparent 70%)`,
-      animation:`orb-float 8s ${delay} ease-in-out infinite`,
-      pointerEvents:"none",
-    }}/>
-  );
-}
-
-// ── CONFETTI (Duolingo style) ─────────────────────────────────────────────────
-const CONFETTI_COLORS = ["#C8A96E","#E2C98A","#FF6B35","#FFD700","#FF4444","#44FF88","#4488FF","#FF44FF"];
-function ConfettiCelebration({ active }) {
-  const [pieces, setPieces] = _useState([]);
-  _useEffect(() => {
-    if (!active) return;
-    const p = Array.from({ length: 55 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      delay: Math.random() * 1.5,
-      duration: 2.5 + Math.random() * 1.5,
-      size: 6 + Math.random() * 8,
-      shape: Math.random() > 0.5 ? "50%" : "2px",
-    }));
-    setPieces(p);
-    const t = setTimeout(() => setPieces([]), 5000);
-    return () => clearTimeout(t);
-  }, [active]);
-  if (!pieces.length) return null;
-  return (
-    <div style={{ position:"fixed", top:0, left:0, right:0, bottom:0, pointerEvents:"none", zIndex:9999, overflow:"hidden" }}>
-      {pieces.map(p => (
-        <div key={p.id} style={{
-          position:"absolute", left:`${p.left}%`, top:"-20px",
-          width:p.size, height:p.size, background:p.color, borderRadius:p.shape,
-          animation:`confetti-fall ${p.duration}s ease-in ${p.delay}s forwards, confetti-sway 1s ease-in-out ${p.delay}s infinite`,
-        }} />
-      ))}
-    </div>
-  );
-}
-
-// ── SPARKLINE (Stripe style) ──────────────────────────────────────────────────
-function Sparkline({ data = [], color = "#C8A96E", width = 70, height = 24 }) {
-  if (!data || data.length < 2) return null;
-  const min = Math.min(...data), max = Math.max(...data), range = max - min || 1;
-  const pts = data.map((v, i) => `${(i/(data.length-1))*width},${height-((v-min)/range)*height}`).join(" ");
-  return (
-    <svg width={width} height={height} style={{ overflow:"visible" }}>
-      <polyline points={`0,${height} ${pts} ${width},${height}`} fill={`${color}15`} stroke="none" />
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-        className="sparkline-path" style={{ filter:`drop-shadow(0 0 3px ${color}66)` }} />
-    </svg>
-  );
-}
-
-// ── ANIMATED COUNTER ─────────────────────────────────────────────────────────
-function AnimatedCounter({ value, duration = 1000, suffix = "", prefix = "", style = {} }) {
-  const [display, setDisplay] = _useState(0);
-  const rafRef = _useRef ? _useRef(null) : { current: null };
-  _useEffect(() => {
-    const target = parseFloat(String(value).replace(/[^0-9.]/g, "")) || 0;
-    const start = performance.now();
-    const animate = (now) => {
-      const p = Math.min((now - start) / duration, 1);
-      setDisplay(Math.round((1 - Math.pow(1-p, 3)) * target));
-      if (p < 1) rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [value]);
-  return <span style={style} className="counter-animate">{prefix}{display.toLocaleString("es-PY")}{suffix}</span>;
-}
-
-// ── DOTS LOADING (Spotify style) ─────────────────────────────────────────────
-function DotsLoading({ color = "#C8A96E", size = 8 }) {
-  return (
-    <div style={{ display:"flex", gap:size*0.6, alignItems:"center", justifyContent:"center", padding:"8px 0" }}>
-      {[1,2,3].map(i => <div key={i} className={`dot-${i}`} style={{ width:size, height:size, borderRadius:"50%", background:color }} />)}
-    </div>
-  );
-}
-
-// ── KPI CARD (Stripe style) ───────────────────────────────────────────────────
-function KpiCard({ label, value, trend, trendUp, sparkData, color = "#C8A96E", delay = "0s" }) {
-  return (
-    <div className="kpi-card card-stagger" style={{ animationDelay:delay, background:"#0F1115", border:`1px solid ${color}33`, borderRadius:12, padding:"14px 16px", position:"relative", overflow:"hidden" }}>
-      <div style={{ position:"absolute", top:0, right:0, width:60, height:60, background:`radial-gradient(circle at top right, ${color}15, transparent)`, pointerEvents:"none" }} />
-      <div style={{ fontSize:9, color:"#555", fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:6, textTransform:"uppercase" }}>{label}</div>
-      <div style={{ fontSize:20, fontWeight:"bold", color, fontFamily:"'DM Mono', monospace", lineHeight:1, marginBottom:4 }}>{value}</div>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end" }}>
-        {trend && <div style={{ fontSize:10, color:trendUp?"#4CAF50":"#E57373", fontFamily:"sans-serif" }}>{trendUp?"↑":"↓"} {trend}</div>}
-        {sparkData && <Sparkline data={sparkData} color={color} width={60} height={18} />}
-      </div>
-    </div>
-  );
-}
+import { useState, useRef, useEffect, useCallback } from "react";
+import React from "react";
 
 // ── EUROPEAN PREMIUM DESIGN SYSTEM ──────────────────────────────────────────
 const GOLD        = "#C8A96E";       // Warm gold
@@ -494,56 +253,56 @@ const INITIAL_CLIENTES = [
 const ESTADO_NEURO = [
 // Estado 0: Pedido recibido
 [
-"Tu pedido está en nuestras manos. Los mejores artesanos del acero ya conocen tu nombre. Seguí el progreso en drparrillaparaguay.com ingresando con tu número de teléfono.",
-"Acabamos de recibir tu pedido. Nuestro equipo ya está planificando cada detalle de tu pieza única. Podés ver el avance en drparrillaparaguay.com con tu número de teléfono.",
-"Tu proyecto acaba de entrar al taller. Pronto el acero tomará la forma de tus sueños. Seguí cada etapa en drparrillaparaguay.com.",
-"Pedido confirmado. Cada obra maestra comienza con un primer paso - el tuyo ya está en marcha. Seguí el progreso en drparrillaparaguay.com con tu número de teléfono.",
-"Bienvenido al proceso. Tu parrilla será creada con la misma pasión con la que vos disfrutás un buen asado. Seguí el avance en drparrillaparaguay.com.",
-"El acero ya te espera. Nuestros maestros soldadores están preparando todo para tu pieza exclusiva. Monitoreá el progreso en drparrillaparaguay.com.",
+"Tu pedido está en nuestras manos. Los mejores artesanos del acero ya conocen tu nombre.",
+"Acabamos de recibir tu pedido. Nuestro equipo ya está planificando cada detalle de tu pieza única.",
+"Tu proyecto acaba de entrar al taller. Pronto el acero tomará la forma de tus sueños.",
+"Pedido confirmado. Cada obra maestra comienza con un primer paso - el tuyo ya está en marcha.",
+"Bienvenido al proceso. Tu parrilla será creada con la misma pasión con la que vos disfrutás un buen asado.",
+"El acero ya te espera. Nuestros maestros soldadores están preparando todo para tu pieza exclusiva.",
 ],
 // Estado 1: En producción
 [
-"Manos expertas forjan tu parrilla ahora mismo. Cada corte, cada soldadura - hecho para toda la vida. Seguí el progreso en drparrillaparaguay.com con tu número de teléfono.",
-"El fuego del taller arde por tu pedido. Acero, precisión y pasión se unen en cada centímetro. Mirá el avance en drparrillaparaguay.com.",
-"Tu parrilla está tomando forma. Cada soldadura es un compromiso de calidad que dura generaciones. Seguí cada etapa en drparrillaparaguay.com.",
-"Ahora mismo, manos artesanas dan vida al acero. Tu parrilla no se fabrica - se crea. Seguí el progreso en drparrillaparaguay.com con tu número de teléfono.",
-"El taller vibra con tu pedido. Corte, doblado, soldadura - cada paso es perfección calculada. Mirá el avance en drparrillaparaguay.com.",
-"Tu pieza está en el corazón del proceso. Solo usamos acero premium porque tu asado lo merece. Seguí el progreso en drparrillaparaguay.com.",
-"Artesanos con décadas de experiencia trabajan en tu pedido. No es producción en serie - es arte. Seguí cada etapa en drparrillaparaguay.com con tu número de teléfono.",
-"El acero inoxidable 304 ya tiene tu nombre. Cada milímetro se mide, se corta, se perfecciona. Mirá el avance en drparrillaparaguay.com.",
+"Manos expertas forjan tu parrilla ahora mismo. Cada corte, cada soldadura - hecho para toda la vida.",
+"El fuego del taller arde por tu pedido. Acero, precisión y pasión se unen en cada centímetro.",
+"Tu parrilla está tomando forma. Cada soldadura es un compromiso de calidad que dura generaciones.",
+"Ahora mismo, manos artesanas dan vida al acero. Tu parrilla no se fabrica - se crea.",
+"El taller vibra con tu pedido. Corte, doblado, soldadura - cada paso es perfección calculada.",
+"Tu pieza está en el corazón del proceso. Solo usamos acero premium porque tu asado lo merece.",
+"Artesanos con décadas de experiencia trabajan en tu pedido. No es producción en serie - es arte.",
+"El acero inoxidable 304 ya tiene tu nombre. Cada milímetro se mide, se corta, se perfecciona.",
 ],
 // Estado 2: Control de calidad
 [
-"Tu parrilla pasó por control de calidad. Solo lo perfecto llega a tu hogar. Seguí el progreso en drparrillaparaguay.com con tu número de teléfono.",
-"Inspección final en curso. Revisamos cada soldadura, cada acabado, cada detalle. Cero defectos. Mirá el avance en drparrillaparaguay.com.",
-"Tu parrilla está siendo examinada con lupa. Nuestro estándar es la perfección - sin excepciones. Seguí cada etapa en drparrillaparaguay.com.",
-"Control de calidad premium: cada unión, cada superficie, cada ángulo debe ser impecable. Seguí el progreso en drparrillaparaguay.com con tu número de teléfono.",
-"Estamos verificando que tu pieza cumpla con los estándares europeos de calidad que nos definen. Mirá el avance en drparrillaparaguay.com.",
-"Tu parrilla casi está lista. Solo falta confirmar que cada detalle esté a la altura de tu expectativa. Seguí el progreso en drparrillaparaguay.com.",
+"Tu parrilla pasó por control de calidad. Solo lo perfecto llega a tu hogar.",
+"Inspección final en curso. Revisamos cada soldadura, cada acabado, cada detalle. Cero defectos.",
+"Tu parrilla está siendo examinada con lupa. Nuestro estándar es la perfección - sin excepciones.",
+"Control de calidad premium: cada unión, cada superficie, cada ángulo debe ser impecable.",
+"Estamos verificando que tu pieza cumpla con los estándares europeos de calidad que nos definen.",
+"Tu parrilla casi está lista. Solo falta confirmar que cada detalle esté a la altura de tu expectativa.",
 ],
 // Estado 3: Lista para entrega
 [
-"¡Tu parrilla de ensueño está lista! Pronto el aroma del asado llenará tu espacio. Seguí el progreso en drparrillaparaguay.com con tu número de teléfono.",
-"Obra maestra terminada. Tu parrilla espera el momento de brillar en tu hogar. Mirá el avance en drparrillaparaguay.com.",
-"El acero ya tiene alma - la tuya. Tu parrilla está lista para escribir historias inolvidables. Seguí cada etapa en drparrillaparaguay.com.",
-"Preparando el embalaje premium. Tu pieza viaja protegida como la joya que es. Seguí el progreso en drparrillaparaguay.com con tu número de teléfono.",
-"Tu parrilla está lista y ansiosa por conocer su nuevo hogar. El primer asado será legendario. Mirá el avance en drparrillaparaguay.com.",
-"Misión cumplida en el taller. Ahora solo falta que el fuego y la carne hagan su magia. Seguí el progreso en drparrillaparaguay.com.",
-"¿Ya compraste la carne? Estamos cerca de entregarte tu parrilla. ¡Prepará un buen vacío para el estreno! Seguí el avance en drparrillaparaguay.com con tu número de teléfono.",
-"¡No te olvides del carbón! Quebracho o algarrobo son los mejores para inaugurar tu Dr. Parrilla. Mirá el progreso en drparrillaparaguay.com.",
-"¿Un buen vino o una cerveza bien fría para maridar los cortes de carne? El momento perfecto se acerca. Seguí el avance en drparrillaparaguay.com.",
-"Comprá la carne, prepará la mesa, invitá a la familia. Tu Dr. Parrilla está a punto de llegar. Seguí el progreso en drparrillaparaguay.com con tu número de teléfono.",
-"¿Ya tenés el chimichurri listo? Tu parrilla está esperando su gran debut. Mirá el avance en drparrillaparaguay.com.",
-"Consejo: un buen sal gruesa y leña de quebracho. Tu primera brasa será inolvidable. Seguí el progreso en drparrillaparaguay.com.",
+"Tu parrilla de ensueño está lista! Pronto el aroma del asado llenará tu espacio.",
+"Obra maestra terminada. Tu parrilla espera el momento de brillar en tu hogar.",
+"El acero ya tiene alma - la tuya. Tu parrilla está lista para escribir historias inolvidables.",
+"Preparando el embalaje premium. Tu pieza viaja protegida como la joya que es.",
+"Tu parrilla está lista y ansiosa por conocer su nuevo hogar. El primer asado será legendario.",
+"Misión cumplida en el taller. Ahora solo falta que el fuego y la carne hagan su magia.",
+"¿Ya compraste la carne? Estamos cerca de entregarte tu parrilla. ¡Prepará un buen vacío para el estreno!",
+"¡No te olvides del carbón! Quebracho o algarrobo son los mejores para inaugurar tu Dr. Parrilla.",
+"¿Un buen vino o una cerveza bien fría para maridar los cortes de carne? El momento perfecto se acerca.",
+"Comprá la carne, prepará la mesa, invitá a la familia. Tu Dr. Parrilla está a punto de llegar.",
+"¿Ya tenés el chimichurri listo? Tu parrilla está esperando su gran debut.",
+"Consejo: un buen sal gruesa y leña de quebracho. Tu primera brasa será inolvidable.",
 ],
 // Estado 4: Entregada
 [
-"¡Bienvenida a tu familia! Que cada asado sea un recuerdo imborrable. 🎁 ¿Dejás una reseña en Google? Te regalamos un cupón de descuento en tu próxima compra. Ingresá a drparrillaparaguay.com con tu número de teléfono para reclamarlo.",
-"Tu parrilla ya está en casa. Cada asado que hagas será una celebración de la vida. 🎁 Dejá tu reseña en Google y recibí un cupón de descuento especial. Ingresá a drparrillaparaguay.com con tu número de teléfono.",
-"Entregada con orgullo. Cuidala y ella te dará décadas de asados perfectos. 🎁 ¿Nos dejás una reseña en Google? Te regalamos un cupón de descuento en tu próxima compra. Reclamalo en drparrillaparaguay.com.",
-"Tu inversión en calidad ya rinde frutos. Disfrutá cada momento alrededor del fuego. 🎁 Dejá tu reseña en Google y recibí un cupón de descuento exclusivo. Ingresá a drparrillaparaguay.com con tu número de teléfono.",
-"La parrilla llegó a destino. Ahora empieza la verdadera historia - la que escribís vos con cada asado. 🎁 ¿Nos dejás una reseña en Google? Te regalamos un cupón de descuento. Reclamalo en drparrillaparaguay.com.",
-"Gracias por confiar en Dr. Parrilla. Tu satisfacción es nuestro mayor logro. 🎁 Dejá tu reseña en Google y recibí un cupón de descuento en tu próxima compra. Ingresá a drparrillaparaguay.com con tu número de teléfono. #ElFuegoNosUne🔥",
+"Bienvenida a tu familia. Que cada asado sea un recuerdo imborrable.",
+"Tu parrilla ya está en casa. Cada asado que hagas será una celebración de la vida.",
+"Entregada con orgullo. Cuidala y ella te dará décadas de asados perfectos.",
+"Tu inversión en calidad ya rinde frutos. Disfrutá cada momento alrededor del fuego.",
+"La parrilla llegó a destino. Ahora empieza la verdadera historia - la que escribís vos con cada asado.",
+"Gracias por confiar en Dr. Parrilla. Tu satisfacción es nuestro mayor logro. #ElFuegoNosUne🔥",
 ],
 ];
 // Función para obtener mensaje aleatorio por estado (cambia cada hora para no repetir en la misma sesión)
@@ -689,46 +448,6 @@ reader.readAsDataURL(blob);
 }
 }
 
-// ── Subir PDF a Firebase Storage y devolver URL pública ──
-async function uploadPdfToFirebaseStorage(file) {
-  if (!FIREBASE_STORAGE_BUCKET) {
-    // Fallback: convertir a base64 si no hay bucket
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.readAsDataURL(file);
-    });
-  }
-  const maxRetries = 3;
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const path = `pdfs/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-      const encodedPath = encodeURIComponent(path);
-      const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodedPath}`;
-      const res = await fetch(uploadUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/pdf' },
-        body: file
-      });
-      if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
-      const data = await res.json();
-      const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodedPath}?alt=media&token=${data.downloadTokens || ''}`;
-      return downloadUrl;
-    } catch (e) {
-      console.warn(`PDF upload intento ${attempt+1} falló:`, e.message);
-      if (attempt === maxRetries - 1) {
-        // Último intento fallido: usar base64
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        });
-      }
-      await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
-    }
-  }
-}
-
 function PhotoUploadButton({ onPhoto, multiple = false, label = "📷 Subir foto", style = {} }) {
 const ref = useRef();
 const [uploading, setUploading] = useState(false);
@@ -766,42 +485,6 @@ return (
 );
 }
 
-// ── PDF UPLOAD BUTTON ───────────────────────────────────────────────────────
-function PdfUploadButton({ onPdf, label = "📄 Subir PDF", style = {} }) {
-const ref = useRef();
-const [uploading, setUploading] = useState(false);
-const [progress, setProgress] = useState("");
-const handle = async (e) => {
-const file = e.target.files?.[0]; if (!file) return;
-if (file.type !== 'application/pdf') { alert('Solo se aceptan archivos PDF'); return; }
-if (file.size > 50 * 1024 * 1024) { alert('El PDF no puede superar 50 MB'); return; }
-setUploading(true);
-setProgress("Subiendo...");
-try {
-const url = await uploadPdfToFirebaseStorage(file);
-setProgress("✅ Listo");
-onPdf(url, file.name);
-setTimeout(() => setProgress(""), 2000);
-} catch (err) {
-console.warn('Error subiendo PDF:', err);
-setProgress("❌ Error");
-setTimeout(() => setProgress(""), 3000);
-} finally {
-setUploading(false);
-}
-e.target.value = "";
-};
-return (
-<>
-<input type="file" accept="application/pdf" ref={ref} onChange={handle} style={{ display:"none" }} />
-<button onClick={() => !uploading && ref.current?.click()}
-style={{ background:CARD, border:`1px solid ${uploading?GOLD:BORDER}`, color:uploading?GOLD:"#CCC", padding:"12px 16px", borderRadius:10, fontFamily:"sans-serif", fontSize:13, cursor:uploading?"wait":"pointer", display:"flex", alignItems:"center", gap:8, opacity:uploading?0.8:1, ...style }}>
-{uploading ? `⏳ ${progress}` : (progress || label)}
-</button>
-</>
-);
-}
-
 // ── REVIEW COMPONENT ─────────────────────────────────────────────────────────
 function ReviewFlow({ pedido, onSave, onClose, cupones, setCupones }) {
 const [step, setStep] = useState(1); // 1=stars, 2=comment, 3=done
@@ -811,26 +494,17 @@ const [comment, setComment] = useState("");
 const submit = () => {
 if (stars === 0) return;
 onSave({ stars, comment, fecha: new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"}) });
-// NO se crea el cupón aquí — solo se crea cuando el cliente toca el botón de Google
-setStep(3);
-};
-
-const crearCuponPendiente = () => {
 if (setCupones) {
 const fecha = new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
 const venceDate = new Date(Date.now() + 3*30*24*60*60*1000);
 const vence = venceDate.toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
-// Verificar que no existe ya un cupón pendiente para este pedido
-const yaExiste = (cupones||[]).some(c => c.motivo && c.motivo.includes(pedido.id));
-if (!yaExiste) {
 setCupones(prev => [{
 id: cuponCode, cliente: pedido.tel, clienteTel: pedido.tel,
-descuento: 10, motivo: "Reseña en Google - " + pedido.modelo + " (" + pedido.id + ")",
-estado: "pendiente", fecha, vence, tipo: "resena", duracionMeses: 3
+descuento: 15, motivo: "Reseña en Google - " + pedido.modelo,
+estado: "activo", fecha, vence, tipo: "resena", duracionMeses: 3
 }, ...(prev||[])]);
 }
-}
-window.open(GOOGLE_REVIEW_URL, "_blank");
+setStep(3);
 };
 
 // Generar código de cupón único basado en el pedido
@@ -847,22 +521,18 @@ Tu opinión nos ayuda a mejorar y a que más familias disfruten de una parrilla 
 <div style={{ background:"linear-gradient(135deg,#1A0800,#0A0A0A)", border:`1px solid ${GOLD}55`, borderRadius:12, padding:"16px", marginBottom:16 }}>
 <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:8 }}>🎁 REGALO EXCLUSIVO · #ElFuegoNosUne🔥</div>
 <div style={{ fontSize:14, color:"#CCC", fontFamily:"sans-serif", lineHeight:1.6, marginBottom:12 }}>
-Dejá tu reseña en Google y recibí un <span style={{ color:GOLD, fontWeight:"bold" }}>cupón de 10% de descuento</span> en servicios, mantenimiento o nuevos productos.
+Dejá tu reseña en Google y ganá un <span style={{ color:GOLD, fontWeight:"bold" }}>cupón de 15% de descuento</span> en tu próxima compra o servicio de mantenimiento.
 </div>
 <div style={{ background:DARK, border:`2px dashed ${GOLD}66`, borderRadius:10, padding:"12px", marginBottom:8 }}>
 <div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif", marginBottom:4 }}>TU CÓDIGO DE CUPÓN</div>
 <div style={{ fontSize:22, fontWeight:"bold", color:GOLD, fontFamily:"monospace", letterSpacing:"3px" }}>{cuponCode}</div>
 </div>
-<div style={{ background:"#1A0800", border:`1px solid ${GOLD}33`, borderRadius:8, padding:"10px 12px", marginBottom:8 }}>
-<div style={{ fontSize:12, color:"#E8A020", fontFamily:"sans-serif", fontWeight:"bold", marginBottom:2 }}>⏳ Pendiente de validación</div>
-<div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", lineHeight:1.5 }}>Nuestro equipo verificará tu reseña en Google y activará el cupón en menos de 24hs. Te notificaremos por WhatsApp.</div>
-</div>
 <div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif" }}>Válido por 3 meses · Presentá este código al hacer tu próximo pedido</div>
 </div>
-<button onClick={crearCuponPendiente}
-style={{ display:"block", width:"100%", background:"linear-gradient(135deg,#4285F4,#34A853)", border:"none", color:"#FFF", padding:"14px", borderRadius:10, fontSize:15, fontFamily:"sans-serif", fontWeight:"bold", cursor:"pointer", textAlign:"center", boxSizing:"border-box", marginBottom:10 }}>
-⭐ Ir a Google y dejar mi reseña
-</button>
+<a href={GOOGLE_REVIEW_URL} target="_blank" rel="noreferrer"
+style={{ display:"block", width:"100%", background:"linear-gradient(135deg,#4285F4,#34A853)", border:"none", color:"#FFF", padding:"14px", borderRadius:10, fontSize:15, fontFamily:"sans-serif", fontWeight:"bold", cursor:"pointer", textDecoration:"none", textAlign:"center", boxSizing:"border-box", marginBottom:10 }}>
+⭐ Dejar reseña en Google y activar cupón
+</a>
 <button onClick={onClose} style={{ width:"100%", background:"none", border:`1px solid ${BORDER}`, color:"#888", padding:"12px", borderRadius:10, fontSize:14, fontFamily:"sans-serif", cursor:"pointer" }}>
 Cerrar
 </button>
@@ -963,33 +633,23 @@ const [tipIdx, setTipIdx] = useState(0);
 const tip = TIPS[tipIdx];
 return (
 
-<div style={{ background:"linear-gradient(145deg, rgba(15,17,21,0.95), rgba(10,12,16,0.98))", border:`1px solid ${GOLD}28`, borderRadius:18, padding:"20px", marginBottom:16, position:"relative", overflow:"hidden", boxShadow:`0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(212,168,75,0.08)` }}>
-  {/* Ambient glow */}
-  <div style={{ position:"absolute", top:-30, right:-30, width:120, height:120, borderRadius:"50%", background:`radial-gradient(circle, ${GOLD}12, transparent)`, pointerEvents:"none" }}/>
-
-  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
-    <div style={{ width:3, height:18, borderRadius:2, background:GOLD_GRAD }}/>
-    <div style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", fontWeight:"bold" }}>🔥 TIPS DEL ASADOR</div>
-  </div>
-
-  <div style={{ display:"flex", gap:14, alignItems:"flex-start", marginBottom:18 }}>
-    <div style={{ width:52, height:52, borderRadius:14, background:`${GOLD}12`, border:`1px solid ${GOLD}25`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, flexShrink:0, boxShadow:`0 4px 16px rgba(0,0,0,0.3)` }}>
-      {tip.icon}
-    </div>
-    <div style={{ flex:1 }}>
-      <div style={{ fontSize:16, fontWeight:"bold", color:CREAM, marginBottom:8, lineHeight:1.2, letterSpacing:"-0.3px" }}>{tip.titulo}</div>
-      <div style={{ fontSize:13, color:"#C0B090", fontFamily:"sans-serif", lineHeight:1.75, letterSpacing:"0.1px" }}>{tip.texto}</div>
-    </div>
-  </div>
-
-  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:14, borderTop:`1px solid ${GOLD}15` }}>
-    <div style={{ display:"flex", gap:6 }}>
-      {TIPS.map((_,i) => <div key={i} onClick={() => setTipIdx(i)} style={{ width:i===tipIdx?22:6, height:5, borderRadius:3, background:i===tipIdx?GOLD:BORDER2, cursor:"pointer", transition:"all 0.25s", boxShadow:i===tipIdx?`0 0 8px ${GOLD}66`:"none" }}/>)}
-    </div>
-    <button onClick={() => setTipIdx((tipIdx+1)%TIPS.length)} style={{ background:`${GOLD}18`, border:`1px solid ${GOLD}35`, color:GOLD, padding:"7px 16px", borderRadius:20, fontSize:11, fontFamily:"sans-serif", cursor:"pointer", letterSpacing:"1px", fontWeight:"bold", transition:"all .2s" }}>
-      Siguiente →
-    </button>
-  </div>
+<div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"16px", marginBottom:16 }}>
+<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>🔥 MIENTRAS ESPERAS -- TIPS DEL ASADOR</div>
+<div style={{ display:"flex", gap:12, alignItems:"flex-start", marginBottom:14 }}>
+<span style={{ fontSize:28, flexShrink:0 }}>{tip.icon}</span>
+<div>
+<div style={{ fontSize:15, fontWeight:"bold", marginBottom:4 }}>{tip.titulo}</div>
+<div style={{ fontSize:13, color:"#AAA", fontFamily:"sans-serif", lineHeight:1.6 }}>{tip.texto}</div>
+</div>
+</div>
+<div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+<div style={{ display:"flex", gap:6 }}>
+{TIPS.map((_,i) => <div key={i} onClick={() => setTipIdx(i)} style={{ width:i===tipIdx?20:6, height:6, borderRadius:3, background:i===tipIdx?GOLD:BORDER, cursor:"pointer", transition:"width 0.2s" }}/>)}
+</div>
+<button onClick={() => setTipIdx((tipIdx+1)%TIPS.length)} style={{ background:GOLD+"22", border:`1px solid ${GOLD}44`, color:GOLD, padding:"6px 14px", borderRadius:20, fontSize:12, fontFamily:"sans-serif", cursor:"pointer" }}>
+Siguiente →
+</button>
+</div>
 </div>
 );
 }
@@ -1011,16 +671,13 @@ const items = expanded ? COCINAR_IDEAS : COCINAR_IDEAS.slice(0, 4);
 return (
 
 <div style={{ marginBottom:16 }}>
-<div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
-  <div style={{ width:3, height:18, borderRadius:2, background:GOLD_GRAD }}/>
-  <div style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", fontWeight:"bold" }}>🔥 ¿SABÍAS TODO LO QUE PODÉS COCINAR?</div>
-</div>
+<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>🔥 ¿SABÍAS TODO LO QUE PODÉS COCINAR?</div>
 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
 {items.map((item, i) => (
-<div key={i} style={{ background:"linear-gradient(145deg, rgba(15,17,21,0.95), rgba(10,12,16,0.98))", border:`1px solid ${GOLD}20`, borderRadius:14, padding:"16px 12px", textAlign:"center", boxShadow:`0 4px 16px rgba(0,0,0,0.3)`, transition:"transform .2s, box-shadow .2s" }}>
-<div style={{ width:48, height:48, borderRadius:12, background:`${GOLD}10`, border:`1px solid ${GOLD}20`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, margin:"0 auto 10px" }}>{item.emoji}</div>
-<div style={{ fontSize:12, fontWeight:"bold", color:GOLD_LIGHT, fontFamily:"sans-serif", marginBottom:6, letterSpacing:"0.3px" }}>{item.titulo}</div>
-<div style={{ fontSize:11.5, color:"#A09070", fontFamily:"sans-serif", lineHeight:1.6 }}>{item.desc}</div>
+<div key={i} style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"14px 12px", textAlign:"center" }}>
+<div style={{ fontSize:28, marginBottom:6 }}>{item.emoji}</div>
+<div style={{ fontSize:12, fontWeight:"bold", color:GOLD, fontFamily:"sans-serif", marginBottom:4, letterSpacing:"0.5px" }}>{item.titulo.toUpperCase()}</div>
+<div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", lineHeight:1.4 }}>{item.desc}</div>
 </div>
 ))}
 </div>
@@ -1095,68 +752,46 @@ const mensajeRetraso = retrasado
 
 return (
 
-<div style={{ background:`linear-gradient(145deg, ${color}0A, rgba(10,12,16,0.98))`, border:`1px solid ${color}35`, borderRadius:18, padding:"22px 18px", marginBottom:20, position:"relative", overflow:"hidden", boxShadow:`0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px ${color}10` }}>
-  {/* Ember particles when active */}
-  {estado > 0 && estado < 4 && <EmberSystem count={6} bottom={0} spread={80}/>}
-
-  <div style={{ display:"flex", alignItems:"center", gap:20, position:"relative", zIndex:1 }}>
-    {/* SVG Circle mejorado */}
-    <div style={{ flexShrink:0, position:"relative", width:120, height:120 }}>
-      <svg width="120" height="120" style={{ transform:"rotate(-90deg)" }}>
-        <circle cx="60" cy="60" r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="10"/>
-        <circle cx="60" cy="60" r={r} fill="none" stroke={color} strokeWidth="10"
-          strokeDasharray={circ} strokeDashoffset={offset}
-          strokeLinecap="round"
-          style={{ transition:"stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)", filter:`drop-shadow(0 0 8px ${color}AA)` }}/>
-      </svg>
-      <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", textAlign:"center" }}>
-        <div style={{ fontSize:26, fontWeight:"900", color, lineHeight:1, fontFamily:"'DM Mono', monospace", textShadow:`0 0 20px ${color}66` }}>
-          <AnimatedCounter value={pct} duration={1400} suffix="%"/>
-        </div>
-        <div style={{ fontSize:8, color:"#666", fontFamily:"sans-serif", marginTop:3, letterSpacing:"2px", textTransform:"uppercase" }}>avance</div>
-      </div>
-    </div>
-
-    {/* Info */}
-    <div style={{ flex:1 }}>
-      <div style={{ fontSize:9, color:"#555", fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:6, textTransform:"uppercase" }}>Estado actual</div>
-      <div style={{ fontSize:16, fontWeight:"bold", color, marginBottom:10, lineHeight:1.2 }}>{ESTADO_LABELS[estado]}</div>
-      {diasRestantes !== null && (
-        <div style={{ display:"flex", alignItems:"center", gap:8, background:`${color}10`, border:`1px solid ${color}25`, borderRadius:10, padding:"8px 12px" }}>
-          <span style={{ fontSize:18 }}>{retrasado?"🚨":urgente?"⏳":"📅"}</span>
-          <div>
-            <div style={{ fontSize:13, color, fontFamily:"'DM Mono', monospace", fontWeight:"bold", lineHeight:1 }}>
-              {retrasado ? `${Math.abs(diasRestantes)}d retraso` : diasRestantes === 0 ? "¡Hoy!" : `${diasRestantes}d hábiles`}
-            </div>
-            <div style={{ fontSize:9, color:"#666", fontFamily:"sans-serif", marginTop:2 }}>para entrega</div>
-          </div>
-        </div>
-      )}
-    </div>
-  </div>
-
-  {/* Mensaje manos expertas - mejorado */}
-  {estado > 0 && estado < 4 && (
-    <div style={{ marginTop:16, paddingTop:14, borderTop:`1px solid ${color}18`, position:"relative", zIndex:1 }}>
-      <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
-        <div style={{ fontSize:20, flexShrink:0, marginTop:1 }}>⚒️</div>
-        <div>
-          <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", fontWeight:"bold", marginBottom:4, letterSpacing:"0.5px" }}>Manos expertas forjan tu parrilla</div>
-          <div style={{ fontSize:12, color:"#A09070", fontFamily:"sans-serif", lineHeight:1.7, fontStyle:"italic" }}>
-            Cada corte, cada soldadura — hecho para toda la vida.
-          </div>
-        </div>
-      </div>
-    </div>
-  )}
-
-  {/* Delay/urgent message */}
-  {mensajeRetraso && (
-    <div style={{ marginTop:14, background: retrasado?"rgba(26,0,0,0.8)":"rgba(26,8,0,0.8)", border:`1px solid ${color}44`, borderRadius:12, padding:"14px 16px", fontSize:12, color:"#D0C0A0", fontFamily:"sans-serif", lineHeight:1.7, position:"relative", zIndex:1 }}>
-      <div style={{ fontWeight:"bold", color, marginBottom:4 }}>{retrasado?"⚠️ Aviso importante":"🔥 ¡Casi listo!"}</div>
-      {mensajeRetraso}
-    </div>
-  )}
+<div style={{ background:`${color}11`, border:`1px solid ${color}33`, borderRadius:14, padding:"20px 16px", marginBottom:20 }}>
+<div style={{ display:"flex", alignItems:"center", gap:20 }}>
+{/* SVG Circle */}
+<div style={{ flexShrink:0, position:"relative", width:120, height:120 }}>
+<svg width="120" height="120" style={{ transform:"rotate(-90deg)" }}>
+<circle cx="60" cy="60" r={r} fill="none" stroke="#1A1A1A" strokeWidth="10"/>
+<circle cx="60" cy="60" r={r} fill="none" stroke={color} strokeWidth="10"
+strokeDasharray={circ} strokeDashoffset={offset}
+strokeLinecap="round"
+style={{ transition:"stroke-dashoffset 0.8s ease", filter:`drop-shadow(0 0 6px ${color}88)` }}/>
+</svg>
+<div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", textAlign:"center" }}>
+<div style={{ fontSize:22, fontWeight:"bold", color, lineHeight:1 }}>{pct}%</div>
+<div style={{ fontSize:9, color:"#888", fontFamily:"sans-serif", marginTop:2 }}>avance</div>
+</div>
+</div>
+{/* Info */}
+<div style={{ flex:1 }}>
+<div style={{ fontSize:13, color:"#AAA", fontFamily:"sans-serif", marginBottom:6 }}>Estado actual:</div>
+<div style={{ fontSize:15, fontWeight:"bold", color, marginBottom:8 }}>{ESTADO_LABELS[estado]}</div>
+{diasRestantes !== null && (
+<div style={{ display:"flex", alignItems:"center", gap:6 }}>
+<span style={{ fontSize:16 }}>{retrasado?"🚨":urgente?"⏳":"📅"}</span>
+<span style={{ fontSize:12, color, fontFamily:"sans-serif", fontWeight:"bold" }}>
+{retrasado
+? `${Math.abs(diasRestantes)}d de retraso`
+: diasRestantes === 0
+? "¡Entrega hoy!"
+: `${diasRestantes}d hábiles`}
+</span>
+</div>
+)}
+</div>
+</div>
+{/* Delay/urgent message */}
+{mensajeRetraso && (
+<div style={{ marginTop:14, background: retrasado?"#1A0000":"#1A0800", border:`1px solid ${color}44`, borderRadius:10, padding:"12px 14px", fontSize:12, color:"#CCC", fontFamily:"sans-serif", lineHeight:1.6 }}>
+{retrasado?"⚠️ ":"🔥 "}{mensajeRetraso}
+</div>
+)}
 </div>
 );
 }
@@ -1184,118 +819,91 @@ setError("Número no registrado");
 };
 
 return (
-<div style={{ minHeight:"100vh", background:STEEL_BG, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 24px", position:"relative", overflow:"hidden" }}>
 
-  {/* Steel grain texture */}
-  <div style={{ position:"absolute", inset:0, pointerEvents:"none", backgroundImage:`repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(212,168,75,0.012) 2px,rgba(212,168,75,0.012) 3px)`, opacity:0.8 }}/>
-
-  {/* Ambient orbs */}
-  <AmbientOrb x="-60px" y="-60px" size="280px" color="rgba(212,168,75,0.12)" delay="0s"/>
-  <AmbientOrb x="60%" y="60%" size="220px" color="rgba(176,48,0,0.08)" delay="2s"/>
-  <AmbientOrb x="30%" y="40%" size="160px" color="rgba(212,168,75,0.05)" delay="1s"/>
-
-  {/* Bottom fire gradient */}
-  <div style={{ position:"absolute", bottom:0, left:0, right:0, height:200, background:"linear-gradient(0deg, rgba(176,48,0,0.14) 0%, rgba(224,80,16,0.05) 40%, transparent 100%)", pointerEvents:"none" }}/>
-
-  {/* Brasas animadas reales */}
-  <EmberSystem count={14} bottom={0} spread={90}/>
-
-  {/* Logo — SIN CAMBIOS */}
-  <div style={{ marginBottom:8, zIndex:1 }}>
-    <Logo width={260} style={{ filter:"drop-shadow(0 0 30px rgba(200,169,110,0.35))" }} />
-  </div>
-
-  {/* Tagline con typewriter */}
-  <div style={{ fontSize:11, color:GOLD_DARK, fontFamily:"'DM Mono', monospace, sans-serif", fontStyle:"italic", marginBottom:32, letterSpacing:"2px", textAlign:"center", zIndex:1, minHeight:18 }}>
-    "La parrilla de tus sueños te espera"
-  </div>
-
-  {/* Form card con glass effect */}
-  <div style={{ width:"100%", maxWidth:340, zIndex:1 }}>
-    <div style={{ background:"rgba(9,9,15,0.82)", backdropFilter:"blur(28px)", WebkitBackdropFilter:"blur(28px)", border:`1px solid ${GOLD}22`, borderRadius:22, padding:"24px 22px", marginBottom:14, boxShadow:"0 40px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(212,168,75,.1)" }}>
-
-      <div style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:10, textTransform:"uppercase" }}>Teléfono</div>
-
-      {/* Input con focus glow */}
-      <div style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(255,255,255,0.03)", border:`1px solid ${isAdmin||clienteMatch?GOLD+"88":BORDER2}`, borderRadius:14, padding:"14px 16px", marginBottom:12, transition:"all .25s", boxShadow:isAdmin||clienteMatch?`0 0 0 3px ${GOLD}18`:"none" }}>
-        <span style={{ fontSize:20 }}>🇵🇾</span>
-        <input type="tel" placeholder="09XX XXX XXX" value={phone}
-          onChange={e => { setPhone(e.target.value); setError(""); setPass(""); }}
-          onKeyDown={e => e.key==="Enter" && handleLogin()}
-          style={{ flex:1, background:"none", border:"none", color:CREAM, fontSize:18, fontFamily:"'DM Mono', monospace", outline:"none", letterSpacing:"2px" }}/>
-        {(isAdmin||clienteMatch) && <div style={{ width:8, height:8, borderRadius:"50%", background:GREEN, flexShrink:0, boxShadow:`0 0 8px ${GREEN}` }}/>}
-      </div>
-
-      {/* Admin password field */}
-      {isAdmin && (
-        <div style={{ marginBottom:12 }}>
-          <div style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:8 }}>CONTRASEÑA</div>
-          <div style={{ position:"relative" }}>
-            <input type={showPass?"text":"password"} placeholder="••••••••" value={pass}
-              onChange={e => { setPass(e.target.value); setError(""); }}
-              onKeyDown={e => e.key==="Enter" && handleLogin()}
-              autoFocus
-              style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:`1px solid ${GOLD}55`, color:CREAM, padding:"14px 48px 14px 16px", borderRadius:12, fontSize:16, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}/>
-            <button onClick={() => setShowPass(!showPass)}
-              style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", color:GOLD_DARK, cursor:"pointer", fontSize:12, fontFamily:"sans-serif" }}>
-              {showPass?"Ocultar":"Ver"}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* User preview */}
-      {(isAdmin || clienteMatch) && (
-        <div style={{ background:`${GOLD}11`, border:`1px solid ${GOLD}33`, borderRadius:12, padding:"10px 14px", marginBottom:12, display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ width:36, height:36, borderRadius:"50%", background:GOLD_GRAD, display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, color:DARK, fontWeight:"bold", fontFamily:"sans-serif" }}>
-            {isAdmin ? findAdmin(phone)?.avatar || "A" : clienteMatch?.nombre?.charAt(0)}
-          </div>
-          <div>
-            <div style={{ fontSize:13, fontWeight:"bold", color:GOLD }}>
-              {isAdmin ? findAdmin(phone)?.nombre : clienteMatch?.nombre}
-            </div>
-            <div style={{ fontSize:11, color:"#777", fontFamily:"sans-serif" }}>
-              {isAdmin ? findAdmin(phone)?.rol : "Cliente"}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Error */}
-      {error && <div style={{ color:"#E57373", fontSize:12, fontFamily:"sans-serif", marginBottom:10, textAlign:"center", letterSpacing:"0.5px" }}>{error}</div>}
-    </div>
-
-    {/* Login button con glow */}
-    <button onClick={handleLogin}
-      style={{ width:"100%", background:phone.length>4?GOLD_GRAD:"rgba(255,255,255,0.04)", border:`1px solid ${phone.length>4?GOLD+"88":BORDER}`, color:phone.length>4?DARK:"#444", padding:"18px", borderRadius:16, fontSize:13, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"3px", cursor:phone.length>4?"pointer":"default", transition:"all .2s", boxShadow:phone.length>4?`0 8px 32px rgba(212,168,75,.28),0 2px 0 rgba(255,255,255,.08) inset`:"none" }}>
-      {isAdmin ? "ACCEDER AL PANEL" : "INGRESAR"}
-    </button>
-
-    <div style={{ textAlign:"center", marginTop:16, fontSize:10, color:"#333", fontFamily:"sans-serif" }}>
-      #ElFuegoNosUne🔥
-    </div>
-
-    {/* Países */}
-    <div style={{ marginTop:24 }}>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:10, justifyItems:"center", marginBottom:14 }}>
-        {[{f:"🇵🇾",n:"Paraguay"},{f:"🇦🇷",n:"Argentina"},{f:"🇧🇷",n:"Brasil"},{f:"🇺🇾",n:"Uruguay"},{f:"🇨🇴",n:"Colombia"},{f:"🇺🇸",n:"EE.UU."},{f:"🇪🇸",n:"España"},{f:"🇵🇦",n:"Panamá"},{f:"🇸🇻",n:"El Salvador"},{f:"🇷🇸",n:"Serbia"}].map((p,i) => (
-          <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:3 }}>
-            <div style={{ width:38, height:38, borderRadius:"50%", background:"rgba(255,255,255,0.04)", border:`1px solid ${BORDER2}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, transition:"transform .2s" }}>{p.f}</div>
-            <span style={{ fontSize:7, color:"#555", fontFamily:"sans-serif" }}>{p.n}</span>
-          </div>
-        ))}
-      </div>
-      <div style={{ textAlign:"center", lineHeight:1.4 }}>
-        <span style={{ fontSize:13, color:"#F5EDD6", fontWeight:"bold", fontFamily:"sans-serif" }}>Exportando </span>
-        <span style={{ fontSize:13, color:GOLD, fontWeight:"bold", fontFamily:"sans-serif" }}>CALIDAD</span>
-        <span style={{ fontSize:13, color:"#F5EDD6", fontWeight:"bold", fontFamily:"sans-serif" }}> de </span>
-        <span style={{ fontSize:13, color:GOLD, fontWeight:"bold", fontFamily:"sans-serif" }}>PARAGUAY</span>
-        <span style={{ fontSize:13, color:"#F5EDD6", fontWeight:"bold", fontFamily:"sans-serif" }}> al </span>
-        <span style={{ fontSize:13, color:GOLD, fontWeight:"bold", fontFamily:"sans-serif" }}>MUNDO</span>
-      </div>
-    </div>
-    <div style={{ fontSize:7, color:"#2A2A2A", fontFamily:"sans-serif", marginTop:24, marginBottom:8, textAlign:"center", letterSpacing:2, opacity:0.6 }}>Dr. Parrilla · v3.0 · #ElFuegoNosUne 🔥</div>
-  </div>
+<div style={{ minHeight:"100vh", background:STEEL_BG, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:32, position:"relative", overflow:"hidden" }}>
+{/* Flame decoration */}
+<div style={{ position:"absolute", bottom:0, left:0, right:0, height:200, background:"linear-gradient(0deg, rgba(200,80,0,0.1) 0%, transparent 100%)", pointerEvents:"none" }}/>
+{[{l:"15%",h:130},{l:"30%",h:80},{l:"50%",h:110},{r:"15%",h:150},{r:"35%",h:90}].map((f,i) => (
+<div key={i} style={{ position:"absolute", bottom:0, left:f.l, right:f.r, width:f.l?"2px":"2px", height:f.h, background:"linear-gradient(0deg,#C84B00,transparent)", opacity:0.2, borderRadius:2, pointerEvents:"none" }}/>
+))}
+{/* Logo */}
+<div style={{ marginBottom:8 }}>
+<Logo width={260} style={{ filter:"drop-shadow(0 0 30px rgba(200,169,110,0.3))" }} />
+</div>
+<div style={{ fontSize:11, color:GOLD_DARK, fontFamily:"sans-serif", fontStyle:"italic", marginBottom:36, letterSpacing:"2px", textAlign:"center" }}>
+"La parrilla de tus sueños te espera"
+</div>
+{/* Form */}
+<div style={{ width:"100%", maxWidth:340 }}>
+<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:8 }}>TELÉFONO</div>
+<input type="tel" placeholder="09XX XXX XXX" value={phone}
+onChange={e => { setPhone(e.target.value); setError(""); setPass(""); }}
+onKeyDown={e => e.key==="Enter" && handleLogin()}
+style={{ width:"100%", background:CARD, border:`1px solid ${isAdmin||clienteMatch?GOLD+"88":BORDER2}`, color:CREAM, padding:"14px 16px", borderRadius:8, fontSize:16, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box", marginBottom:12 }}/>
+{/* Admin password field */}
+{isAdmin && (
+<div style={{ marginBottom:12 }}>
+<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:8 }}>CONTRASEÑA</div>
+<div style={{ position:"relative" }}>
+<input type={showPass?"text":"password"} placeholder="••••••••" value={pass}
+onChange={e => { setPass(e.target.value); setError(""); }}
+onKeyDown={e => e.key==="Enter" && handleLogin()}
+autoFocus
+style={{ width:"100%", background:CARD, border:`1px solid ${GOLD}88`, color:CREAM, padding:"14px 48px 14px 16px", borderRadius:8, fontSize:16, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}/>
+<button onClick={() => setShowPass(!showPass)}
+style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", color:GOLD_DARK, cursor:"pointer", fontSize:12, fontFamily:"sans-serif" }}>
+{showPass?"Ocultar":"Ver"}
+</button>
+</div>
+</div>
+)}
+{/* User preview */}
+{(isAdmin || clienteMatch) && (
+<div style={{ background:`${GOLD}11`, border:`1px solid ${GOLD}33`, borderRadius:8, padding:"10px 14px", marginBottom:12, display:"flex", alignItems:"center", gap:10 }}>
+<div style={{ width:34, height:34, borderRadius:"50%", background:`${GOLD}22`, border:`1px solid ${GOLD}44`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, color:GOLD, fontWeight:"bold", fontFamily:"sans-serif" }}>
+{isAdmin ? findAdmin(phone)?.avatar || "A" : clienteMatch?.nombre?.charAt(0)}
+</div>
+<div>
+<div style={{ fontSize:13, fontWeight:"bold", color:GOLD }}>
+{isAdmin ? findAdmin(phone)?.nombre : clienteMatch?.nombre}
+</div>
+<div style={{ fontSize:11, color:"#777", fontFamily:"sans-serif" }}>
+{isAdmin ? findAdmin(phone)?.rol : "Cliente"}
+</div>
+</div>
+</div>
+)}
+{/* Error */}
+{error && <div style={{ color:"#E57373", fontSize:12, fontFamily:"sans-serif", marginBottom:10, textAlign:"center" }}>{error}</div>}
+{/* Login button */}
+<button onClick={handleLogin}
+style={{ width:"100%", background:phone.length>4?GOLD_GRAD:BORDER, border:"none", color:phone.length>4?DARK:BORDER2, padding:"16px", borderRadius:8, fontSize:14, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"3px", cursor:phone.length>4?"pointer":"default" }}>
+{isAdmin ? "ACCEDER AL PANEL" : "INGRESAR"}
+</button>
+<div style={{ textAlign:"center", marginTop:16, fontSize:10, color:"#333", fontFamily:"sans-serif" }}>
+#ElFuegoNosUne🔥
+</div>
+{/* Países - Exportando calidad */}
+<div style={{ marginTop:24 }}>
+<div style={{ display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,justifyItems:"center",marginBottom:14 }}>
+{[{f:"🇵🇾",n:"Paraguay"},{f:"🇦🇷",n:"Argentina"},{f:"🇧🇷",n:"Brasil"},{f:"🇺🇾",n:"Uruguay"},{f:"🇨🇴",n:"Colombia"},{f:"🇺🇸",n:"EE.UU."},{f:"🇪🇸",n:"España"},{f:"🇵🇦",n:"Panamá"},{f:"🇸🇻",n:"El Salvador"},{f:"🇷🇸",n:"Serbia"}].map((p,i) => (
+<div key={i} style={{ display:"flex",flexDirection:"column",alignItems:"center",gap:3 }}>
+<div style={{ width:38,height:38,borderRadius:"50%",background:"#1A1A1A",border:`1px solid ${BORDER}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20 }}>{p.f}</div>
+<span style={{ fontSize:7,color:"#555",fontFamily:"sans-serif" }}>{p.n}</span>
+</div>
+))}
+</div>
+<div style={{ textAlign:"center",lineHeight:1.4 }}>
+<span style={{ fontSize:13,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}>Exportando </span>
+<span style={{ fontSize:13,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>CALIDAD</span>
+<span style={{ fontSize:13,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}> de </span>
+<span style={{ fontSize:13,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>PARAGUAY</span>
+<span style={{ fontSize:13,color:"#F5EDD6",fontWeight:"bold",fontFamily:"sans-serif" }}> al </span>
+<span style={{ fontSize:13,color:GOLD,fontWeight:"bold",fontFamily:"sans-serif" }}>MUNDO</span>
+</div>
+</div>
+<div style={{ fontSize:7, color:"#2A2A2A", fontFamily:"sans-serif", marginTop:24, marginBottom:8, textAlign:"center", letterSpacing:2, opacity:0.6 }}>Dr. Parrilla · v2.0 · #ElFuegoNosUne 🔥</div>
+</div>
 </div>
 );
 }
@@ -1316,9 +924,7 @@ return (
 
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"28px 20px 24px", background:"linear-gradient(180deg, #1A0D00 0%, #111418 60%, #0A0A0A 100%)", borderBottom:`1px solid ${GOLD}22`, position:"relative", overflow:"hidden" }}>
-<EmberSystem count={5} bottom={0} spread={90}/>
-<AmbientOrb x="75%" y="-20px" size="120px" color="rgba(212,168,75,0.10)"/>
-<Logo width={140} style={{ marginBottom:14, filter:"drop-shadow(0 0 12px #C9A84C44)", position:"relative" }} />
+<Logo width={140} style={{ marginBottom:14, filter:"drop-shadow(0 0 12px #C9A84C44)" }} />
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:6 }}>{tratamiento==="Sra."||tratamiento==="Srta."?"BIENVENIDA":"BIENVENIDO"}</div>
 <div style={{ fontSize:24, fontWeight:"bold", marginBottom:4 }}>Hola, {nombre} 👋</div>
 <div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif" }}>¿Qué necesitás hoy?</div>
@@ -1347,8 +953,8 @@ return (
 {key:"pedidos",icon:"📦",title:"Mis Pedidos",desc: misPedidos.length > 0 ? `${misPedidos.length} pedido${misPedidos.length>1?"s":""} activo${misPedidos.length>1?"s":""}` : "Seguí el estado de tu pedido"},
 {key:"cupones",icon:"🎟️",title:"Mis Cupones",desc: (() => { const mc = cupones ? cupones.filter(c => c.clienteTel && normalizePhone(c.clienteTel) === normalizePhone(clienteUser?.tel||"")) : []; const a = mc.filter(c => c.estado === "activo"); return a.length > 0 ? `${a.length} cupón${a.length>1?"es":""} disponible${a.length>1?"s":""}` : "Ver tus descuentos"; })()},
 {key:"soporte",icon:"🔧",title:"Soporte",desc:"Reclamos y mantenimiento"}
-].map((c, _ci) => (
-<button key={c.key} onClick={() => setActive(c.key)} className="card-stagger" style={{ animationDelay:`${_ci*0.08}s`, background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"20px", display:"flex", alignItems:"center", gap:16, cursor:"pointer", textAlign:"left" }}>
+].map(c => (
+<button key={c.key} onClick={() => setActive(c.key)} style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"20px", display:"flex", alignItems:"center", gap:16, cursor:"pointer", textAlign:"left" }}>
 <div style={{ width:52, height:52, background:GOLD+"18", borderRadius:14, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, border:`1px solid ${GOLD}33`, flexShrink:0 }}>{c.icon}</div>
 <div><div style={{ fontSize:17, fontWeight:"bold", marginBottom:3 }}>{c.title}</div><div style={{ fontSize:12, color:"#666", fontFamily:"sans-serif" }}>{c.desc}</div></div>
 <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>›</span>
@@ -1367,8 +973,8 @@ style={{ display:"flex", alignItems:"center", gap:12, background:"#0A1F0A", bord
 );
 }
 
-// ── CLIENT: CATÁLOGO ────────────────────────────────────────────────
-function CatalogoScreen({ productos, config }) {
+// ── CLIENT: CATÁLOGO ──────────────────────────────────────────────────────────
+function CatalogoScreen({ productos }) {
 const [selected, setSelected] = useState(null);
 const [colorSel, setColorSel] = useState(null);
 const [done, setDone] = useState(false);
@@ -1446,41 +1052,9 @@ style={{ display:"block", textAlign:"center", width:"100%", background:"linear-g
 return (
 <div style={{ paddingBottom:80 }}>
 <Header title="Catálogo" subtitle="NUESTROS MODELOS · #ElFuegoNosUne🔥" />
-{/* ── BOTÓN DESCARGAR CATÁLOGO PDF ── */}
-{config?.catalogoPdf && (
-<div style={{ padding:"0 16px", marginBottom:4, marginTop:8 }}>
-<a
-href={config.catalogoPdf}
-target="_blank"
-rel="noreferrer"
-style={{
-display:"flex", alignItems:"center", gap:14,
-background:`linear-gradient(135deg, #1A0E00, #1A1200)`,
-border:`2px solid ${GOLD}66`,
-borderRadius:14, padding:"16px 20px",
-textDecoration:"none",
-boxShadow:`0 4px 20px rgba(212,168,75,0.15)`,
-position:"relative", overflow:"hidden"
-}}>
-<div style={{ position:"absolute", inset:0, background:`linear-gradient(135deg, ${GOLD}08, transparent)`, pointerEvents:"none" }} />
-<div style={{ width:48, height:48, background:GOLD+"22", border:`1px solid ${GOLD}55`, borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, flexShrink:0, position:"relative" }}>
-📄
-</div>
-<div style={{ flex:1, position:"relative" }}>
-<div style={{ fontSize:15, fontWeight:"bold", color:GOLD, marginBottom:2 }}>Descargar catálogo PDF</div>
-<div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>Todos nuestros modelos y precios</div>
-</div>
-<div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:2, position:"relative" }}>
-<span style={{ color:GOLD, fontSize:20 }}>↓</span>
-<span style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:1 }}>PDF</span>
-</div>
-</a>
-</div>
-)}
 <div style={{ padding:"16px", display:"flex", flexDirection:"column", gap:12 }}>
-{productos.map((p, _pi) => (
-<button key={p.id} onClick={() => setSelected(p.id)} className="card-stagger" style={{ animationDelay:`${_pi*0.07}s`, background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:0, cursor:"pointer", textAlign:"left", overflow:"hidden", position:"relative" }}>
-<EmberSystem count={2} bottom={0} spread={70}/>
+{productos.map(p => (
+<button key={p.id} onClick={() => setSelected(p.id)} style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:0, cursor:"pointer", textAlign:"left", overflow:"hidden" }}>
 <div style={{ height:120, background:"linear-gradient(135deg,#1A1200,#0D0D0D)", display:"flex", alignItems:"center", justifyContent:"center", borderBottom:`1px solid ${BORDER}`, overflow:"hidden", position:"relative" }}>
 {(p.fotos && p.fotos.length > 0 ? p.fotos[0] : p.foto) ? <><img src={p.fotos && p.fotos.length > 0 ? p.fotos[0] : p.foto} alt={p.nombre} style={{ width:"100%", height:"100%", objectFit:"cover", opacity:0.85 }} />{(p.fotos||[]).length > 1 && <div style={{ position:"absolute",bottom:6,right:8,background:"#000000AA",borderRadius:12,padding:"2px 8px",fontSize:10,color:"#FFF",fontFamily:"sans-serif" }}>\U0001f4f7 {(p.fotos||[]).length}</div>}</> : <span style={{ fontSize:60 }}>{p.emoji}</span>}
 </div>
@@ -1544,69 +1118,30 @@ return (
 {lim && <><div style={{ height:1, background:BORDER, margin:"12px 0" }} /><div style={{ display:"flex", justifyContent:"space-between" }}><div><div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginBottom:3 }}>DÍAS HÁBILES ASIGNADOS</div><div style={{ fontSize:13, color:"#CCC", fontFamily:"sans-serif" }}>{p.diasHabiles} días (Lun-Vie)</div></div><div><div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginBottom:3 }}>FECHA LÍMITE</div><div style={{ fontSize:13, color:GOLD, fontWeight:"bold" }}>{formatFechaCorta(lim)}</div></div></div></>}
 {p.nota && <><div style={{ height:1, background:BORDER, margin:"12px 0" }} /><div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>📍 {p.nota}</div></>}
 </div>
-{/* ── PROGRESS HERO PREMIUM (v2 style) ── */}
-<div style={{
-  background:`linear-gradient(148deg, rgba(26,8,0,0.9) 0%, rgba(13,14,22,0.92) 100%)`,
-  border:`1px solid ${GOLD}44`,
-  borderRadius:22, padding:24, marginBottom:16,
-  position:"relative", overflow:"hidden",
-  boxShadow:`0 20px 48px rgba(0,0,0,.4)`,
-}}>
-  <EmberSystem count={6} bottom={0} spread={85}/>
-  <AmbientOrb x="60%" y="-30px" size="140px" color="rgba(212,168,75,0.14)"/>
-
-  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", marginBottom:16, position:"relative" }}>
-    <div>
-      <div style={{ fontSize:9, color:GOLD_DARK, fontFamily:"'DM Mono',monospace", letterSpacing:"3px", marginBottom:8 }}>PROGRESO TOTAL</div>
-      <div style={{ display:"flex", alignItems:"baseline", gap:3 }}>
-        <span style={{ fontSize:52, fontWeight:900, fontFamily:"'DM Mono',monospace", lineHeight:1, color:GOLD_LIGHT }}>
-          <AnimatedCounter value={pct} duration={1400}/>
-        </span>
-        <span style={{ fontSize:22, color:GOLD, fontFamily:"'DM Mono',monospace" }}>%</span>
-      </div>
-    </div>
-    {lim && (
-      <div style={{ textAlign:"right" }}>
-        <div style={{ fontSize:9, color:"rgba(242,223,186,0.4)", fontFamily:"'DM Mono',monospace", marginBottom:4 }}>ENTREGA EST.</div>
-        <div style={{ fontSize:16, color:CREAM, fontFamily:"'DM Mono',monospace", fontWeight:600 }}>{formatFechaCorta(lim)}</div>
-        <div style={{ fontSize:10, color:GOLD, fontFamily:"'DM Mono',monospace" }}>{p.diasHabiles} días hábiles</div>
-      </div>
-    )}
-  </div>
-
-  {/* Barra con wave */}
-  <div style={{ height:8, background:"rgba(255,255,255,0.05)", borderRadius:8, overflow:"hidden", marginBottom:14, position:"relative" }}>
-    <div className="progress-wave" style={{ width:`${pct}%`, height:"100%", borderRadius:8, boxShadow:`0 0 20px rgba(212,168,75,.7)`, position:"relative", overflow:"hidden", transition:"width 1.4s cubic-bezier(0.4,0,0.2,1)" }}>
-      <div style={{ position:"absolute", inset:0, background:`linear-gradient(90deg,transparent 0%,rgba(255,255,255,.3) 50%,transparent 100%)`, animation:"wave 1.8s ease-in-out infinite" }}/>
-    </div>
-  </div>
-
-  {/* 5-step mini indicators */}
-  <div style={{ display:"flex", gap:4, marginBottom:14 }}>
-    {ESTADO_LABELS.map((_,i) => (
-      <div key={i} style={{ flex:1, height:3, borderRadius:3,
-        background: i<=p.estado ? (i===p.estado ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` : `${GOLD}55`) : "rgba(255,255,255,0.06)",
-        boxShadow: i===p.estado ? `0 0 8px rgba(212,168,75,.6)` : "none",
-        transition:"all .3s"
-      }}/>
-    ))}
-  </div>
-
-  {/* Neuro message */}
-  <div style={{ borderTop:`1px solid ${GOLD}18`, paddingTop:12, fontSize:12, color:"rgba(242,223,186,0.55)", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:1.75, position:"relative" }}>
-    {getNeuroMessage(p.estado)}
-  </div>
+<div style={{ background:`${GOLD}11`, border:`1px solid ${GOLD}22`, borderRadius:12, padding:"16px", marginBottom:20 }}>
+<div style={{ display:"flex", justifyContent:"space-between", marginBottom:10 }}>
+<div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px" }}>PROGRESO</div>
+<div style={{ fontSize:13, color:GOLD, fontWeight:"bold" }}>{pct}%</div>
+</div>
+<div style={{ background:"#1A1A1A", borderRadius:6, height:8, overflow:"hidden" }}>
+<div style={{ background:`linear-gradient(90deg,${GOLD},${GOLD_LIGHT})`, width:`${pct}%`, height:"100%", borderRadius:6, boxShadow:`0 0 8px ${GOLD}66` }} />
+</div>
+<div style={{ fontSize:12, color:"#AAA", fontFamily:"sans-serif", marginTop:8 }}>Estado: <span style={{ color:GOLD, fontWeight:"bold" }}>{ESTADO_LABELS[p.estado]}</span></div>
+</div>
+<div style={{ background:"linear-gradient(135deg,#1A0800,#0A0A0A)", border:`1px solid ${GOLD}33`, borderRadius:12, padding:"14px 16px", marginBottom:16, display:"flex", alignItems:"flex-start", gap:10 }}>
+<span style={{ fontSize:20, flexShrink:0 }}>🔥</span>
+<div style={{ fontSize:13, color:"#CCC", fontFamily:"sans-serif", lineHeight:1.6, fontStyle:"italic" }}>{getNeuroMessage(p.estado)}</div>
+<div style={{ fontSize:11, color:GOLD, fontFamily:"Georgia, serif", marginTop:6 }}>#ElFuegoNosUne🔥</div>
 </div>
 {/* Tips while in production */}
 {(p.estado === 1 || p.estado === 2) && <TipsSection />}
 {/* ¿Qué podés cocinar? - visible en todos los estados */}
 <CocinarSection />
 <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:14 }}>LÍNEA DE TIEMPO</div>
-{p.estado === 3 && <ConfettiCelebration active={true} />}
 {ESTADO_LABELS.map((est,i) => {
 const done=i<=p.estado; const act=i===p.estado;
 return (
-<div key={i} className="timeline-step" style={{ animationDelay:`${i*0.1}s`, display:"flex", gap:16 }}>
+<div key={i} style={{ display:"flex", gap:16 }}>
 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", width:40, flexShrink:0 }}>
 <div style={{ width:36,height:36,borderRadius:"50%",background:act?`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`:done?GOLD+"33":DARK3,border:`2px solid ${done?GOLD:BORDER}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:act?`0 0 16px ${GOLD}66`:"none" }}>{ESTADO_ICONS[i]}</div>
 {i<ESTADO_LABELS.length-1 && <div style={{ width:2,height:36,background:i<p.estado?`linear-gradient(${GOLD},${GOLD}44)`:BORDER,margin:"2px 0" }} />}
@@ -1619,33 +1154,6 @@ return (
 </div>
 );
 })}
-{/* ── PRESUPUESTO PDF ── */}
-{p.presupuestoPdf && (
-<div style={{ marginTop:16, marginBottom:16 }}>
-<div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:10 }}>📄 TU PRESUPUESTO</div>
-<a
-href={p.presupuestoPdf}
-target="_blank"
-rel="noreferrer"
-style={{
-display:"flex", alignItems:"center", gap:14,
-background:`linear-gradient(135deg, #1A0E00, ${CARD})`,
-border:`2px solid ${GOLD}55`,
-borderRadius:14, padding:"18px 20px",
-textDecoration:"none",
-boxShadow:`0 4px 20px rgba(0,0,0,0.3)`
-}}>
-<div style={{ width:48, height:48, background:GOLD+"22", border:`1px solid ${GOLD}44`, borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, flexShrink:0 }}>
-📄
-</div>
-<div style={{ flex:1 }}>
-<div style={{ fontSize:15, fontWeight:"bold", color:GOLD, marginBottom:3 }}>Ver mi presupuesto</div>
-<div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>Tocá para abrir el PDF</div>
-</div>
-<span style={{ color:GOLD, fontSize:22 }}>›</span>
-</a>
-</div>
-)}
 {p.fotos && p.fotos.length > 0 && (
 <div style={{ marginTop:12 }}>
 <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:14 }}>📸 FOTOS DE PRODUCCIÓN</div>
@@ -1721,10 +1229,8 @@ const pct=Math.round((p.estado/(ESTADO_LABELS.length-1))*100);
 const base = parseFecha(p.fecha);
 const lim = base && p.diasHabiles ? addDiasHabiles(base, p.diasHabiles) : null;
 const dias = lim ? diasHabilesRestantes(lim) : null;
-const _sparkData = [0,1,2,3,4].map(s => s <= p.estado ? (s+1)*20 : 0);
 return (
-<button key={p.id} onClick={() => setSelected(i)} className="card-stagger" style={{ animationDelay:`${i*0.1}s`, background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"18px",cursor:"pointer",textAlign:"left",position:"relative",overflow:"hidden" }}>
-<EmberSystem count={3} bottom={0} spread={80}/>
+<button key={p.id} onClick={() => setSelected(i)} style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"18px",cursor:"pointer",textAlign:"left" }}>
 <div style={{ display:"flex",justifyContent:"space-between",marginBottom:4 }}>
 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
 <div style={{ fontSize:13, color:GOLD, fontFamily:"sans-serif", fontWeight:"bold" }}>{p.id}</div>
@@ -1743,7 +1249,7 @@ return (
 <div style={{ background:BORDER,borderRadius:4,height:4,marginBottom:8,overflow:"hidden" }}>
 <div style={{ background:`linear-gradient(90deg,${GOLD},${GOLD_LIGHT})`,width:`${pct}%`,height:"100%",borderRadius:4 }} />
 </div>
-<div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-end" }}>
+<div style={{ display:"flex",justifyContent:"space-between" }}>
 <div style={{ fontSize:11,color:"#555",fontFamily:"sans-serif" }}>{pct}% completado</div>
 <div style={{ fontSize:14,color:GOLD,fontWeight:"bold" }}>{p.monto}</div>
 </div>
@@ -1842,8 +1348,7 @@ return (
 </button>
 {misTickets.length===0 && <div style={{ textAlign:"center",padding:"30px 20px",color:"#555",fontFamily:"sans-serif" }}><div style={{ fontSize:36,marginBottom:10 }}>🔧</div><div>No tenés solicitudes activas. #ElFuegoNosUne🔥</div></div>}
 {misTickets.map(t => (
-<div key={t.id} style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"16px",marginBottom:10,position:"relative",overflow:"hidden" }}>
-<EmberSystem count={2} bottom={0} spread={60}/>
+<div key={t.id} style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"16px",marginBottom:10 }}>
 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8 }}>
 <div style={{ display:"flex",gap:8,alignItems:"center" }}><span style={{ fontSize:12,color:"#666",fontFamily:"sans-serif" }}>{t.id}</span><Tag label={t.tipo} color={tc[t.estado]||GOLD} /></div>
 <div style={{ background:tc[t.estado]+"22",border:`1px solid ${tc[t.estado]}44`,color:tc[t.estado],fontSize:11,padding:"3px 10px",borderRadius:20,fontFamily:"sans-serif" }}>{t.estado}</div>
@@ -1999,7 +1504,7 @@ return (
 }
 
 // ── ADMIN: CATÁLOGO ───────────────────────────────────────────────────────────
-function AdminCatalog({ productos, setProductos, config, setConfig }) {
+function AdminCatalog({ productos, setProductos }) {
 const [view, setView] = useState("list");
 const [idx, setIdx] = useState(null);
 const emptyForm = { nombre:"", precio:"", desc:"", specs:[], colores:[], foto:null, fotos:[], tag:"", emoji:"🔥", instagramUrl:"" };
@@ -2096,46 +1601,6 @@ return (
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 <div style={{ padding:"16px",display:"flex",flexDirection:"column",gap:10 }}>
-{/* ── CATÁLOGO PDF (ADMIN) ── */}
-<div style={{ background:CARD, border:`1px solid ${GOLD}44`, borderRadius:12, padding:"16px", marginBottom:4 }}>
-<div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>📄 CATÁLOGO PDF GENERAL</div>
-{config?.catalogoPdf ? (
-<div>
-<div style={{ display:"flex", alignItems:"center", gap:12, background:GOLD+"11", border:`1px solid ${GOLD}33`, borderRadius:10, padding:"12px 14px", marginBottom:10 }}>
-<span style={{ fontSize:22 }}>📄</span>
-<div style={{ flex:1 }}>
-<div style={{ fontSize:13, color:GOLD, fontWeight:"bold", marginBottom:2 }}>{config.catalogoPdfNombre || "catalogo.pdf"}</div>
-<div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>Visible para todos los clientes ✅</div>
-</div>
-<a href={config.catalogoPdf} target="_blank" rel="noreferrer"
-style={{ background:GOLD, border:"none", color:DARK, padding:"8px 14px", borderRadius:8, fontSize:12, fontFamily:"sans-serif", fontWeight:"bold", textDecoration:"none", flexShrink:0 }}>
-Ver
-</a>
-</div>
-<div style={{ display:"flex", gap:8 }}>
-<PdfUploadButton
-label="🔄 Reemplazar catálogo"
-onPdf={(url, nombre) => setConfig(prev => ({ ...prev, catalogoPdf:url, catalogoPdfNombre:nombre }))}
-style={{ flex:1, justifyContent:"center", boxSizing:"border-box" }}
-/>
-<button
-onClick={() => { if(window.confirm('\u00bfEliminar el catálogo PDF? Los clientes ya no verán el botón de descarga.')) setConfig(prev => ({ ...prev, catalogoPdf:null, catalogoPdfNombre:null })); }}
-style={{ background:"none", border:"1px solid #E5737444", color:"#E57373", padding:"10px 14px", borderRadius:10, fontSize:12, fontFamily:"sans-serif", cursor:"pointer" }}>
-🗑 Quitar
-</button>
-</div>
-</div>
-) : (
-<div>
-<div style={{ fontSize:12, color:"#666", fontFamily:"sans-serif", marginBottom:10 }}>Subi el PDF del catálogo completo. Aparecerá un botón de descarga para todos los clientes.</div>
-<PdfUploadButton
-label="📄 Subir catálogo PDF"
-onPdf={(url, nombre) => setConfig(prev => ({ ...prev, catalogoPdf:url, catalogoPdfNombre:nombre }))}
-style={{ width:"100%", justifyContent:"center", boxSizing:"border-box" }}
-/>
-</div>
-)}
-</div>
 <button onClick={openAdd} style={{ background:`${GOLD}11`,border:`1px solid ${GOLD}55`,borderRadius:12,padding:"16px 20px",display:"flex",alignItems:"center",gap:14,cursor:"pointer" }}>
 <div style={{ width:44,height:44,background:GOLD+"22",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22 }}>➕</div>
 <div style={{ textAlign:"left" }}><div style={{ fontSize:16,fontWeight:"bold",color:GOLD }}>Agregar producto</div><div style={{ fontSize:12,color:"#888",fontFamily:"sans-serif" }}>Con foto, color y especificaciones</div></div>
@@ -2426,7 +1891,7 @@ return (
   <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:24 }}>
     {ESTADO_LABELS.map((est,i) => {
       const isCurrentState = p.estado===i;
-      const waMsg = `Hola ${cliente?.tratamiento ? cliente.tratamiento + " " + (cliente?.nombre?.split(" ").slice(-1)[0]||""): cliente?.nombre?.split(" ")[0]||""} 👋! Somos de *Doctor Parrilla* 🔥\n\nTe informamos que tu parrilla *${p.modelo}* (Pedido ${p.id}) ahora está en: *${est}*\n\n${i===0?"Ya recibimos tu pedido. Nuestro equipo ya está planificando cada detalle de tu parrilla.\n\nSeguí el progreso en tiempo real en: drparrillaparaguay.com ingresando con tu número de teléfono.": i===1?"Manos expertas están forjando tu parrilla ahora mismo. ¡Cada soldadura es perfección!\n\nMirá el avance en: drparrillaparaguay.com ingresando con tu número de teléfono.": i===2?"Tu parrilla está en control de calidad. Revisamos cada detalle para que sea perfecta. ¡Ya falta poco!\n\nMonitoreá el progreso en: drparrillaparaguay.com ingresando con tu número de teléfono.": i===3?"¡Tu parrilla está lista para entrega! 🎉 Coordinaremos la entrega pronto. ¿Ya compraste la carne para el estreno?\n\nSeguí los detalles en: drparrillaparaguay.com ingresando con tu número de teléfono.": "¡Tu parrilla ya fue entregada! 🎉 Disfrutala. Cada asado será un recuerdo imborrable.\n\n🎁 *REGALO EXCLUSIVO:* Dejá tu reseña en Google y recibí un *cupón de 10% de descuento* en servicios, mantenimiento o nuevos productos.\n\nIngresá a drparrillaparaguay.com con tu número de teléfono para reclamarlo."}\n\n#ElFuegoNosUne🔥 Gracias por confiar en Dr. Parrilla`;;
+      const waMsg = `Hola ${cliente?.tratamiento ? cliente.tratamiento + " " + (cliente?.nombre?.split(" ").slice(-1)[0]||"") : cliente?.nombre?.split(" ")[0]||""} 👋! Somos de *Doctor Parrilla* 🔥\n\nTe informamos que tu parrilla *${p.modelo}* (Pedido ${p.id}) ahora está en: *${est}*\n\n${i===0?"Ya recibimos tu pedido. Nuestro equipo ya está planificando cada detalle.":i===1?"Manos expertas están forjando tu parrilla ahora mismo. ¡Cada soldadura es perfección!":i===2?"Tu parrilla está en control de calidad. Revisamos cada detalle para que sea perfecta. ¡Ya falta poco!":i===3?"¡Tu parrilla está lista para entrega! 🎉 Coordinaremos la entrega pronto. ¿Ya compraste la carne para el estreno?":"¡Tu parrilla ya fue entregada! 🎉 Disfrutala. Nos encantaría que nos dejes una reseña en Google."}\n\n#ElFuegoNosUne🔥 Gracias por confiar en Dr. Parrilla`;
       return (
       <button key={i} onClick={() => {
         const prevEstado = p.estado;
@@ -2444,47 +1909,6 @@ return (
       </button>
       );
     })}
-  </div>
-
-  {/* ── PRESUPUESTO PDF (ADMIN) ── */}
-  <div style={{ background:CARD, border:`1px solid ${GOLD}44`, borderRadius:12, padding:"16px", marginBottom:20 }}>
-    <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>📄 PRESUPUESTO PDF</div>
-    {p.presupuestoPdf ? (
-      <div>
-        <div style={{ display:"flex", alignItems:"center", gap:12, background:GOLD+"11", border:`1px solid ${GOLD}33`, borderRadius:10, padding:"12px 14px", marginBottom:10 }}>
-          <span style={{ fontSize:22 }}>📄</span>
-          <div style={{ flex:1 }}>
-            <div style={{ fontSize:13, color:GOLD, fontWeight:"bold", marginBottom:2 }}>{p.presupuestoPdfNombre || "presupuesto.pdf"}</div>
-            <div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>PDF cargado ✅</div>
-          </div>
-          <a href={p.presupuestoPdf} target="_blank" rel="noreferrer"
-            style={{ background:GOLD, border:"none", color:DARK, padding:"8px 14px", borderRadius:8, fontSize:12, fontFamily:"sans-serif", fontWeight:"bold", textDecoration:"none", flexShrink:0 }}>
-            Ver
-          </a>
-        </div>
-        <div style={{ display:"flex", gap:8 }}>
-          <PdfUploadButton
-            label="🔄 Reemplazar PDF"
-            onPdf={(url, nombre) => setPedidos(pedidos.map((x,j) => j===selected ? {...x, presupuestoPdf:url, presupuestoPdfNombre:nombre} : x))}
-            style={{ flex:1, justifyContent:"center", boxSizing:"border-box" }}
-          />
-          <button
-            onClick={() => { if(window.confirm('\u00bfEliminar el presupuesto PDF de este pedido?')) setPedidos(pedidos.map((x,j) => j===selected ? {...x, presupuestoPdf:null, presupuestoPdfNombre:null} : x)); }}
-            style={{ background:"none", border:"1px solid #E5737444", color:"#E57373", padding:"10px 14px", borderRadius:10, fontSize:12, fontFamily:"sans-serif", cursor:"pointer" }}>
-            🗑 Quitar
-          </button>
-        </div>
-      </div>
-    ) : (
-      <div>
-        <div style={{ fontSize:12, color:"#666", fontFamily:"sans-serif", marginBottom:10 }}>Subi el presupuesto en PDF para que el cliente lo vea en su pedido.</div>
-        <PdfUploadButton
-          label="📄 Subir presupuesto PDF"
-          onPdf={(url, nombre) => setPedidos(pedidos.map((x,j) => j===selected ? {...x, presupuestoPdf:url, presupuestoPdfNombre:nombre} : x))}
-          style={{ width:"100%", justifyContent:"center", boxSizing:"border-box" }}
-        />
-      </div>
-    )}
   </div>
 
   <div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"2px",marginBottom:12 }}>📸 FOTOS DE PRODUCCIÓN</div>
@@ -2987,7 +2411,7 @@ return (
 Dejá tu reseña y lleváte un
 </div>
 <div style={{ fontSize:28, fontWeight:"bold", background:GOLD_GRAD, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", marginBottom:8 }}>
-10% DE DESCUENTO
+15% DE DESCUENTO
 </div>
 <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif", lineHeight:1.6, marginBottom:4 }}>
 en tu próxima compra o servicio de mantenimiento
@@ -3096,7 +2520,7 @@ style={{ display:"flex", alignItems:"center", gap:12, background:"linear-gradien
 }
 
 // ── ADMIN: RESENAS─────────────────────────────────────────────────────────
-function AdminResenas({ pedidos, clientes, cupones, setCupones }) {
+function AdminResenas({ pedidos, clientes }) {
 const resenas = pedidos.filter(p => p.resena).map(p => {
 const cliente = clientes.find(c => normalizePhone(c.tel||"")===normalizePhone(p.tel));
 return { ...p.resena, cliente: cliente?.nombre || p.tel, modelo: p.modelo, pedidoId: p.id };
@@ -3168,13 +2592,8 @@ return (
         <div>Aun no hay resenas. Se muestran aqui cuando los clientes califiquen sus pedidos.</div>
       </div>
     )}
-    {resenas.sort((a,b) => b.stars-a.stars).map((r,i) => {
-      // Buscar cupón pendiente de esta reseña
-      const cuponPendiente = (cupones||[]).find(c => c.tipo==="resena" && normalizePhone(c.clienteTel||c.cliente||"")=== normalizePhone(r.clienteTel||r.pedidoId||"" ) && c.estado==="pendiente");
-      const cuponActivo = (cupones||[]).find(c => c.tipo==="resena" && normalizePhone(c.clienteTel||c.cliente||"")=== normalizePhone(r.clienteTel||r.pedidoId||"" ) && c.estado==="activo");
-      return (
-      <div key={i} style={{ background:CARD, border:`1px solid ${starColor(r.stars)}44`, borderRadius:12, padding:"16px", position:"relative", overflow:"hidden" }}>
-        <EmberSystem count={2} bottom={0} spread={60}/>
+    {resenas.sort((a,b) => b.stars-a.stars).map((r,i) => (
+      <div key={i} style={{ background:CARD, border:`1px solid ${starColor(r.stars)}44`, borderRadius:12, padding:"16px" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
           <div>
             <div style={{ fontSize:14, fontWeight:"bold", marginBottom:2 }}>{r.cliente}</div>
@@ -3189,24 +2608,9 @@ return (
             "{r.comment}"
           </div>
         )}
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:8 }}>
-          <div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif" }}>{r.fecha}</div>
-          {cuponActivo && (
-            <div style={{ background:"#4CAF5022", border:"1px solid #4CAF5066", color:"#4CAF50", fontSize:11, padding:"4px 10px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold" }}>
-              ✅ Cupón activado
-            </div>
-          )}
-          {cuponPendiente && setCupones && (
-            <button onClick={() => {
-              setCupones(prev => prev.map(c => c.id===cuponPendiente.id ? {...c, estado:"activo"} : c));
-            }} style={{ background:`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, border:"none", color:DARK, fontSize:12, padding:"6px 14px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold", cursor:"pointer" }}>
-              🎁 Activar cupón 10%
-            </button>
-          )}
-        </div>
+        <div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif" }}>{r.fecha}</div>
       </div>
-      );
-    })}
+    ))}
   </div>
 </div>
 
@@ -3428,59 +2832,19 @@ const [savingIndicator, setSavingIndicator] = useState(false);
 const [firebaseOk, setFirebaseOk] = useState(false);
 const [visitas, setVisitas] = useState([]);
 const [cupones, setCupones] = useState([]);
-const [config, setConfig] = useState({ catalogoPdf: null, catalogoPdfNombre: null }); // PDF del catálogo general
 const dataLoaded = useRef(false);
-
-// ── Timestamp del último guardado de clientes (para evitar sobreescritura en polling) ──
-const lastClientesSave = useRef(0);
 
 // ── Load from storage on mount + check Firebase ──
 useEffect(() => {
 const load = async () => {
 const fbOk = await checkFirebase();
 setFirebaseOk(fbOk);
-
-// 1. Cargar desde localStorage primero (rápido)
 try { const r1 = await appStorage.get("dp_clientes"); if (r1) { const raw=JSON.parse(r1); const seen=new Set(); const fixed=raw.map(c=>{if(!c.id||seen.has(c.id)){return{...c,id:"C-"+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,4).toUpperCase()};} seen.add(c.id); return c;}); setClientes(fixed); if(fixed.some((c,i)=>c.id!==raw[i]?.id))appStorage.set("dp_clientes",JSON.stringify(fixed)); } } catch(e) {}
 try { const r2 = await appStorage.get("dp_pedidos");   if (r2) setPedidos(JSON.parse(r2));   } catch(e) {}
 try { const r3 = await appStorage.get("dp_tickets");   if (r3) setTickets(JSON.parse(r3));   } catch(e) {}
 try { const r4 = await appStorage.get("dp_productos"); if (r4) setProductos(JSON.parse(r4)); } catch(e) {}
 try { const r5 = await appStorage.get("dp_visitas");   if (r5) setVisitas(JSON.parse(r5));   } catch(e) {}
 try { const r6 = await appStorage.get("dp_cupones");   if (r6) setCupones(JSON.parse(r6));   } catch(e) {}
-try { const r7 = await appStorage.get("dp_config");   if (r7) setConfig(JSON.parse(r7));   } catch(e) {}
-
-// 2. Si Firebase está disponible, cargar desde Firebase para tener los datos más actualizados
-if (fbOk && FIREBASE_URL) {
-try {
-const [rc, rp, rt, rprod, rv, rcu, rcfg] = await Promise.all([
-fetch(`${FIREBASE_URL}/drparrilla/dp_clientes.json`),
-fetch(`${FIREBASE_URL}/drparrilla/dp_pedidos.json`),
-fetch(`${FIREBASE_URL}/drparrilla/dp_tickets.json`),
-fetch(`${FIREBASE_URL}/drparrilla/dp_productos.json`),
-fetch(`${FIREBASE_URL}/drparrilla/dp_visitas.json`),
-fetch(`${FIREBASE_URL}/drparrilla/dp_cupones.json`),
-fetch(`${FIREBASE_URL}/drparrilla/dp_config.json`)
-]);
-const [fbC, fbP, fbT, fbProd, fbV, fbCu, fbCfg] = await Promise.all([rc.json(), rp.json(), rt.json(), rprod.json(), rv.json(), rcu.json(), rcfg.json()]);
-if (fbC && Array.isArray(fbC) && fbC.length > 0) {
-// Merge: Firebase + clientes locales que no estén en Firebase
-const localRaw = await appStorage.get("dp_clientes");
-const localC = localRaw ? JSON.parse(localRaw) : [];
-const fbIds = new Set(fbC.map(c => c.id));
-const localOnly = localC.filter(c => c.id && !fbIds.has(c.id));
-const merged = localOnly.length > 0 ? [...fbC, ...localOnly] : fbC;
-setClientes(merged);
-appStorage.set("dp_clientes", JSON.stringify(merged));
-}
-if (fbP && Array.isArray(fbP)) { setPedidos(fbP); appStorage.set("dp_pedidos", JSON.stringify(fbP)); }
-if (fbT && Array.isArray(fbT)) { setTickets(fbT); appStorage.set("dp_tickets", JSON.stringify(fbT)); }
-if (fbProd && Array.isArray(fbProd)) { setProductos(fbProd); appStorage.set("dp_productos", JSON.stringify(fbProd)); }
-if (fbV && Array.isArray(fbV)) { setVisitas(fbV); appStorage.set("dp_visitas", JSON.stringify(fbV)); }
-if (fbCu && Array.isArray(fbCu)) { setCupones(fbCu); appStorage.set("dp_cupones", JSON.stringify(fbCu)); }
-if (fbCfg && typeof fbCfg === 'object' && !Array.isArray(fbCfg)) { setConfig(fbCfg); appStorage.set("dp_config", JSON.stringify(fbCfg)); }
-} catch(e) { console.warn("Error cargando desde Firebase al inicio:", e); }
-}
-
 dataLoaded.current = true;
 setStorageReady(true);
 };
@@ -3520,17 +2884,25 @@ return data;
 const saveClientes = useCallback((next) => {
 setClientes(prev => {
 const data = typeof next === 'function' ? next(prev) : next;
-// Registrar timestamp del guardado para que el polling no sobreescriba datos recientes
-lastClientesSave.current = Date.now();
-// Guardar inmediatamente en local y Firebase
-saveNow("dp_clientes", data);
-// Subir a Firebase en background con PUT directo
 if (FIREBASE_URL) {
-fetch(`${FIREBASE_URL}/drparrilla/dp_clientes.json`, {
-method: "PUT",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify(data)
-}).catch(() => {});
+fetch(`${FIREBASE_URL}/drparrilla/dp_clientes.json`)
+.then(r => r.json())
+.then(fbData => {
+if (fbData && Array.isArray(fbData)) {
+const newIds = new Set(data.map(c => c.id));
+const fbOnly = fbData.filter(c => !newIds.has(c.id));
+if (fbOnly.length > 0) {
+const merged = [...data, ...fbOnly];
+appStorage.set("dp_clientes", JSON.stringify(merged));
+setClientes(merged);
+return;
+}
+}
+appStorage.set("dp_clientes", JSON.stringify(data));
+})
+.catch(() => appStorage.set("dp_clientes", JSON.stringify(data)));
+} else {
+saveNow("dp_clientes", data);
 }
 return data;
 });
@@ -3549,13 +2921,6 @@ saveNow("dp_cupones", data);
 return data;
 });
 }, [saveNow]);
-const saveConfig = useCallback((next) => {
-setConfig(prev => {
-const data = typeof next === 'function' ? next(prev) : next;
-saveNow("dp_config", data);
-return data;
-});
-}, [saveNow]);
 
 // ── Auto-save de respaldo: guarda TODO cada 15s por si algo se escapó ──
 useEffect(() => {
@@ -3567,10 +2932,9 @@ try { await appStorage.set("dp_tickets",   JSON.stringify(tickets)); } catch(e) 
 try { await appStorage.set("dp_productos", JSON.stringify(productos)); } catch(e) {}
 try { await appStorage.set("dp_visitas",  JSON.stringify(visitas));   } catch(e) {}
 try { await appStorage.set("dp_cupones",  JSON.stringify(cupones));   } catch(e) {}
-try { await appStorage.set("dp_config",   JSON.stringify(config));    } catch(e) {}
 }, 15000);
 return () => clearTimeout(timer);
-}, [clientes, pedidos, tickets, productos, visitas, cupones, config, storageReady]);
+}, [clientes, pedidos, tickets, productos, visitas, cupones, storageReady]);
 
 // ── Polling: sync desde Firebase cada 20s (lee TODAS las colecciones) ──
 useEffect(() => {
@@ -3598,8 +2962,6 @@ return merged;
 });
 if (fbTickets) setTickets(prev => JSON.stringify(prev)===JSON.stringify(fbTickets) ? prev : fbTickets);
 if (fbClientes) setClientes(prev => {
-// No sobreescribir si se guardó hace menos de 10 segundos (evita perder datos recién guardados)
-if (Date.now() - lastClientesSave.current < 10000) return prev;
 if (JSON.stringify(prev)===JSON.stringify(fbClientes)) return prev;
 const fbIds = new Set(fbClientes.map(c => c.id));
 const localOnly = prev.filter(c => !fbIds.has(c.id));
@@ -3608,7 +2970,6 @@ const merged = [...fbClientes, ...localOnly];
 appStorage.set("dp_clientes", JSON.stringify(merged));
 return merged;
 }
-appStorage.set("dp_clientes", JSON.stringify(fbClientes));
 return fbClientes;
 });
 if (fbProductos) setProductos(prev => {
@@ -3631,22 +2992,21 @@ return () => clearInterval(poll);
 if (!logged) return (
 
 <div style={{ fontFamily:"Georgia, serif",background:DARK,color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto" }}>
-<InjectPremiumStyles />
 <LoginScreen clientes={clientes} onLogin={(admin,cliente,esAdmin) => { setAdminUser(admin); setClienteUser(cliente); setIsAdmin(esAdmin); setActive(esAdmin?"admin-orders":"home"); setLogged(true); }} />
 </div>
 );
 
 const screens = {
 home:             () => <HomeScreen setActive={setActive} clienteUser={clienteUser} pedidos={pedidos} cupones={cupones} />,
-catalogo:         () => <CatalogoScreen productos={productos} config={config} />,
+catalogo:         () => <CatalogoScreen productos={productos} />,
 pedidos:          () => <PedidosScreen setPedidos={savePedidos} pedidos={pedidos} clienteUser={clienteUser} cupones={cupones} setCupones={saveCupones} />,
 soporte:          () => <SoporteScreen tickets={tickets} setTickets={saveTickets} clienteUser={clienteUser} />,
 "admin-orders":   () => <AdminOrders pedidos={pedidos} setPedidos={savePedidos} clientes={clientes} adminUser={adminUser} productos={productos} />,
 "admin-tickets":  () => <AdminTickets tickets={tickets} setTickets={saveTickets} clientes={clientes} />,
 "admin-clientes": () => <AdminClientes clientes={clientes} setClientes={saveClientes} />,
-"admin-catalog":  () => <AdminCatalog productos={productos} setProductos={saveProductos} config={config} setConfig={saveConfig} />,
+"admin-catalog":  () => <AdminCatalog productos={productos} setProductos={saveProductos} />,
 "admin-cupones":  () => <AdminCupones cupones={cupones} setCupones={saveCupones} clientes={clientes} pedidos={pedidos} />,
-"admin-resenas":  () => <AdminResenas pedidos={pedidos} clientes={clientes} cupones={cupones} setCupones={saveCupones} />,
+"admin-resenas":  () => <AdminResenas pedidos={pedidos} clientes={clientes} />,
 "admin-visitas":  () => <AdminVisitas visitas={visitas} setVisitas={saveVisitas} />,
 "cupones":        () => <MisCuponesScreen cupones={cupones} clienteUser={clienteUser} />,
 "resenas":        () => <ClienteResenasScreen pedidos={pedidos} clientes={clientes} clienteUser={clienteUser} cupones={cupones} setCupones={saveCupones} setPedidos={savePedidos} />,
@@ -3657,7 +3017,6 @@ const Screen = screens[active] || screens["home"];
 return (
 
 <div style={{ fontFamily:"Georgia, serif",background:"linear-gradient(180deg, #0B0D10 0%, #09090B 15%, #080808 40%, #080A08 70%, #0A0808 100%)",color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto",position:"relative" }}>
-<InjectPremiumStyles />
 <div style={{ background:"#080808", padding:"10px 20px 6px", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:11, color:"#555", fontFamily:"sans-serif" }}>
 <span style={{ fontSize:10, minWidth:50, fontFamily:"sans-serif" }}>
 {isAdmin ? (
