@@ -689,48 +689,39 @@ reader.readAsDataURL(blob);
 }
 }
 
-// ── Subir PDF a Firebase Storage y devolver URL pública ──
+// ── Subir PDF a catbox.moe y devolver URL pública permanente ──
 async function uploadPdfToFirebaseStorage(file) {
-  if (!FIREBASE_STORAGE_BUCKET) {
-    // Fallback: convertir a base64 si no hay bucket
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.readAsDataURL(file);
-    });
-  }
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const path = `pdfs/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-      const encodedPath = encodeURIComponent(path);
-      const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodedPath}`;
-      const res = await fetch(uploadUrl, {
+      const formData = new FormData();
+      formData.append('reqtype', 'fileupload');
+      formData.append('fileToUpload', file);
+      const res = await fetch('https://catbox.moe/user/api.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/pdf' },
-        body: file
+        body: formData
       });
       if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
-      const data = await res.json();
-      // Construir URL pública: si hay token lo usamos, si no usamos alt=media solo
-      const token = data.downloadTokens || data.downloadToken || '';
-      const downloadUrl = token
-        ? `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodedPath}?alt=media&token=${token}`
-        : `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodedPath}?alt=media`;
-      return downloadUrl;
+      const url = await res.text();
+      if (!url.startsWith('https://')) throw new Error('Respuesta inválida: ' + url);
+      return url.trim();
     } catch (e) {
       console.warn(`PDF upload intento ${attempt+1} falló:`, e.message);
-      if (attempt === maxRetries - 1) {
-        // Último intento fallido: usar base64
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        });
+      if (attempt < maxRetries - 1) {
+        await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
       }
-      await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
     }
   }
+  // Fallback final: base64 (solo para archivos pequeños <2MB)
+  if (file.size < 2 * 1024 * 1024) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  throw new Error('No se pudo subir el PDF. Verificá tu conexión e intentá de nuevo.');
 }
 
 function PhotoUploadButton({ onPhoto, multiple = false, label = "📷 Subir foto", style = {} }) {
@@ -780,16 +771,16 @@ const file = e.target.files?.[0]; if (!file) return;
 if (file.type !== 'application/pdf') { alert('Solo se aceptan archivos PDF'); return; }
 if (file.size > 50 * 1024 * 1024) { alert('El PDF no puede superar 50 MB'); return; }
 setUploading(true);
-setProgress("Subiendo...");
+setProgress("Subiendo PDF...");
 try {
 const url = await uploadPdfToFirebaseStorage(file);
-setProgress("✅ Listo");
+setProgress("✅ PDF subido");
 onPdf(url, file.name);
-setTimeout(() => setProgress(""), 2000);
+setTimeout(() => setProgress(""), 2500);
 } catch (err) {
 console.warn('Error subiendo PDF:', err);
-setProgress("❌ Error");
-setTimeout(() => setProgress(""), 3000);
+setProgress("");
+alert('❌ No se pudo subir el PDF.\n\n' + (err.message || 'Verificá tu conexión e intentá de nuevo.'));
 } finally {
 setUploading(false);
 }
@@ -1453,16 +1444,29 @@ return (
 {/* ── BANNER CATÁLOGO PDF ── siempre visible si hay PDF cargado ── */}
 {config?.catalogoPdf && (
 <div style={{ padding:"12px 16px 4px" }}>
-<a
-href={config.catalogoPdf}
-target="_blank"
-rel="noreferrer"
+<button
+onClick={() => {
+const pdf = config.catalogoPdf;
+if (pdf.startsWith('http')) { window.open(pdf, '_blank'); }
+else {
+try {
+const byteStr = atob(pdf.split(',')[1]);
+const arr = new Uint8Array(byteStr.length);
+for (let i=0;i<byteStr.length;i++) arr[i]=byteStr.charCodeAt(i);
+const blob = new Blob([arr], {type:'application/pdf'});
+const url = URL.createObjectURL(blob);
+window.open(url, '_blank');
+setTimeout(() => URL.revokeObjectURL(url), 30000);
+} catch(e) { alert('No se pudo abrir el catálogo. Pedi al admin que lo vuelva a subir.'); }
+}
+}}
 style={{
+width:"100%",
 display:"flex", alignItems:"center", gap:14,
 background:`linear-gradient(135deg, #1A0800 0%, #0D0D0D 100%)`,
 border:`2px solid ${GOLD}88`,
 borderRadius:16, padding:"18px 20px",
-textDecoration:"none",
+cursor:"pointer",
 boxShadow:`0 6px 28px rgba(212,168,75,0.22), inset 0 1px 0 rgba(212,168,75,0.1)`,
 position:"relative", overflow:"hidden"
 }}>
@@ -1482,7 +1486,7 @@ position:"relative", overflow:"hidden"
 </div>
 <span style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:1 }}>PDF</span>
 </div>
-</a>
+</button>
 </div>
 )}
 <div style={{ padding:"16px", display:"flex", flexDirection:"column", gap:12 }}>
@@ -1631,27 +1635,42 @@ return (
 {p.presupuestoPdf && (
 <div style={{ marginTop:16, marginBottom:16 }}>
 <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:10 }}>📄 TU PRESUPUESTO</div>
-<a
-href={p.presupuestoPdf}
-target="_blank"
-rel="noreferrer"
+<button
+onClick={() => {
+const pdf = p.presupuestoPdf;
+if (pdf.startsWith('http')) {
+window.open(pdf, '_blank');
+} else {
+// base64: convertir a blob y abrir
+try {
+const byteStr = atob(pdf.split(',')[1]);
+const arr = new Uint8Array(byteStr.length);
+for (let i=0;i<byteStr.length;i++) arr[i]=byteStr.charCodeAt(i);
+const blob = new Blob([arr], {type:'application/pdf'});
+const url = URL.createObjectURL(blob);
+window.open(url, '_blank');
+setTimeout(() => URL.revokeObjectURL(url), 30000);
+} catch(e) { alert('No se pudo abrir el PDF. Pedi al admin que lo vuelva a subir.'); }
+}
+}}
 style={{
+width:"100%",
 display:"flex", alignItems:"center", gap:14,
 background:`linear-gradient(135deg, #1A0E00, ${CARD})`,
 border:`2px solid ${GOLD}55`,
 borderRadius:14, padding:"18px 20px",
-textDecoration:"none",
+cursor:"pointer",
 boxShadow:`0 4px 20px rgba(0,0,0,0.3)`
 }}>
 <div style={{ width:48, height:48, background:GOLD+"22", border:`1px solid ${GOLD}44`, borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, flexShrink:0 }}>
 📄
 </div>
-<div style={{ flex:1 }}>
+<div style={{ flex:1, textAlign:"left" }}>
 <div style={{ fontSize:15, fontWeight:"bold", color:GOLD, marginBottom:3 }}>Ver mi presupuesto</div>
 <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>Tocá para abrir el PDF</div>
 </div>
 <span style={{ color:GOLD, fontSize:22 }}>›</span>
-</a>
+</button>
 </div>
 )}
 {p.fotos && p.fotos.length > 0 && (
