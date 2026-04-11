@@ -610,7 +610,7 @@ return (
 {back && <button onClick={onBack} style={{ background:"none", border:"none", color:GOLD, fontSize:22, cursor:"pointer", padding:"0 4px 0 0" }}>←</button>}
 <div>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", textTransform:"uppercase", marginBottom:2 }}>{subtitle||"DOCTOR PARRILLA"}</div>
-<div style={{ fontSize:20, fontWeight:"bold", color:"#F5F5F5" }}>{title}</div>
+<div style={{ fontSize:20, fontWeight:"bold", color:GOLD_LIGHT }}>{title}</div>
 </div>
 </div>
 );
@@ -1411,7 +1411,7 @@ return allFotos.length > 0 ? (
 })()}
 <div style={{ padding:"20px" }}>
 <div style={{ display:"flex", gap:8, marginBottom:12 }}><Tag label={p.tag} /></div>
-<div style={{ fontSize:22, fontWeight:"bold", color:"#F5F5F5", marginBottom:6 }}>{p.nombre}</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:GOLD_LIGHT, marginBottom:6 }}>{p.nombre}</div>
 <div style={{ fontSize:22, color:GOLD, fontWeight:"bold", marginBottom:16 }}>{p.precio}</div>
 <div style={{ fontSize:14, color:"#AAA", fontFamily:"sans-serif", lineHeight:1.7, marginBottom:24 }}>{p.desc}</div>
 {(p.colores||[]).length > 0 && <>
@@ -1502,7 +1502,7 @@ position:"relative", overflow:"hidden"
 </div>
 <div style={{ padding:"14px 16px" }}>
 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6 }}>
-<div style={{ fontSize:16, fontWeight:"bold", color:"#F5F5F5" }}>{p.nombre}</div><Tag label={p.tag} />
+<div style={{ fontSize:16, fontWeight:"bold", color:GOLD_LIGHT }}>{p.nombre}</div><Tag label={p.tag} />
 </div>
 <div style={{ display:"flex", gap:6, marginBottom:8 }}>
 {(p.colores||[]).map(c => <span key={c} style={{ fontSize:10, color:"#888", fontFamily:"sans-serif", background:DARK3, border:`1px solid ${BORDER}`, padding:"2px 8px", borderRadius:20 }}>{c}</span>)}
@@ -1994,9 +1994,11 @@ style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:8,backgr
 }
 return (
 <div style={{ paddingBottom:80 }}>
-<div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${BORDER}` }}>
+<div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${BORDER}`, position:"relative", overflow:"hidden", background:"linear-gradient(135deg,#0E0C08,#0B0A07)" }}>
+<EmberSystem count={6} bottom={0} spread={120}/>
 <div style={{ fontSize:10,color:GOLD,fontFamily:"sans-serif",letterSpacing:"3px",marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22,fontWeight:"bold", color:"#F5F5F5" }}>Clientes</div>
+<div style={{ fontSize:22,fontWeight:"bold", color:GOLD_LIGHT }}>👥 Clientes</div>
+<div style={{ fontSize:11, color:"#AAA", fontFamily:"sans-serif", marginTop:4 }}>Cada cliente es una relación que dura toda la vida</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 <div style={{ padding:"16px 16px 0",display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:4 }}>
@@ -2121,9 +2123,11 @@ style={{ flex:1,background:CARD,border:`1px solid ${BORDER}`,color:"#F0F0F0",pad
 );
 return (
 <div style={{ paddingBottom:80 }}>
-<div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${BORDER}` }}>
+<div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${BORDER}`, position:"relative", overflow:"hidden", background:"linear-gradient(135deg,#0E0C08,#0B0A07)" }}>
+<EmberSystem count={8} bottom={0} spread={140}/>
 <div style={{ fontSize:10,color:GOLD,fontFamily:"sans-serif",letterSpacing:"3px",marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22,fontWeight:"bold", color:"#F5F5F5" }}>Catálogo</div>
+<div style={{ fontSize:22,fontWeight:"bold", color:GOLD_LIGHT }}>🔥 Catálogo</div>
+<div style={{ fontSize:11, color:"#AAA", fontFamily:"sans-serif", marginTop:4 }}>Tus productos, tu fuego, tu marca</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 <div style={{ padding:"16px",display:"flex",flexDirection:"column",gap:10 }}>
@@ -2177,7 +2181,7 @@ style={{ width:"100%", justifyContent:"center", boxSizing:"border-box" }}
 <div style={{ padding:"14px 16px",display:"flex",alignItems:"center",gap:14 }}>
 {!(p.fotos && p.fotos.length > 0 ? p.fotos[0] : p.foto) && <div style={{ width:48,height:48,background:"#1A1200",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0 }}>{p.emoji}</div>}
 <div style={{ flex:1 }}>
-<div style={{ display:"flex",justifyContent:"space-between",marginBottom:4 }}><div style={{ fontSize:15,fontWeight:"bold", color:"#F5F5F5" }}>{p.nombre}</div><Tag label={p.tag} /></div>
+<div style={{ display:"flex",justifyContent:"space-between",marginBottom:4 }}><div style={{ fontSize:15,fontWeight:"bold", color:GOLD_LIGHT }}>{p.nombre}</div><Tag label={p.tag} /></div>
 <div style={{ fontSize:14,color:GOLD,fontFamily:"sans-serif",marginBottom:4 }}>{p.precio}</div>
 <div style={{ display:"flex",gap:6 }}>{(p.colores||[]).map(c => <span key={c} style={{ fontSize:10,color:"#888",fontFamily:"sans-serif",background:DARK3,border:`1px solid ${BORDER}`,padding:"2px 8px",borderRadius:20 }}>{c}</span>)}</div>
 </div>
@@ -2657,7 +2661,7 @@ return (
 <div style={{ background:sc[t.estado]+"22",color:sc[t.estado],fontSize:12,padding:"4px 12px",borderRadius:20,fontFamily:"sans-serif",fontWeight:"bold" }}>{t.estado}</div>
 </div>
 <div style={{ fontSize:11,color:"#555",fontFamily:"sans-serif",marginBottom:4 }}>CLIENTE</div>
-<div style={{ fontSize:18,fontWeight:"bold",marginBottom:14 }}>{getNombre(t.tel)}</div>
+<div style={{ fontSize:18,fontWeight:"bold",color:GOLD_LIGHT,marginBottom:14 }}>{getNombre(t.tel)}</div>
 <div style={{ height:1,background:BORDER,marginBottom:14 }} />
 <div style={{ fontSize:14,color:"#CCC",fontFamily:"sans-serif",lineHeight:1.6 }}>{t.desc}</div>
 <div style={{ fontSize:11,color:"#555",fontFamily:"sans-serif",marginTop:12 }}>📅 {t.fecha}</div>
@@ -2690,22 +2694,25 @@ const stats = [
 ];
 return (
 <div style={{ paddingBottom:80 }}>
-<div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${BORDER}` }}>
+<div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${BORDER}`, position:"relative", overflow:"hidden", background:"linear-gradient(135deg,#0E0C08,#0B0A07)" }}>
+<EmberSystem count={6} bottom={0} spread={120}/>
 <div style={{ fontSize:10,color:GOLD,fontFamily:"sans-serif",letterSpacing:"3px",marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22,fontWeight:"bold", color:"#F5F5F5" }}>Soporte</div>
+<div style={{ fontSize:22,fontWeight:"bold", color:GOLD_LIGHT }}>🔧 Soporte al Cliente</div>
+<div style={{ fontSize:11, color:"#AAA", fontFamily:"sans-serif", marginTop:4 }}>Respondé rápido — cada minuto cuenta para tu cliente</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 <div style={{ padding:"16px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:4 }}>
-{stats.map(s => <div key={s.label} style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:10,padding:"12px",textAlign:"center" }}><div style={{ fontSize:24,fontWeight:"bold",color:s.color }}>{s.value}</div><div style={{ fontSize:10,color:"#666",fontFamily:"sans-serif",marginTop:2 }}>{s.label}</div></div>)}
+{stats.map(s => <div key={s.label} style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:10,padding:"12px",textAlign:"center", position:"relative", overflow:"hidden" }}><EmberSystem count={1} bottom={0} spread={40}/><div style={{ fontSize:24,fontWeight:"bold",color:s.color }}>{s.value}</div><div style={{ fontSize:10,color:"#666",fontFamily:"sans-serif",marginTop:2 }}>{s.label}</div></div>)}
 </div>
 <div style={{ padding:"0 16px",display:"flex",flexDirection:"column",gap:10 }}>
 {tickets.map((t,i) => (
-<button key={t.id} onClick={() => setSelected(i)} style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"16px",cursor:"pointer",textAlign:"left" }}>
+<button key={t.id} onClick={() => setSelected(i)} style={{ background:CARD,border:`1px solid ${sc[t.estado]}33`,borderRadius:12,padding:"16px",cursor:"pointer",textAlign:"left", position:"relative", overflow:"hidden" }}>
+<EmberSystem count={2} bottom={0} spread={60}/>
 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6 }}>
 <div style={{ display:"flex",gap:8,alignItems:"center" }}><span style={{ fontSize:12,color:"#666",fontFamily:"sans-serif" }}>{t.id}</span><Tag label={t.tipo} color={sc[t.estado]} /></div>
 <div style={{ background:sc[t.estado]+"22",color:sc[t.estado],fontSize:11,padding:"3px 10px",borderRadius:20,fontFamily:"sans-serif" }}>{t.estado}</div>
 </div>
-<div style={{ fontSize:14,color:"#F5EDD6",fontFamily:"sans-serif",marginBottom:4, fontWeight:"bold" }}>{getNombre(t.tel)}</div>
+<div style={{ fontSize:14,color:GOLD_LIGHT,fontFamily:"sans-serif",marginBottom:4, fontWeight:"bold" }}>{getNombre(t.tel)}</div>
 <div style={{ fontSize:13,color:"#888",fontFamily:"sans-serif",lineHeight:1.5 }}>{(t.desc||"").slice(0,70)}...</div>
 <div style={{ fontSize:11,color:"#555",fontFamily:"sans-serif",marginTop:8 }}>{t.fecha}</div>
 </button>
@@ -2835,9 +2842,11 @@ c.tel.includes(search)
 return (
 
 <div style={{ paddingBottom:80 }}>
-<div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}` }}>
+<div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}`, position:"relative", overflow:"hidden", background:"linear-gradient(135deg,#0E0C08,#0B0A07)" }}>
+<EmberSystem count={8} bottom={0} spread={140}/>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22, fontWeight:"bold", color:"#F5F5F5" }}>Cupones 🎟️</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:GOLD_LIGHT }}>🎟️ Cupones de Descuento</div>
+<div style={{ fontSize:11, color:"#AAA", fontFamily:"sans-serif", marginTop:4 }}>Los clientes con cupón compran 3x más — fidelizalos con fuego</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
   <div style={{ padding:"16px", display:"flex", gap:8, marginBottom:4 }}>
@@ -2920,7 +2929,8 @@ return (
     )}
     {activos.length > 0 && <div style={{ fontSize:11, color:"#4CAF50", fontFamily:"sans-serif", letterSpacing:"2px", marginTop:8 }}>ACTIVOS</div>}
     {activos.map(c => (
-      <div key={c.id} style={{ background:CARD, border:`1px solid ${GOLD}66`, borderRadius:12, padding:"16px" }}>
+      <div key={c.id} style={{ background:CARD, border:`1px solid ${GOLD}66`, borderRadius:12, padding:"16px", position:"relative", overflow:"hidden" }}>
+        <EmberSystem count={3} bottom={0} spread={80}/>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
           <div style={{ fontSize:16, fontWeight:"bold", color:GOLD, fontFamily:"monospace", letterSpacing:"2px" }}>{c.id}</div>
           <div style={{ background:"#4CAF5022", color:"#4CAF50", fontSize:11, padding:"3px 10px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold" }}>ACTIVO</div>
@@ -3148,9 +3158,11 @@ const starColor = (s) => s>=4?"#4CAF50":s===3?GOLD:"#E57373";
 return (
 
 <div style={{ paddingBottom:80 }}>
-<div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}` }}>
+<div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}`, position:"relative", overflow:"hidden", background:"linear-gradient(135deg,#0E0C08,#0B0A07)" }}>
+<EmberSystem count={8} bottom={0} spread={140}/>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22, fontWeight:"bold", color:"#F5F5F5" }}>Reseñas</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:GOLD_LIGHT }}>⭐ Reseñas de Clientes</div>
+<div style={{ fontSize:11, color:"#AAA", fontFamily:"sans-serif", marginTop:4 }}>La prueba social más poderosa — cada reseña es fuego que vende</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 
@@ -3208,7 +3220,7 @@ return (
         <EmberSystem count={2} bottom={0} spread={60}/>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
           <div>
-            <div style={{ fontSize:14, fontWeight:"bold", marginBottom:2 }}>{r.cliente}</div>
+            <div style={{ fontSize:14, fontWeight:"bold", color:GOLD_LIGHT, marginBottom:2 }}>{r.cliente}</div>
             <div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>{r.modelo} · {r.pedidoId}</div>
           </div>
           <div style={{ display:"flex", gap:2 }}>
@@ -3399,7 +3411,7 @@ return (
 <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
 <div>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22, fontWeight:"bold", color:"#F5F5F5" }}>Visitas</div>
+<div style={{ fontSize:22,fontWeight:"bold", color:GOLD_LIGHT }}>📅 Visitas</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 </div>
