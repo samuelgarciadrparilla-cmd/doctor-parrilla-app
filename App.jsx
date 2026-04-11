@@ -2377,90 +2377,69 @@ return (
 function ClienteResenasScreen({ pedidos, clientes, clienteUser, cupones, setCupones, setPedidos }) {
 const [showReviewForm, setShowReviewForm] = useState(false);
 
-// Todas las reseñas de todos los pedidos
-const resenas = pedidos.filter(p => p.resena).map(p => {
-const cliente = clientes.find(c => normalizePhone(c.tel||"")===normalizePhone(p.tel));
-return { ...p.resena, cliente: cliente?.nombre || p.tel, modelo: p.modelo, pedidoId: p.id, tel: p.tel };
-});
-
 // Mis pedidos entregados sin reseña
 const misPedidosSinResena = clienteUser ? pedidos.filter(p => 
 normalizePhone(p.tel)===normalizePhone(clienteUser.tel) && p.estado === 4 && !p.resena
 ) : [];
 
-const avg = resenas.length > 0
-? (resenas.reduce((s,r) => s+r.stars, 0) / resenas.length).toFixed(1)
-: "-";
+// Mis reseñas ya dejadas
+const misResenas = clienteUser ? pedidos.filter(p => 
+normalizePhone(p.tel)===normalizePhone(clienteUser.tel) && p.resena
+).map(p => ({ ...p.resena, modelo: p.modelo, pedidoId: p.id })) : [];
 
-const dist = [5,4,3,2,1].map(s => ({
-stars: s,
-count: resenas.filter(r=>r.stars===s).length,
-pct: resenas.length > 0 ? Math.round(resenas.filter(r=>r.stars===s).length/resenas.length*100) : 0
-}));
-
-const starColor = (s) => s>=4?"#4CAF50":s===3?GOLD:"#E57373";
-
+const clienteNombre = clienteUser?.nombre?.split(" ")[0] || "";
 
 return (
 <div style={{ paddingBottom:80 }}>
-<div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}` }}>
-<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>OPINIONES DE CLIENTES</div>
-<div style={{ fontSize:22, fontWeight:"bold" }}>Reseñas</div>
-<div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
-</div>
 
-{/* Summary */}
-<div style={{ padding:"16px", display:"grid", gridTemplateColumns:"1fr 2fr", gap:12, marginBottom:4 }}>
-<div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"20px", textAlign:"center" }}>
-<div style={{ fontSize:42, fontWeight:"bold", color:GOLD }}>{avg}</div>
-<div style={{ fontSize:24, marginBottom:4 }}>⭐</div>
-<div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>{resenas.length} reseñas</div>
-</div>
-<div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"16px" }}>
-{dist.map(d => (
-<div key={d.stars} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-<span style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", minWidth:12 }}>{d.stars}</span>
-<span style={{ fontSize:11 }}>⭐</span>
-<div style={{ flex:1, background:BORDER, borderRadius:4, height:8, overflow:"hidden" }}>
-<div style={{ background:starColor(d.stars), width:`${d.pct}%`, height:"100%", borderRadius:4 }}/>
-</div>
-<span style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", minWidth:24 }}>{d.count}</span>
-</div>
-))}
+{/* Header con neuromarketing */}
+<div style={{ padding:"24px 20px 20px", borderBottom:`1px solid ${BORDER}`, textAlign:"center" }}>
+<div style={{ fontSize:40, marginBottom:10 }}>🔥</div>
+<div style={{ fontSize:22, fontWeight:"bold", marginBottom:6 }}>Tu opinión vale oro</div>
+<div style={{ fontSize:13, color:"#AAA", fontFamily:"sans-serif", lineHeight:1.7, maxWidth:320, margin:"0 auto" }}>
+{clienteNombre ? `${clienteNombre}, en` : "En"} <span style={{ color:GOLD, fontWeight:"bold" }}>Doctor Parrilla</span> siempre estamos dispuestos a mejorar. Cada comentario tuyo nos ayuda a brindarte un servicio aún mejor.
 </div>
 </div>
 
-{/* CTA: Dejar reseña en Google */}
-<div style={{ margin:"0 16px 12px" }}>
-<a href={GOOGLE_REVIEW_URL} target="_blank" rel="noreferrer"
-style={{ display:"flex", alignItems:"center", gap:12, background:"linear-gradient(135deg,#0A1428,#0A0F1F)", border:"1px solid #1A2A4A", borderRadius:12, padding:"14px 16px", textDecoration:"none" }}>
-<span style={{ fontSize:24 }}>⭐</span>
-<div>
-<div style={{ fontSize:13, fontWeight:"bold", color:"#4285F4" }}>Dejá tu reseña en Google</div>
-<div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>Ayudanos a que más familias nos conozcan</div>
+{/* Incentivo cupón - Neuromarketing: reciprocidad + escasez */}
+<div style={{ margin:"20px 16px 0" }}>
+<div style={{ background:`linear-gradient(145deg, #1A0E00, ${CARD})`, border:`1px solid ${GOLD}44`, borderRadius:16, padding:"20px", textAlign:"center" }}>
+<div style={{ display:"flex", justifyContent:"center", gap:4, marginBottom:12 }}>
+{["🌟","⭐","🌟","⭐","🌟"].map((e,i) => <span key={i} style={{ fontSize:20 }}>{e}</span>)}
 </div>
-<span style={{ marginLeft:"auto", color:"#4285F4", fontSize:18 }}>›</span>
-</a>
+<div style={{ fontSize:15, fontWeight:"bold", color:CREAM, marginBottom:8, lineHeight:1.5 }}>
+Dejá tu reseña y lleváte un
+</div>
+<div style={{ fontSize:28, fontWeight:"bold", background:GOLD_GRAD, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", marginBottom:8 }}>
+15% DE DESCUENTO
+</div>
+<div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif", lineHeight:1.6, marginBottom:4 }}>
+en tu próxima compra o servicio de mantenimiento
+</div>
+<div style={{ fontSize:10, color:"#555", fontFamily:"sans-serif", marginTop:8 }}>
+Válido por 3 meses · Exclusivo para clientes que comparten su experiencia
+</div>
+</div>
 </div>
 
-{/* CTA: Dejar reseña interna si tiene pedidos entregados sin reseña */}
+{/* Botón principal: Dejar reseña interna */}
 {misPedidosSinResena.length > 0 && !showReviewForm && (
-<div style={{ margin:"0 16px 16px" }}>
+<div style={{ margin:"20px 16px 0" }}>
 <button onClick={() => setShowReviewForm(true)}
-style={{ width:"100%", display:"flex", alignItems:"center", gap:12, background:`linear-gradient(135deg,${GOLD}15,${GOLD}08)`, border:`1px solid ${GOLD}44`, borderRadius:12, padding:"14px 16px", cursor:"pointer" }}>
-<span style={{ fontSize:24 }}>🔥</span>
-<div style={{ textAlign:"left" }}>
-<div style={{ fontSize:13, fontWeight:"bold", color:GOLD }}>Contá tu experiencia</div>
-<div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>Tenés {misPedidosSinResena.length} pedido{misPedidosSinResena.length>1?"s":""} sin calificar</div>
+style={{ width:"100%", background:`linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, border:"none", borderRadius:14, padding:"18px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:14 }}>
+<span style={{ fontSize:28 }}>✍️</span>
+<div style={{ textAlign:"left", flex:1 }}>
+<div style={{ fontSize:15, fontWeight:"bold", color:DARK }}>Contá tu experiencia ahora</div>
+<div style={{ fontSize:11, color:"#333", fontFamily:"sans-serif", marginTop:2 }}>Tenés {misPedidosSinResena.length} pedido{misPedidosSinResena.length>1?"s":""} para calificar y ganar tu cupón</div>
 </div>
-<span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>›</span>
+<span style={{ fontSize:22, color:DARK }}>›</span>
 </button>
 </div>
 )}
 
 {/* Review form */}
 {showReviewForm && misPedidosSinResena.length > 0 && (
-<div style={{ margin:"0 16px 16px" }}>
+<div style={{ margin:"20px 16px 0" }}>
 {misPedidosSinResena.length > 1 && (
 <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", marginBottom:8, textAlign:"center" }}>Calificá tu pedido más reciente:</div>
 )}
@@ -2480,27 +2459,41 @@ onClose={() => setShowReviewForm(false)}
 </div>
 )}
 
-{/* Lista de reseñas */}
-<div style={{ padding:"0 16px", display:"flex", flexDirection:"column", gap:10 }}>
-{resenas.length === 0 && (
-<div style={{ textAlign:"center", padding:"40px 20px", color:"#555", fontFamily:"sans-serif" }}>
-<div style={{ fontSize:40, marginBottom:12 }}>⭐</div>
-<div style={{ fontSize:14, marginBottom:8 }}>Aún no hay reseñas</div>
-<div style={{ fontSize:12, color:"#444" }}>Sé el primero en compartir tu experiencia con Dr. Parrilla</div>
+{/* Si no tiene pedidos para calificar */}
+{misPedidosSinResena.length === 0 && !showReviewForm && (
+<div style={{ margin:"20px 16px 0", textAlign:"center", padding:"20px", background:CARD, borderRadius:14, border:`1px solid ${BORDER}` }}>
+<div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif", lineHeight:1.6 }}>
+{misResenas.length > 0 
+? "¡Gracias por compartir tu experiencia! Tu opinión nos impulsa a seguir mejorando."
+: "Cuando recibas tu parrilla, podrás dejarnos tu opinión aquí y ganar tu cupón de descuento."
+}
+</div>
 </div>
 )}
-{resenas.sort((a,b) => b.stars-a.stars).map((r,i) => {
-const esMia = clienteUser && normalizePhone(r.tel||"")=== normalizePhone(clienteUser.tel);
-return (
-<div key={i} style={{ background:CARD, border:`1px solid ${esMia ? GOLD+'66' : starColor(r.stars)+'44'}`, borderRadius:12, padding:"16px", position:"relative" }}>
-{esMia && <div style={{ position:"absolute", top:8, right:12, fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"1px", background:`${GOLD}15`, padding:"2px 8px", borderRadius:10 }}>TU RESEÑA</div>}
-<div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
-<div>
-<div style={{ fontSize:14, fontWeight:"bold", marginBottom:2 }}>{r.cliente}</div>
-<div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>{r.modelo}</div>
+
+{/* Enlace a Google Reviews - Neuromarketing: prueba social */}
+<div style={{ margin:"20px 16px 0" }}>
+<a href={GOOGLE_REVIEW_URL} target="_blank" rel="noreferrer"
+style={{ display:"flex", alignItems:"center", gap:12, background:"linear-gradient(135deg,#0A1428,#0A0F1F)", border:"1px solid #1A2A4A", borderRadius:14, padding:"16px 18px", textDecoration:"none" }}>
+<span style={{ fontSize:26 }}>🌐</span>
+<div style={{ flex:1 }}>
+<div style={{ fontSize:13, fontWeight:"bold", color:"#4285F4" }}>También dejá tu reseña en Google</div>
+<div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif", marginTop:2 }}>Ayudá a que más familias paraguayas nos conozcan</div>
 </div>
+<span style={{ color:"#4285F4", fontSize:20 }}>›</span>
+</a>
+</div>
+
+{/* Mis reseñas anteriores */}
+{misResenas.length > 0 && (
+<div style={{ margin:"24px 16px 0" }}>
+<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:10 }}>TUS RESEÑAS</div>
+{misResenas.map((r,i) => (
+<div key={i} style={{ background:CARD, border:`1px solid ${GOLD}33`, borderRadius:12, padding:"16px", marginBottom:10 }}>
+<div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+<div style={{ fontSize:13, fontWeight:"bold" }}>{r.modelo}</div>
 <div style={{ display:"flex", gap:2 }}>
-{[1,2,3,4,5].map(s => <span key={s} style={{ fontSize:16 }}>{s<=r.stars?"⭐":"☆"}</span>)}
+{[1,2,3,4,5].map(s => <span key={s} style={{ fontSize:14 }}>{s<=r.stars?"⭐":"☆"}</span>)}
 </div>
 </div>
 {r.comment && (
@@ -2510,9 +2503,18 @@ return (
 )}
 <div style={{ fontSize:11, color:"#555", fontFamily:"sans-serif" }}>{r.fecha}</div>
 </div>
-);
-})}
+))}
 </div>
+)}
+
+{/* Footer motivacional */}
+<div style={{ margin:"24px 16px 0", textAlign:"center", padding:"16px" }}>
+<div style={{ fontSize:11, color:"#444", fontFamily:"Georgia, serif", fontStyle:"italic", lineHeight:1.6 }}>
+"Cada parrilla que creamos lleva el fuego de nuestra pasión. Tu voz nos guía para hacerlo aún mejor."
+</div>
+<div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"sans-serif", marginTop:6 }}>#ElFuegoNosUne🔥</div>
+</div>
+
 </div>
 );
 }
