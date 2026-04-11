@@ -689,22 +689,26 @@ reader.readAsDataURL(blob);
 }
 }
 
-// ── Subir PDF a catbox.moe y devolver URL pública permanente ──
+// ── Subir PDF a Firebase Storage y devolver URL pública directa ──
 async function uploadPdfToFirebaseStorage(file) {
+  const bucket = FIREBASE_STORAGE_BUCKET;
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const formData = new FormData();
-      formData.append('reqtype', 'fileupload');
-      formData.append('fileToUpload', file);
-      const res = await fetch('https://catbox.moe/user/api.php', {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `pdfs/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeName}`;
+      const encodedPath = encodeURIComponent(path);
+      const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodedPath}`;
+      const res = await fetch(uploadUrl, {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/pdf' },
+        body: file
       });
       if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
-      const url = await res.text();
-      if (!url.startsWith('https://')) throw new Error('Respuesta inválida: ' + url);
-      return url.trim();
+      const data = await res.json();
+      // URL pública directa (no requiere token porque las reglas permiten lectura pública)
+      const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodedPath}?alt=media`;
+      return downloadUrl;
     } catch (e) {
       console.warn(`PDF upload intento ${attempt+1} falló:`, e.message);
       if (attempt < maxRetries - 1) {
