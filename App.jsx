@@ -610,7 +610,7 @@ return (
 {back && <button onClick={onBack} style={{ background:"none", border:"none", color:GOLD, fontSize:22, cursor:"pointer", padding:"0 4px 0 0" }}>←</button>}
 <div>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", textTransform:"uppercase", marginBottom:2 }}>{subtitle||"DOCTOR PARRILLA"}</div>
-<div style={{ fontSize:20, fontWeight:"bold" }}>{title}</div>
+<div style={{ fontSize:20, fontWeight:"bold", color:"#F5F5F5" }}>{title}</div>
 </div>
 </div>
 );
@@ -1411,7 +1411,7 @@ return allFotos.length > 0 ? (
 })()}
 <div style={{ padding:"20px" }}>
 <div style={{ display:"flex", gap:8, marginBottom:12 }}><Tag label={p.tag} /></div>
-<div style={{ fontSize:22, fontWeight:"bold", marginBottom:6 }}>{p.nombre}</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:"#F5F5F5", marginBottom:6 }}>{p.nombre}</div>
 <div style={{ fontSize:22, color:GOLD, fontWeight:"bold", marginBottom:16 }}>{p.precio}</div>
 <div style={{ fontSize:14, color:"#AAA", fontFamily:"sans-serif", lineHeight:1.7, marginBottom:24 }}>{p.desc}</div>
 {(p.colores||[]).length > 0 && <>
@@ -1502,7 +1502,7 @@ position:"relative", overflow:"hidden"
 </div>
 <div style={{ padding:"14px 16px" }}>
 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6 }}>
-<div style={{ fontSize:16, fontWeight:"bold" }}>{p.nombre}</div><Tag label={p.tag} />
+<div style={{ fontSize:16, fontWeight:"bold", color:"#F5F5F5" }}>{p.nombre}</div><Tag label={p.tag} />
 </div>
 <div style={{ display:"flex", gap:6, marginBottom:8 }}>
 {(p.colores||[]).map(c => <span key={c} style={{ fontSize:10, color:"#888", fontFamily:"sans-serif", background:DARK3, border:`1px solid ${BORDER}`, padding:"2px 8px", borderRadius:20 }}>{c}</span>)}
@@ -1972,7 +1972,7 @@ return (
 <div style={{ background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,padding:"20px",marginBottom:16 }}>
 <div style={{ display:"flex",alignItems:"center",gap:16,marginBottom:20 }}>
 <div style={{ width:56,height:56,borderRadius:"50%",background:`${GOLD}22`,border:`2px solid ${GOLD}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26 }}>👤</div>
-<div><div style={{ fontSize:20,fontWeight:"bold" }}>{c.nombre}</div><div style={{ fontSize:12,color:"#666",fontFamily:"sans-serif",marginTop:2 }}>{c.id}</div></div>
+<div><div style={{ fontSize:20,fontWeight:"bold", color:"#F5F5F5" }}>{c.nombre}</div><div style={{ fontSize:12,color:"#666",fontFamily:"sans-serif",marginTop:2 }}>{c.id}</div></div>
 </div>
 <div style={{ height:1,background:BORDER,marginBottom:16 }} />
 {[{icon:"📞",label:"Teléfono",val:c.tel},{icon:"📍",label:"Dirección",val:c.dir||"--"}].map(r => (
@@ -1996,7 +1996,7 @@ return (
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${BORDER}` }}>
 <div style={{ fontSize:10,color:GOLD,fontFamily:"sans-serif",letterSpacing:"3px",marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22,fontWeight:"bold" }}>Clientes</div>
+<div style={{ fontSize:22,fontWeight:"bold", color:"#F5F5F5" }}>Clientes</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 <div style={{ padding:"16px 16px 0",display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:4 }}>
@@ -2123,7 +2123,7 @@ return (
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${BORDER}` }}>
 <div style={{ fontSize:10,color:GOLD,fontFamily:"sans-serif",letterSpacing:"3px",marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22,fontWeight:"bold" }}>Catálogo</div>
+<div style={{ fontSize:22,fontWeight:"bold", color:"#F5F5F5" }}>Catálogo</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 <div style={{ padding:"16px",display:"flex",flexDirection:"column",gap:10 }}>
@@ -2177,7 +2177,7 @@ style={{ width:"100%", justifyContent:"center", boxSizing:"border-box" }}
 <div style={{ padding:"14px 16px",display:"flex",alignItems:"center",gap:14 }}>
 {!(p.fotos && p.fotos.length > 0 ? p.fotos[0] : p.foto) && <div style={{ width:48,height:48,background:"#1A1200",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0 }}>{p.emoji}</div>}
 <div style={{ flex:1 }}>
-<div style={{ display:"flex",justifyContent:"space-between",marginBottom:4 }}><div style={{ fontSize:15,fontWeight:"bold" }}>{p.nombre}</div><Tag label={p.tag} /></div>
+<div style={{ display:"flex",justifyContent:"space-between",marginBottom:4 }}><div style={{ fontSize:15,fontWeight:"bold", color:"#F5F5F5" }}>{p.nombre}</div><Tag label={p.tag} /></div>
 <div style={{ fontSize:14,color:GOLD,fontFamily:"sans-serif",marginBottom:4 }}>{p.precio}</div>
 <div style={{ display:"flex",gap:6 }}>{(p.colores||[]).map(c => <span key={c} style={{ fontSize:10,color:"#888",fontFamily:"sans-serif",background:DARK3,border:`1px solid ${BORDER}`,padding:"2px 8px",borderRadius:20 }}>{c}</span>)}</div>
 </div>
@@ -2692,7 +2692,7 @@ return (
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${BORDER}` }}>
 <div style={{ fontSize:10,color:GOLD,fontFamily:"sans-serif",letterSpacing:"3px",marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22,fontWeight:"bold" }}>Soporte</div>
+<div style={{ fontSize:22,fontWeight:"bold", color:"#F5F5F5" }}>Soporte</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 <div style={{ padding:"16px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:4 }}>
@@ -2837,7 +2837,7 @@ return (
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}` }}>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22, fontWeight:"bold" }}>Cupones 🎟️</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:"#F5F5F5" }}>Cupones 🎟️</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
   <div style={{ padding:"16px", display:"flex", gap:8, marginBottom:4 }}>
@@ -2914,7 +2914,7 @@ return (
     {cupones.length === 0 && (
       <div style={{ textAlign:"center", padding:"40px 20px" }}>
         <div style={{ fontSize:48, marginBottom:12 }}>🎟️</div>
-        <div style={{ fontSize:16, fontWeight:"bold", marginBottom:6 }}>No hay cupones aún</div>
+        <div style={{ fontSize:16, fontWeight:"bold", color:"#F5F5F5", marginBottom:6 }}>No hay cupones aún</div>
         <div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif" }}>Creá un cupón manual o esperá a que un cliente deje una reseña. #ElFuegoNosUne🔥</div>
       </div>
     )}
@@ -3098,7 +3098,7 @@ style={{ display:"flex", alignItems:"center", gap:12, background:"linear-gradien
 {misResenas.map((r,i) => (
 <div key={i} style={{ background:CARD, border:`1px solid ${GOLD}33`, borderRadius:12, padding:"16px", marginBottom:10 }}>
 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-<div style={{ fontSize:13, fontWeight:"bold" }}>{r.modelo}</div>
+<div style={{ fontSize:13, fontWeight:"bold", color:"#F5F5F5" }}>{r.modelo}</div>
 <div style={{ display:"flex", gap:2 }}>
 {[1,2,3,4,5].map(s => <span key={s} style={{ fontSize:14 }}>{s<=r.stars?"⭐":"☆"}</span>)}
 </div>
@@ -3150,7 +3150,7 @@ return (
 <div style={{ paddingBottom:80 }}>
 <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}` }}>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22, fontWeight:"bold" }}>Reseñas</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:"#F5F5F5" }}>Reseñas</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 
@@ -3360,7 +3360,7 @@ return (
     <div style={{ background:`${GOLD}11`, border:`1px solid ${GOLD}33`, borderRadius:12, padding:"20px", marginBottom:16 }}>
       <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:12 }}>RESUMEN DE VISITA</div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:14 }}>
-        <div><div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif", marginBottom:4 }}>FECHA</div><div style={{ fontSize:14, fontWeight:"bold" }}>{fecha}</div></div>
+        <div><div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif", marginBottom:4 }}>FECHA</div><div style={{ fontSize:14, fontWeight:"bold", color:"#F5F5F5" }}>{fecha}</div></div>
         <div><div style={{ fontSize:10, color:"#666", fontFamily:"sans-serif", marginBottom:4 }}>HORARIO</div><div style={{ fontSize:14, fontWeight:"bold", color:GOLD }}>{hora}</div></div>
       </div>
       <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>📍 Showroom Dr. Parrilla · Lambaré · #ElFuegoNosUne🔥</div>
@@ -3399,7 +3399,7 @@ return (
 <div style={{ padding:"20px 20px 16px", borderBottom:`1px solid ${BORDER}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
 <div>
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>PANEL DE GESTIÓN</div>
-<div style={{ fontSize:22, fontWeight:"bold" }}>Visitas</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:"#F5F5F5" }}>Visitas</div>
 <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:2 }}>#ElFuegoNosUne🔥</div>
 </div>
 </div>
