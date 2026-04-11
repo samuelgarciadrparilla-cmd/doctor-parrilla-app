@@ -712,7 +712,11 @@ async function uploadPdfToFirebaseStorage(file) {
       });
       if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
       const data = await res.json();
-      const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodedPath}?alt=media&token=${data.downloadTokens || ''}`;
+      // Construir URL pública: si hay token lo usamos, si no usamos alt=media solo
+      const token = data.downloadTokens || data.downloadToken || '';
+      const downloadUrl = token
+        ? `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodedPath}?alt=media&token=${token}`
+        : `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodedPath}?alt=media`;
       return downloadUrl;
     } catch (e) {
       console.warn(`PDF upload intento ${attempt+1} falló:`, e.message);
@@ -1446,32 +1450,36 @@ style={{ display:"block", textAlign:"center", width:"100%", background:"linear-g
 return (
 <div style={{ paddingBottom:80 }}>
 <Header title="Catálogo" subtitle="NUESTROS MODELOS · #ElFuegoNosUne🔥" />
-{/* ── BOTÓN DESCARGAR CATÁLOGO PDF ── */}
+{/* ── BANNER CATÁLOGO PDF ── siempre visible si hay PDF cargado ── */}
 {config?.catalogoPdf && (
-<div style={{ padding:"0 16px", marginBottom:4, marginTop:8 }}>
+<div style={{ padding:"12px 16px 4px" }}>
 <a
 href={config.catalogoPdf}
 target="_blank"
 rel="noreferrer"
 style={{
 display:"flex", alignItems:"center", gap:14,
-background:`linear-gradient(135deg, #1A0E00, #1A1200)`,
-border:`2px solid ${GOLD}66`,
-borderRadius:14, padding:"16px 20px",
+background:`linear-gradient(135deg, #1A0800 0%, #0D0D0D 100%)`,
+border:`2px solid ${GOLD}88`,
+borderRadius:16, padding:"18px 20px",
 textDecoration:"none",
-boxShadow:`0 4px 20px rgba(212,168,75,0.15)`,
+boxShadow:`0 6px 28px rgba(212,168,75,0.22), inset 0 1px 0 rgba(212,168,75,0.1)`,
 position:"relative", overflow:"hidden"
 }}>
-<div style={{ position:"absolute", inset:0, background:`linear-gradient(135deg, ${GOLD}08, transparent)`, pointerEvents:"none" }} />
-<div style={{ width:48, height:48, background:GOLD+"22", border:`1px solid ${GOLD}55`, borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, flexShrink:0, position:"relative" }}>
+<EmberSystem count={4} bottom={0} spread={80}/>
+<AmbientOrb x="80%" y="-10px" size="80px" color="rgba(212,168,75,0.12)"/>
+<div style={{ width:52, height:52, background:`linear-gradient(135deg,${GOLD}33,${GOLD}11)`, border:`2px solid ${GOLD}66`, borderRadius:14, display:"flex", alignItems:"center", justifyContent:"center", fontSize:28, flexShrink:0, position:"relative", boxShadow:`0 0 16px ${GOLD}44` }}>
 📄
 </div>
 <div style={{ flex:1, position:"relative" }}>
-<div style={{ fontSize:15, fontWeight:"bold", color:GOLD, marginBottom:2 }}>Descargar catálogo PDF</div>
-<div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>Todos nuestros modelos y precios</div>
+<div style={{ fontSize:9, color:GOLD_DARK, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:4 }}>CATÁLOGO OFICIAL</div>
+<div style={{ fontSize:16, fontWeight:"bold", color:GOLD_LIGHT, marginBottom:3 }}>Descargar catálogo PDF</div>
+<div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif" }}>Todos los modelos, precios y specs</div>
 </div>
-<div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:2, position:"relative" }}>
-<span style={{ color:GOLD, fontSize:20 }}>↓</span>
+<div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:3, position:"relative", flexShrink:0 }}>
+<div style={{ width:36, height:36, borderRadius:"50%", background:GOLD, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:`0 0 12px ${GOLD}88` }}>
+<span style={{ color:DARK, fontSize:18, fontWeight:"bold" }}>↓</span>
+</div>
 <span style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:1 }}>PDF</span>
 </div>
 </a>
@@ -3520,18 +3528,10 @@ return data;
 const saveClientes = useCallback((next) => {
 setClientes(prev => {
 const data = typeof next === 'function' ? next(prev) : next;
-// Registrar timestamp del guardado para que el polling no sobreescriba datos recientes
+// Registrar timestamp para que el polling no sobreescriba datos recientes
 lastClientesSave.current = Date.now();
-// Guardar inmediatamente en local y Firebase
+// Un solo guardado (saveNow ya hace PUT a Firebase + localStorage)
 saveNow("dp_clientes", data);
-// Subir a Firebase en background con PUT directo
-if (FIREBASE_URL) {
-fetch(`${FIREBASE_URL}/drparrilla/dp_clientes.json`, {
-method: "PUT",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify(data)
-}).catch(() => {});
-}
 return data;
 });
 }, [saveNow]);
@@ -3577,15 +3577,16 @@ useEffect(() => {
 if (!firebaseOk || !FIREBASE_URL || !dataLoaded.current) return;
 const poll = setInterval(async () => {
 try {
-const [r1, r2, r3, r4, r5, r6] = await Promise.all([
+const [r1, r2, r3, r4, r5, r6, r7] = await Promise.all([
 fetch(`${FIREBASE_URL}/drparrilla/dp_pedidos.json`),
 fetch(`${FIREBASE_URL}/drparrilla/dp_tickets.json`),
 fetch(`${FIREBASE_URL}/drparrilla/dp_clientes.json`),
 fetch(`${FIREBASE_URL}/drparrilla/dp_productos.json`),
 fetch(`${FIREBASE_URL}/drparrilla/dp_visitas.json`),
-fetch(`${FIREBASE_URL}/drparrilla/dp_cupones.json`)
+fetch(`${FIREBASE_URL}/drparrilla/dp_cupones.json`),
+fetch(`${FIREBASE_URL}/drparrilla/dp_config.json`)
 ]);
-const [fbPedidos, fbTickets, fbClientes, fbProductos, fbVisitas, fbCupones] = await Promise.all([r1.json(), r2.json(), r3.json(), r4.json(), r5.json(), r6.json()]);
+const [fbPedidos, fbTickets, fbClientes, fbProductos, fbVisitas, fbCupones, fbConfig] = await Promise.all([r1.json(), r2.json(), r3.json(), r4.json(), r5.json(), r6.json(), r7.json()]);
 if (fbPedidos) setPedidos(prev => {
 if (JSON.stringify(prev)===JSON.stringify(fbPedidos)) return prev;
 // Preserve resena (reviews) from local state -- never overwrite with Firebase if local has review
@@ -3598,8 +3599,8 @@ return merged;
 });
 if (fbTickets) setTickets(prev => JSON.stringify(prev)===JSON.stringify(fbTickets) ? prev : fbTickets);
 if (fbClientes) setClientes(prev => {
-// No sobreescribir si se guardó hace menos de 10 segundos (evita perder datos recién guardados)
-if (Date.now() - lastClientesSave.current < 10000) return prev;
+// No sobreescribir si se guardó hace menos de 30 segundos (evita perder datos recién guardados)
+if (Date.now() - lastClientesSave.current < 30000) return prev;
 if (JSON.stringify(prev)===JSON.stringify(fbClientes)) return prev;
 const fbIds = new Set(fbClientes.map(c => c.id));
 const localOnly = prev.filter(c => !fbIds.has(c.id));
@@ -3623,6 +3624,10 @@ return merged;
 });
 if (fbVisitas) setVisitas(prev => JSON.stringify(prev)===JSON.stringify(fbVisitas) ? prev : fbVisitas);
 if (fbCupones) setCupones(prev => JSON.stringify(prev)===JSON.stringify(fbCupones) ? prev : fbCupones);
+// Sincronizar config (catálogo PDF, etc.) para que clientes lo vean al instante
+if (fbConfig && typeof fbConfig === 'object' && !Array.isArray(fbConfig)) {
+setConfig(prev => JSON.stringify(prev)===JSON.stringify(fbConfig) ? prev : fbConfig);
+}
 } catch(e) {}
 }, 20000);
 return () => clearInterval(poll);
