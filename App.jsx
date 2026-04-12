@@ -1319,8 +1319,8 @@ return (
 <AmbientOrb x="75%" y="-20px" size="120px" color="rgba(212,168,75,0.10)"/>
 <Logo width={140} style={{ marginBottom:14, filter:"drop-shadow(0 0 12px #C9A84C44)", position:"relative" }} />
 <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:6 }}>{tratamiento==="Sra."||tratamiento==="Srta."?"BIENVENIDA":"BIENVENIDO"}</div>
-<div style={{ fontSize:24, fontWeight:"bold", marginBottom:4 }}>Hola, {nombre} 👋</div>
-<div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif" }}>¿Qué necesitás hoy?</div>
+<div style={{ fontSize:24, fontWeight:"bold", color:GOLD_LIGHT, marginBottom:4 }}>Hola, {nombre} 👋</div>
+<div style={{ fontSize:13, color:"#AAA", fontFamily:"sans-serif" }}>Tu parrilla premium te espera 🔥</div>
 <div style={{ fontSize:12, color:GOLD, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:8, letterSpacing:1 }}>#ElFuegoNosUne🔥</div>
 </div>
 {urgente && (() => {
@@ -1342,14 +1342,14 @@ return (
 );
 })()}
 <div style={{ padding:"16px 20px 0", display:"flex", flexDirection:"column", gap:12 }}>
-{[{key:"catalogo",icon:"🔥",title:"Catálogo",desc:"Explorá todos nuestros modelos"},
-{key:"pedidos",icon:"📦",title:"Mis Pedidos",desc: misPedidos.length > 0 ? `${misPedidos.length} pedido${misPedidos.length>1?"s":""} activo${misPedidos.length>1?"s":""}` : "Seguí el estado de tu pedido"},
-{key:"cupones",icon:"🎟️",title:"Mis Cupones",desc: (() => { const mc = cupones ? cupones.filter(c => c.clienteTel && normalizePhone(c.clienteTel) === normalizePhone(clienteUser?.tel||"")) : []; const a = mc.filter(c => c.estado === "activo"); return a.length > 0 ? `${a.length} cupón${a.length>1?"es":""} disponible${a.length>1?"s":""}` : "Ver tus descuentos"; })()},
-{key:"soporte",icon:"🔧",title:"Soporte",desc:"Reclamos y mantenimiento"}
+{[{key:"catalogo",icon:"🔥",title:"Catálogo Exclusivo",desc:"Modelos premium · Acero inoxidable 304"},
+{key:"pedidos",icon:"📦",title:"Mis Pedidos",desc: misPedidos.length > 0 ? `🔴 ${misPedidos.length} pedido${misPedidos.length>1?"s":""} activo${misPedidos.length>1?"s":""}` : "Seguí tu pedido en tiempo real"},
+{key:"cupones",icon:"🎟️",title:"Mis Cupones",desc: (() => { const mc = cupones ? cupones.filter(c => c.clienteTel && normalizePhone(c.clienteTel) === normalizePhone(clienteUser?.tel||"")) : []; const a = mc.filter(c => c.estado === "activo"); return a.length > 0 ? `🎁 ${a.length} descuento${a.length>1?"s":""} esperándote` : "Descuentos exclusivos para vos"; })()},
+{key:"soporte",icon:"🔧",title:"Soporte Prioritario",desc:"Atención directa · Respondemos hoy"}
 ].map((c, _ci) => (
 <button key={c.key} onClick={() => setActive(c.key)} className="card-stagger" style={{ animationDelay:`${_ci*0.08}s`, background:CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:"20px", display:"flex", alignItems:"center", gap:16, cursor:"pointer", textAlign:"left" }}>
 <div style={{ width:52, height:52, background:GOLD+"18", borderRadius:14, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, border:`1px solid ${GOLD}33`, flexShrink:0 }}>{c.icon}</div>
-<div><div style={{ fontSize:17, fontWeight:"bold", marginBottom:3 }}>{c.title}</div><div style={{ fontSize:12, color:"#666", fontFamily:"sans-serif" }}>{c.desc}</div></div>
+<div><div style={{ fontSize:17, fontWeight:"bold", color:GOLD_LIGHT, marginBottom:3 }}>{c.title}</div><div style={{ fontSize:12, color:"#AAA", fontFamily:"sans-serif" }}>{c.desc}</div></div>
 <span style={{ marginLeft:"auto", color:GOLD, fontSize:18 }}>›</span>
 </button>
 ))}
@@ -1865,11 +1865,19 @@ style={{ width:"100%",height:140,background:CARD,border:`1px solid ${BORDER}`,co
 const tc = { "Abierto":"#E57373","En proceso":GOLD,"Resuelto":"#4CAF50" };
 return (
 <div style={{ paddingBottom:80 }}>
-<Header title="Soporte" subtitle="RECLAMOS Y MANTENIMIENTO · #ElFuegoNosUne🔥" />
+<div style={{ padding:"24px 20px 20px", background:"linear-gradient(180deg,#1A0D00 0%,#111418 60%,#0A0A0A 100%)", borderBottom:`1px solid ${GOLD}22`, position:"relative", overflow:"hidden" }}>
+<EmberSystem count={6} bottom={0} spread={110}/>
+<AmbientOrb x="80%" y="-10px" size="100px" color="rgba(212,168,75,0.08)"/>
+<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:6 }}>SOPORTE PRIORITARIO</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:GOLD_LIGHT, marginBottom:6 }}>🔧 Estamos para vos</div>
+<div style={{ fontSize:13, color:"#AAA", fontFamily:"sans-serif", lineHeight:1.6 }}>Tu satisfacción es nuestra prioridad. Respondemos el mismo día.</div>
+<div style={{ fontSize:11, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:8 }}>#ElFuegoNosUne🔥</div>
+</div>
 <div style={{ padding:"16px" }}>
-<button onClick={() => setForm(true)} style={{ width:"100%",background:`${GOLD}11`,border:`1px solid ${GOLD}55`,borderRadius:12,padding:"18px 20px",display:"flex",alignItems:"center",gap:14,cursor:"pointer",marginBottom:20 }}>
+<button onClick={() => setForm(true)} style={{ width:"100%",background:`linear-gradient(135deg,${GOLD}18,${GOLD}08)`,border:`1px solid ${GOLD}55`,borderRadius:12,padding:"18px 20px",display:"flex",alignItems:"center",gap:14,cursor:"pointer",marginBottom:20, position:"relative", overflow:"hidden" }}>
+<EmberSystem count={3} bottom={0} spread={80}/>
 <div style={{ width:44,height:44,background:GOLD+"22",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22 }}>➕</div>
-<div style={{ textAlign:"left" }}><div style={{ fontSize:16,fontWeight:"bold",color:GOLD }}>Nueva solicitud</div><div style={{ fontSize:12,color:"#888",fontFamily:"sans-serif" }}>Reclamo, mantenimiento o consulta</div></div>
+<div style={{ textAlign:"left" }}><div style={{ fontSize:16,fontWeight:"bold",color:GOLD_LIGHT }}>Nueva solicitud</div><div style={{ fontSize:12,color:"#AAA",fontFamily:"sans-serif" }}>Reclamo, mantenimiento o consulta</div></div>
 </button>
 {misTickets.length===0 && <div style={{ textAlign:"center",padding:"30px 20px",color:"#555",fontFamily:"sans-serif" }}><div style={{ fontSize:36,marginBottom:10 }}>🔧</div><div>No tenés solicitudes activas. #ElFuegoNosUne🔥</div></div>}
 {misTickets.map(t => (
@@ -2731,12 +2739,20 @@ const expiradosOUsados = misCupones.filter(c => c.estado === "usado" || isCuponE
 return (
 
 <div style={{ paddingBottom:80 }}>
-<Header title="Mis Cupones" subtitle="DESCUENTOS EXCLUSIVOS" />
+<div style={{ padding:"24px 20px 20px", background:"linear-gradient(180deg,#1A0D00 0%,#111418 60%,#0A0A0A 100%)", borderBottom:`1px solid ${GOLD}22`, position:"relative", overflow:"hidden" }}>
+<EmberSystem count={8} bottom={0} spread={130}/>
+<AmbientOrb x="75%" y="-20px" size="120px" color="rgba(212,168,75,0.10)"/>
+<div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:6 }}>DESCUENTOS EXCLUSIVOS</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:GOLD_LIGHT, marginBottom:6 }}>🎟️ Mis Cupones</div>
+<div style={{ fontSize:13, color:"#AAA", fontFamily:"sans-serif", lineHeight:1.6 }}>Beneficios exclusivos que el fuego te ganó.</div>
+<div style={{ fontSize:11, color:GOLD_DARK, fontFamily:"Georgia, serif", fontStyle:"italic", marginTop:8 }}>#ElFuegoNosUne🔥</div>
+</div>
 {activos.length > 0 && (
 <div style={{ padding:"16px", display:"flex", flexDirection:"column", gap:12 }}>
 <div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px" }}>CUPONES DISPONIBLES</div>
 {activos.map(c => (
 <div key={c.id} style={{ background:"linear-gradient(135deg,#1A0800,#0A0A0A)", border:`2px solid ${GOLD}66`, borderRadius:16, padding:"20px", position:"relative", overflow:"hidden" }}>
+<EmberSystem count={4} bottom={0} spread={100}/>
 <div style={{ position:"absolute", top:0, right:0, width:80, height:80, background:`radial-gradient(circle at top right, ${GOLD}22, transparent)`, pointerEvents:"none" }} />
 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
 <div style={{ background:"#4CAF5022", color:"#4CAF50", fontSize:11, padding:"4px 12px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold" }}>ACTIVO</div>
@@ -2758,9 +2774,9 @@ return (
 )}
 {activos.length === 0 && (
 <div style={{ textAlign:"center", padding:"60px 20px" }}>
-<div style={{ fontSize:56, marginBottom:16 }}>{"🎟️"}</div>
-<div style={{ fontSize:18, fontWeight:"bold", marginBottom:8 }}>No tenés cupones activos</div>
-<div style={{ fontSize:13, color:"#666", fontFamily:"sans-serif", lineHeight:1.6 }}>Los cupones se generan cuando dejás una reseña o cuando el equipo de Dr. Parrilla te asigna uno. #ElFuegoNosUne{"🔥"}</div>
+<div style={{ fontSize:56, marginBottom:16 }}>🎟️</div>
+<div style={{ fontSize:18, fontWeight:"bold", color:GOLD_LIGHT, marginBottom:8 }}>Todavía no tenés cupones</div>
+<div style={{ fontSize:13, color:"#888", fontFamily:"sans-serif", lineHeight:1.6 }}>Dejá una reseña de tu pedido y te regalamos un <span style={{ color:GOLD, fontWeight:"bold" }}>10% de descuento</span> en tu próxima compra. 🔥</div>
 </div>
 )}
 {expiradosOUsados.length > 0 && (
@@ -3010,9 +3026,11 @@ return (
 <div style={{ paddingBottom:80 }}>
 
 {/* Header con neuromarketing */}
-<div style={{ padding:"24px 20px 20px", borderBottom:`1px solid ${BORDER}`, textAlign:"center" }}>
+<div style={{ padding:"24px 20px 20px", background:"linear-gradient(180deg,#1A0D00 0%,#111418 60%,#0A0A0A 100%)", borderBottom:`1px solid ${GOLD}22`, textAlign:"center", position:"relative", overflow:"hidden" }}>
+<EmberSystem count={8} bottom={0} spread={130}/>
+<AmbientOrb x="50%" y="-20px" size="140px" color="rgba(212,168,75,0.08)"/>
 <div style={{ fontSize:40, marginBottom:10 }}>🔥</div>
-<div style={{ fontSize:22, fontWeight:"bold", marginBottom:6 }}>Tu opinión vale oro</div>
+<div style={{ fontSize:22, fontWeight:"bold", color:GOLD_LIGHT, marginBottom:6 }}>Tu opinión vale oro</div>
 <div style={{ fontSize:13, color:"#AAA", fontFamily:"sans-serif", lineHeight:1.7, maxWidth:320, margin:"0 auto" }}>
 {clienteNombre ? `${clienteNombre}, en` : "En"} <span style={{ color:GOLD, fontWeight:"bold" }}>Doctor Parrilla</span> siempre estamos dispuestos a mejorar. Cada comentario tuyo nos ayuda a brindarte un servicio aún mejor.
 </div>
@@ -3108,7 +3126,7 @@ style={{ display:"flex", alignItems:"center", gap:12, background:"linear-gradien
 {misResenas.map((r,i) => (
 <div key={i} style={{ background:CARD, border:`1px solid ${GOLD}33`, borderRadius:12, padding:"16px", marginBottom:10 }}>
 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-<div style={{ fontSize:13, fontWeight:"bold", color:"#F5F5F5" }}>{r.modelo}</div>
+<div style={{ fontSize:13, fontWeight:"bold", color:GOLD_LIGHT }}>{r.modelo}</div>
 <div style={{ display:"flex", gap:2 }}>
 {[1,2,3,4,5].map(s => <span key={s} style={{ fontSize:14 }}>{s<=r.stars?"⭐":"☆"}</span>)}
 </div>
