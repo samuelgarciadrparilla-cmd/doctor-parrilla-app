@@ -2829,7 +2829,7 @@ vence,
 tipo:"manual",
 duracionMeses: meses
 };
-setCupones([cuponObj, ...cupones]);
+setCupones(prev => [cuponObj, ...prev]);
 setNewCupon({ clienteTel:"", descuento:"15", motivo:"", duracion:"3" });
 setShowNew(false);
 setSearch("");
@@ -2842,11 +2842,12 @@ window.open(`https://wa.me/595${tel}?text=${msg}`, "_blank");
 
 const marcarUsado = (id) => {
 const fecha = new Date().toLocaleDateString("es-PY",{day:"2-digit",month:"short",year:"numeric"});
-setCupones(cupones.map(c => c.id===id ? {...c, estado:"usado", fechaUso:fecha} : c));
+// Usar functional update para evitar closures viejos
+setCupones(prev => prev.map(c => c.id===id ? {...c, estado:"usado", fechaUso:fecha} : c));
 };
 
 const eliminarCupon = (id) => {
-setCupones(cupones.filter(c => c.id !== id));
+setCupones(prev => prev.filter(c => c.id !== id));
 setConfirmDelete(null);
 };
 
@@ -3492,8 +3493,9 @@ const [cupones, setCupones] = useState([]);
 const [config, setConfig] = useState({ catalogoPdf: null, catalogoPdfNombre: null }); // PDF del catálogo general
 const dataLoaded = useRef(false);
 
-// ── Timestamp del último guardado de clientes (para evitar sobreescritura en polling) ──
+// ── Timestamps del último guardado (para evitar sobreescritura en polling) ──
 const lastClientesSave = useRef(0);
+const lastCuponesSave = useRef(0);
 
 // ── Load from storage on mount + check Firebase ──
 useEffect(() => {
@@ -3598,6 +3600,8 @@ return data;
 const saveCupones = useCallback((next) => {
 setCupones(prev => {
 const data = typeof next === 'function' ? next(prev) : next;
+// Registrar timestamp para que el polling no sobreescriba datos recientes
+lastCuponesSave.current = Date.now();
 saveNow("dp_cupones", data);
 return data;
 });
@@ -3676,7 +3680,36 @@ return fbProd;
 return merged;
 });
 if (fbVisitas) setVisitas(prev => JSON.stringify(prev)===JSON.stringify(fbVisitas) ? prev : fbVisitas);
-if (fbCupones) setCupones(prev => JSON.stringify(prev)===JSON.stringify(fbCupones) ? prev : fbCupones);
+if (fbCupones && Array.isArray(fbCupones)) {
+// No sobreescribir si se guardó hace menos de 30 segundos
+if (Date.now() - lastCuponesSave.current < 30000) {
+// Igual hacemos merge: agregar cupones de Firebase que no existan localmente
+setCupones(prev => {
+const localIds = new Set(prev.map(c => c.id));
+const nuevosDeFirebase = fbCupones.filter(c => !localIds.has(c.id));
+if (nuevosDeFirebase.length === 0) return prev;
+const merged = [...prev, ...nuevosDeFirebase];
+lastCuponesSave.current = Date.now();
+saveNow("dp_cupones", merged);
+return merged;
+});
+} else {
+// Merge bidireccional: combinar cupones locales y de Firebase por ID
+setCupones(prev => {
+if (JSON.stringify(prev) === JSON.stringify(fbCupones)) return prev;
+const fbIds = new Set(fbCupones.map(c => c.id));
+const localOnly = prev.filter(c => !fbIds.has(c.id));
+if (localOnly.length > 0) {
+// Hay cupones locales que Firebase no tiene — hacer merge y guardar
+const merged = [...fbCupones, ...localOnly];
+lastCuponesSave.current = Date.now();
+saveNow("dp_cupones", merged);
+return merged;
+}
+return fbCupones;
+});
+}
+}
 // Sincronizar config (catálogo PDF, etc.) para que clientes lo vean al instante
 if (fbConfig && typeof fbConfig === 'object' && !Array.isArray(fbConfig)) {
 setConfig(prev => JSON.stringify(prev)===JSON.stringify(fbConfig) ? prev : fbConfig);
