@@ -275,22 +275,17 @@ const FIREBASE_STORAGE_BUCKET = "doctor-parrilla-clientes.firebasestorage.app";
 
 const appStorage = {
 async get(key) {
-// 1. Try Firebase
-if (FIREBASE_URL) {
-try {
-const r = await fetch(`${FIREBASE_URL}/drparrilla/${key}.json`);
-if (r.ok) { const d = await r.json(); if (d !== null) return JSON.stringify(d); }
-} catch(e) {}
-}
-// 2. Try Claude artifact storage
-try {
-if (window.storage) { const r = await window.storage.get(key); return r ? r.value : null; }
-} catch(e) {}
-// 3. Fallback localStorage
-try { return localStorage.getItem(key); } catch(e) { return null; }
+// SOLO localStorage — Firebase se carga por separado con merge controlado
+// Esto evita que Firebase sobreescriba datos locales recientes al inicio
+try { return localStorage.getItem(key); } catch(e) {}
+try { if (window.storage) { const r = await window.storage.get(key); return r ? r.value : null; } } catch(e) {}
+return null;
 },
 async set(key, value) {
-// 1. Save to Firebase (con reintento)
+// 1. Guardar en localStorage PRIMERO (instantáneo, nunca falla)
+try { localStorage.setItem(key, value); } catch(e) {}
+try { if (window.storage) { await window.storage.set(key, value); } } catch(e) {}
+// 2. Guardar en Firebase (asíncrono, con reintento)
 if (FIREBASE_URL) {
 for (let attempt = 0; attempt < 2; attempt++) {
 try {
@@ -307,10 +302,6 @@ if (attempt === 0) await new Promise(r => setTimeout(r, 1000));
 }
 }
 }
-// 2. Save to Claude artifact storage
-try { if (window.storage) { await window.storage.set(key, value); } } catch(e) {}
-// 3. Save to localStorage (backup)
-try { localStorage.setItem(key, value); } catch(e) {}
 }
 };
 
@@ -3539,7 +3530,17 @@ if (fbP && Array.isArray(fbP)) { setPedidos(fbP); appStorage.set("dp_pedidos", J
 if (fbT && Array.isArray(fbT)) { setTickets(fbT); appStorage.set("dp_tickets", JSON.stringify(fbT)); }
 if (fbProd && Array.isArray(fbProd)) { setProductos(fbProd); appStorage.set("dp_productos", JSON.stringify(fbProd)); }
 if (fbV && Array.isArray(fbV)) { setVisitas(fbV); appStorage.set("dp_visitas", JSON.stringify(fbV)); }
-if (fbCu && Array.isArray(fbCu)) { setCupones(fbCu); appStorage.set("dp_cupones", JSON.stringify(fbCu)); }
+if (fbCu && Array.isArray(fbCu)) {
+// Merge: Firebase + cupones locales que no estén en Firebase
+const localCuRaw = localStorage.getItem("dp_cupones");
+const localCu = localCuRaw ? JSON.parse(localCuRaw) : [];
+const fbCuIds = new Set(fbCu.map(c => c.id));
+const localCuOnly = localCu.filter(c => c.id && !fbCuIds.has(c.id));
+const mergedCu = localCuOnly.length > 0 ? [...fbCu, ...localCuOnly] : fbCu;
+setCupones(mergedCu);
+lastCuponesSave.current = Date.now();
+appStorage.set("dp_cupones", JSON.stringify(mergedCu));
+}
 if (fbCfg && typeof fbCfg === 'object' && !Array.isArray(fbCfg)) { setConfig(fbCfg); appStorage.set("dp_config", JSON.stringify(fbCfg)); }
 } catch(e) { console.warn("Error cargando desde Firebase al inicio:", e); }
 }
