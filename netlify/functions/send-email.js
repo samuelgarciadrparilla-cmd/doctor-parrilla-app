@@ -8,14 +8,14 @@
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const SENDER_EMAIL = "drparrillapy@gmail.com";
-const SENDER_NAME = "Samuel Garcia - Dr. Parrilla";
+const SENDER_NAME = "Dr. Parrilla";
 const REPLY_TO_EMAIL = "drparrillapy@gmail.com";
 
 // Link directo de reseña de Google Business — Place ID verificado
 const GOOGLE_REVIEW_LINK = "https://search.google.com/local/writereview?placeid=ChIJxz02rNqpXZQRH4Mx5vR7Mx8";
 
 // Logo Dr. Parrilla (CDN público)
-const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663512395733/qZFFQioosHMykgAC.png";
+const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663512395733/HpjFakLtDiwidEAZ.png";
 
 const HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -77,26 +77,29 @@ function emailWrapper(content) {
       <table cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;background:#111111;border-radius:8px;overflow:hidden;">
         <tr><td>
           ${content}
-          <div style="background:#0D0D0D;padding:24px 30px;text-align:center;">
-            <div style="font-size:10px;color:#666;letter-spacing:2px;margin-bottom:16px;">DR. PARRILLA — LAMBARE, PARAGUAY</div>
-            <!-- Links de redes sociales prominentes -->
-            <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+          <!-- SECCION DE REDES SOCIALES - GRANDE Y VISIBLE -->
+          <div style="background:#0D0D0D;padding:30px 20px;text-align:center;">
+            <div style="font-size:13px;color:#C8A96E;letter-spacing:2px;margin-bottom:20px;font-weight:bold;">SEGUINOS EN NUESTRAS REDES</div>
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 auto;max-width:500px;">
               <tr>
-                <td style="padding:0 10px;">
-                  <a href="https://drparrilla.com.py" style="display:inline-block;background:#1A1A1A;border:1px solid #333;border-radius:6px;padding:10px 16px;text-decoration:none;font-size:12px;color:#C8A96E;font-weight:bold;">Web</a>
+                <td style="padding:6px 8px;width:50%;" align="center">
+                  <a href="https://drparrilla.com.py" style="display:block;background:#C8A96E;border-radius:8px;padding:16px 10px;text-decoration:none;font-size:16px;color:#0A0A0A;font-weight:bold;letter-spacing:1px;">drparrilla.com.py</a>
                 </td>
-                <td style="padding:0 10px;">
-                  <a href="https://www.instagram.com/drparrillapy/" style="display:inline-block;background:#1A1A1A;border:1px solid #333;border-radius:6px;padding:10px 16px;text-decoration:none;font-size:12px;color:#C8A96E;font-weight:bold;">Instagram</a>
+                <td style="padding:6px 8px;width:50%;" align="center">
+                  <a href="https://www.instagram.com/drparrillapy/" style="display:block;background:#1A1A1A;border:2px solid #C8A96E;border-radius:8px;padding:14px 10px;text-decoration:none;font-size:16px;color:#C8A96E;font-weight:bold;letter-spacing:1px;">Instagram</a>
                 </td>
-                <td style="padding:0 10px;">
-                  <a href="https://www.facebook.com/doctorparrillapy/" style="display:inline-block;background:#1A1A1A;border:1px solid #333;border-radius:6px;padding:10px 16px;text-decoration:none;font-size:12px;color:#C8A96E;font-weight:bold;">Facebook</a>
+              </tr>
+              <tr>
+                <td style="padding:6px 8px;width:50%;" align="center">
+                  <a href="https://www.facebook.com/doctorparrillapy/" style="display:block;background:#1A1A1A;border:2px solid #C8A96E;border-radius:8px;padding:14px 10px;text-decoration:none;font-size:16px;color:#C8A96E;font-weight:bold;letter-spacing:1px;">Facebook</a>
                 </td>
-                <td style="padding:0 10px;">
-                  <a href="https://wa.me/595994389932" style="display:inline-block;background:#1A1A1A;border:1px solid #333;border-radius:6px;padding:10px 16px;text-decoration:none;font-size:12px;color:#C8A96E;font-weight:bold;">WhatsApp</a>
+                <td style="padding:6px 8px;width:50%;" align="center">
+                  <a href="https://wa.me/595994389932" style="display:block;background:#25D366;border-radius:8px;padding:16px 10px;text-decoration:none;font-size:16px;color:#FFFFFF;font-weight:bold;letter-spacing:1px;">WhatsApp</a>
                 </td>
               </tr>
             </table>
-            <div style="font-size:9px;color:#444;margin-top:14px;">
+            <div style="font-size:10px;color:#666;letter-spacing:2px;margin-top:20px;">DR. PARRILLA \u2014 LAMBARE, PARAGUAY</div>
+            <div style="font-size:9px;color:#444;margin-top:8px;">
               Recibes este correo porque eres cliente de Dr. Parrilla.
             </div>
           </div>
