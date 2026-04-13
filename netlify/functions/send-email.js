@@ -77,14 +77,26 @@ function emailWrapper(content) {
       <table cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;background:#111111;border-radius:8px;overflow:hidden;">
         <tr><td>
           ${content}
-          <div style="background:#0D0D0D;padding:20px 30px;text-align:center;">
-            <div style="font-size:10px;color:#555;letter-spacing:2px;">DR. PARRILLA — LAMBARE, PARAGUAY</div>
-            <div style="font-size:10px;color:#444;margin-top:4px;">
-              <a href="https://drparrilla.com.py" style="color:#C8A96E;text-decoration:none;">drparrilla.com.py</a> |
-              <a href="https://www.instagram.com/drparrillapy/" style="color:#C8A96E;text-decoration:none;">Instagram</a> |
-              <a href="https://wa.me/595994389932" style="color:#C8A96E;text-decoration:none;">WhatsApp</a>
-            </div>
-            <div style="font-size:9px;color:#333;margin-top:8px;">
+          <div style="background:#0D0D0D;padding:24px 30px;text-align:center;">
+            <div style="font-size:10px;color:#666;letter-spacing:2px;margin-bottom:16px;">DR. PARRILLA — LAMBARE, PARAGUAY</div>
+            <!-- Links de redes sociales prominentes -->
+            <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+              <tr>
+                <td style="padding:0 10px;">
+                  <a href="https://drparrilla.com.py" style="display:inline-block;background:#1A1A1A;border:1px solid #333;border-radius:6px;padding:10px 16px;text-decoration:none;font-size:12px;color:#C8A96E;font-weight:bold;">Web</a>
+                </td>
+                <td style="padding:0 10px;">
+                  <a href="https://www.instagram.com/drparrillapy/" style="display:inline-block;background:#1A1A1A;border:1px solid #333;border-radius:6px;padding:10px 16px;text-decoration:none;font-size:12px;color:#C8A96E;font-weight:bold;">Instagram</a>
+                </td>
+                <td style="padding:0 10px;">
+                  <a href="https://www.facebook.com/doctorparrillapy/" style="display:inline-block;background:#1A1A1A;border:1px solid #333;border-radius:6px;padding:10px 16px;text-decoration:none;font-size:12px;color:#C8A96E;font-weight:bold;">Facebook</a>
+                </td>
+                <td style="padding:0 10px;">
+                  <a href="https://wa.me/595994389932" style="display:inline-block;background:#1A1A1A;border:1px solid #333;border-radius:6px;padding:10px 16px;text-decoration:none;font-size:12px;color:#C8A96E;font-weight:bold;">WhatsApp</a>
+                </td>
+              </tr>
+            </table>
+            <div style="font-size:9px;color:#444;margin-top:14px;">
               Recibes este correo porque eres cliente de Dr. Parrilla.
             </div>
           </div>
