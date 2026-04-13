@@ -1,7 +1,7 @@
 // ── NETLIFY FUNCTION: send-email ──────────────────────────────────────────────
 // Envía emails transaccionales via Brevo API
 // Endpoint: /.netlify/functions/send-email (POST)
-// Tipos: "entrega", "bienvenida", "seguimiento"
+// Tipos: "entrega", "bienvenida", "registro", "seguimiento"
 // Diseño: Neuromarketing aplicado — colores, urgencia, reciprocidad, prueba social
 // Anti-spam: Sin palabras gatillo, ratio texto/imagen equilibrado, sender verificado
 // ──────────────────────────────────────────────────────────────────────────────
@@ -57,7 +57,8 @@ function emailFooter() {
   </div>`;
 }
 
-function emailWrapper(content) {
+function emailWrapper(content, preheaderText) {
+  const preheader = preheaderText || "Dr. Parrilla — Fabricantes artesanales de parrillas premium en Paraguay";
   // Anti-spam: DOCTYPE completo, charset, viewport, texto plano visible
   return `<!DOCTYPE html>
 <html lang="es">
@@ -70,7 +71,7 @@ function emailWrapper(content) {
 <body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,'Helvetica Neue',Helvetica,sans-serif;-webkit-font-smoothing:antialiased;">
   <!-- Anti-spam: preheader oculto para mejorar preview en inbox -->
   <div style="display:none;font-size:1px;color:#f4f4f4;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
-    Dr. Parrilla — Fabricantes artesanales de parrillas premium en Paraguay
+    ${preheader}
   </div>
   <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f4f4;">
     <tr><td align="center" style="padding:24px 16px;">
@@ -100,7 +101,7 @@ function emailWrapper(content) {
             </table>
             <div style="font-size:10px;color:#666;letter-spacing:2px;margin-top:20px;">DR. PARRILLA \u2014 LAMBARE, PARAGUAY</div>
             <div style="font-size:9px;color:#444;margin-top:8px;">
-              Recibes este correo porque eres cliente de Dr. Parrilla.
+              Recibes este correo porque eres parte de la familia Dr. Parrilla.
             </div>
           </div>
         </td></tr>
@@ -174,22 +175,24 @@ function buildEntregaEmail(data) {
 
       ${emailFooter()}
     </div>
-  `);
+  `, `Tu parrilla ${modelo || "Dr. Parrilla"} ya fue entregada — Dr. Parrilla Paraguay`);
   return { subject, html };
 }
 
-// ── Email: Bienvenida ───────────────────────────────────────────────────────
-// NEUROMARKETING: Efecto dotación (cupon = ya es tuyo) + Escasez (3 meses) + Pertenencia
+// ── Email: Bienvenida (CLIENTE que compró) ──────────────────────────────────
+// NEUROMARKETING: Identidad + Exclusividad + Pertenencia + Prueba social + Reciprocidad
+// Basado en texto del CEO Samuel Garcia, potenciado con triggers psicológicos
 
 function buildBienvenidaEmail(data) {
   const nombre = formatNombre(data);
   const { cuponCode } = data || {};
   const subject = `Bienvenido a la familia Dr. Parrilla, ${nombre}`;
+
   const cuponBlock = cuponCode ? `
     <div style="background:#1A1400;border:2px solid #C8A96E;border-radius:12px;padding:28px;margin:28px 0;text-align:center;">
-      <div style="font-size:12px;color:#C8A96E;letter-spacing:3px;margin-bottom:10px;">TU CUPON DE BIENVENIDA</div>
+      <div style="font-size:12px;color:#C8A96E;letter-spacing:3px;margin-bottom:10px;">TU REGALO DE BIENVENIDA</div>
       <div style="font-size:28px;font-weight:bold;color:#F5EDD6;letter-spacing:4px;font-family:'Courier New',monospace;margin-bottom:10px;padding:12px;background:#0D0A00;border-radius:6px;display:inline-block;">${cuponCode}</div>
-      <div style="font-size:14px;color:#C8A96E;font-weight:bold;margin-top:8px;">10% de descuento en tu primera compra</div>
+      <div style="font-size:14px;color:#C8A96E;font-weight:bold;margin-top:8px;">10% de descuento en tu proxima compra o mantenimiento</div>
       <!-- NEUROMARKETING: Escasez temporal = urgencia de acción -->
       <div style="font-size:12px;color:#888;margin-top:8px;">Valido por 90 dias desde hoy. Presenta este codigo al hacer tu pedido.</div>
     </div>` : "";
@@ -200,16 +203,29 @@ function buildBienvenidaEmail(data) {
 
       <div style="font-size:18px;color:#F5EDD6;margin-bottom:20px;">Hola ${nombre},</div>
 
-      <!-- NEUROMARKETING: Pertenencia = "familia" genera lealtad -->
+      <!-- NEUROMARKETING: Identidad — "no compraste, elegiste" redefine la acción -->
       <div style="font-size:15px;color:#CCC;line-height:1.8;margin-bottom:20px;">
-        Es un placer tenerte en la familia <strong style="color:#C8A96E;">Dr. Parrilla</strong>.
-        Somos fabricantes artesanales de parrillas premium en acero inoxidable 304,
-        y cada pieza que sale de nuestro taller en Lambare es unica.
+        Acabas de dar un paso que pocos toman: <strong style="color:#C8A96E;">no compraste una parrilla,
+        elegiste una experiencia hecha a otro nivel.</strong>
       </div>
 
-      ${cuponBlock}
+      <!-- NEUROMARKETING: Autoridad + Diferenciación — posicionamiento como pioneros -->
+      <div style="font-size:15px;color:#CCC;line-height:1.8;margin-bottom:20px;">
+        Somos fabricantes y pioneros en el desarrollo de parrillas premium en
+        <strong style="color:#C8A96E;">acero inoxidable 304</strong>, disenadas y construidas
+        artesanalmente en Lambare por manos 100% paraguayas. Cada pieza es unica,
+        pensada para durar, rendir y destacarse.
+      </div>
 
-      <!-- NEUROMARKETING: Prueba social = números que generan confianza -->
+      <!-- NEUROMARKETING: Prueba social internacional = confianza amplificada -->
+      <div style="background:#1A1A1A;border-left:4px solid #C8A96E;border-radius:8px;padding:24px;margin:24px 0;">
+        <div style="font-size:15px;color:#F5EDD6;line-height:1.8;">
+          Nuestra calidad ya cruzo fronteras, llevando el sello paraguayo a distintos paises,
+          sin perder lo que nos define: <strong style="color:#C8A96E;">precision, caracter y pasion por el fuego.</strong>
+        </div>
+      </div>
+
+      <!-- NEUROMARKETING: Números que generan confianza -->
       <div style="background:#1A1A1A;border-radius:8px;padding:20px;margin:24px 0;">
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
@@ -229,20 +245,139 @@ function buildBienvenidaEmail(data) {
         </table>
       </div>
 
-      <div style="font-size:15px;color:#CCC;line-height:1.8;margin-bottom:20px;">
-        Podes explorar nuestro catalogo completo y seguir tus pedidos en tiempo real
-        desde nuestra plataforma:
+      <!-- NEUROMARKETING: Pertenencia — "formas parte de algo más grande" -->
+      <div style="font-size:16px;color:#F5EDD6;line-height:1.8;margin-bottom:8px;font-weight:bold;">
+        Desde hoy, formas parte de algo mas grande.
+      </div>
+      <div style="font-size:15px;color:#CCC;line-height:1.8;margin-bottom:24px;">
+        Bienvenido al estandar que no se negocia.
+        Bienvenido a <strong style="color:#C8A96E;">Dr. Parrilla.</strong>
       </div>
 
+      ${cuponBlock}
+
+      <!-- CTA principal -->
       <div style="text-align:center;margin:24px 0;">
-        <a href="https://drparrillaparaguay.com" style="display:inline-block;background:#C8A96E;color:#0A0A0A;padding:14px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px;letter-spacing:1px;">
-          Ver catalogo Dr. Parrilla
+        <a href="https://wa.me/595994389932" style="display:inline-block;background:#C8A96E;color:#0A0A0A;padding:14px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px;letter-spacing:1px;">
+          Escribinos por WhatsApp
         </a>
+      </div>
+
+      <div style="font-size:13px;color:#888;text-align:center;margin-top:8px;font-style:italic;">
+        #ElFuegoNosUne
       </div>
 
       ${emailFooter()}
     </div>
-  `);
+  `, `Bienvenido a la familia Dr. Parrilla — Tu parrilla, tu legado`);
+  return { subject, html };
+}
+
+// ── Email: Registro (NO es cliente aún — lead nuevo) ────────────────────────
+// NEUROMARKETING: Prueba social + Autoridad + Escasez + Urgencia + Reciprocidad
+// Se envía cuando alguien se registra sin haber comprado todavía
+
+function buildRegistroEmail(data) {
+  const nombre = formatNombre(data);
+  const { cuponCode } = data || {};
+  const cupon = cuponCode || "PRIMERA10";
+  const subject = `Ya diste el primer paso, ${nombre} — Dr. Parrilla te espera`;
+
+  const html = emailWrapper(`
+    ${emailHeader("GRACIAS POR REGISTRARTE")}
+    <div style="padding:36px 30px;">
+
+      <div style="font-size:18px;color:#F5EDD6;margin-bottom:20px;">Hola ${nombre},</div>
+
+      <!-- NEUROMARKETING: Validación — "dice mucho de vos" refuerza la decisión -->
+      <div style="font-size:15px;color:#CCC;line-height:1.8;margin-bottom:20px;">
+        Gracias por registrarte en <strong style="color:#C8A96E;">Dr. Parrilla</strong>.
+        Ese primer paso dice mucho de vos: <strong style="color:#F5EDD6;">sabes reconocer lo que vale.</strong>
+      </div>
+
+      <!-- NEUROMARKETING: Prueba social — número concreto genera confianza -->
+      <div style="background:#1A1A1A;border-left:4px solid #C8A96E;border-radius:8px;padding:24px;margin:24px 0;">
+        <div style="font-size:15px;color:#F5EDD6;line-height:1.8;">
+          Mas de <strong style="color:#C8A96E;">500 familias</strong> ya eligieron Dr. Parrilla.
+          No somos una fabrica mas. Somos los creadores de las parrillas premium en acero inoxidable 304
+          mas reconocidas de Paraguay — hechas a mano, una por una, en nuestro taller de Lambare.
+        </div>
+      </div>
+
+      <!-- NEUROMARKETING: Autoridad — diferenciadores técnicos que generan respeto -->
+      <div style="font-size:14px;color:#CCC;line-height:1.8;margin-bottom:20px;">
+        <div style="font-size:13px;color:#C8A96E;letter-spacing:2px;margin-bottom:12px;font-weight:bold;">LO QUE NOS HACE DIFERENTES</div>
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;width:30px;">
+              <div style="width:8px;height:8px;background:#C8A96E;border-radius:50%;margin-top:6px;"></div>
+            </td>
+            <td style="padding:8px 0;color:#CCC;font-size:14px;">
+              <strong style="color:#F5EDD6;">Acero inoxidable 304</strong> — el mismo grado que usan hospitales y la industria alimentaria
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;width:30px;">
+              <div style="width:8px;height:8px;background:#C8A96E;border-radius:50%;margin-top:6px;"></div>
+            </td>
+            <td style="padding:8px 0;color:#CCC;font-size:14px;">
+              <strong style="color:#F5EDD6;">Fabricacion 100% artesanal</strong> — manos paraguayas que dominan el fuego y el metal
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;width:30px;">
+              <div style="width:8px;height:8px;background:#C8A96E;border-radius:50%;margin-top:6px;"></div>
+            </td>
+            <td style="padding:8px 0;color:#CCC;font-size:14px;">
+              <strong style="color:#F5EDD6;">Disenos personalizados</strong> — cada parrilla se fabrica a tu medida
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;width:30px;">
+              <div style="width:8px;height:8px;background:#C8A96E;border-radius:50%;margin-top:6px;"></div>
+            </td>
+            <td style="padding:8px 0;color:#CCC;font-size:14px;">
+              <strong style="color:#F5EDD6;">Calidad que cruzo fronteras</strong> — el sello paraguayo ya se enciende en otros paises
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- NEUROMARKETING: Reciprocidad + Escasez — cupón con tiempo limitado -->
+      <div style="background:#1A1400;border:2px solid #C8A96E;border-radius:12px;padding:28px;margin:28px 0;text-align:center;">
+        <div style="font-size:12px;color:#C8A96E;letter-spacing:3px;margin-bottom:10px;">TU DESCUENTO EXCLUSIVO POR REGISTRARTE</div>
+        <div style="font-size:28px;font-weight:bold;color:#F5EDD6;letter-spacing:4px;font-family:'Courier New',monospace;margin-bottom:10px;padding:12px;background:#0D0A00;border-radius:6px;display:inline-block;">${cupon}</div>
+        <div style="font-size:14px;color:#C8A96E;font-weight:bold;margin-top:8px;">10% de descuento en tu primera parrilla</div>
+        <!-- NEUROMARKETING: Urgencia — deadline claro genera acción inmediata -->
+        <div style="font-size:12px;color:#B22222;margin-top:10px;font-weight:bold;">Valido por 30 dias — despues de eso, el precio vuelve al estandar.</div>
+      </div>
+
+      <!-- NEUROMARKETING: Escasez de disponibilidad — "la lista crece" -->
+      <div style="font-size:15px;color:#CCC;line-height:1.8;margin-bottom:20px;">
+        No dejes pasar esta oportunidad. Las parrillas Dr. Parrilla no esperan —
+        se fabrican bajo pedido y <strong style="color:#C8A96E;">la lista de espera crece cada semana.</strong>
+      </div>
+
+      <!-- CTA principal — WhatsApp para máxima conversión -->
+      <div style="text-align:center;margin:28px 0;">
+        <a href="https://wa.me/595994389932?text=Hola%2C%20me%20registre%20en%20Dr.%20Parrilla%20y%20quiero%20conocer%20mas%20sobre%20sus%20parrillas" style="display:inline-block;background:#25D366;color:#FFFFFF;padding:16px 40px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:15px;letter-spacing:1px;">
+          Escribinos por WhatsApp
+        </a>
+      </div>
+
+      <div style="text-align:center;margin:16px 0;">
+        <a href="https://drparrilla.com.py" style="display:inline-block;background:#C8A96E;color:#0A0A0A;padding:14px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px;letter-spacing:1px;">
+          Ver catalogo completo
+        </a>
+      </div>
+
+      <div style="font-size:13px;color:#888;text-align:center;margin-top:16px;font-style:italic;">
+        #ElFuegoNosUne
+      </div>
+
+      ${emailFooter()}
+    </div>
+  `, `Gracias por registrarte en Dr. Parrilla — Tu descuento exclusivo te espera`);
   return { subject, html };
 }
 
@@ -297,7 +432,7 @@ function buildSeguimientoEmail(data) {
 
       ${emailFooter()}
     </div>
-  `);
+  `, `Como va tu ${modelo || "parrilla"}? — Samuel de Dr. Parrilla`);
   return { subject, html };
 }
 
@@ -323,6 +458,8 @@ exports.handler = async (event) => {
       ({ subject, html } = buildEntregaEmail(data));
     } else if (type === "bienvenida") {
       ({ subject, html } = buildBienvenidaEmail(data));
+    } else if (type === "registro") {
+      ({ subject, html } = buildRegistroEmail(data));
     } else if (type === "seguimiento") {
       ({ subject, html } = buildSeguimientoEmail(data));
     } else {
