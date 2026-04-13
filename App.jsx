@@ -1891,7 +1891,7 @@ return (
 function AdminClientes({ clientes, setClientes }) {
 const [view, setView] = useState("list");
 const [idx, setIdx] = useState(null);
-const emptyForm = { nombre:"", tel:"", dir:"", historial:"", tratamiento:"" };
+const emptyForm = { nombre:"", tel:"", dir:"", historial:"", tratamiento:"", email:"" };
 const [form, setForm] = useState(emptyForm);
 const [error, setError] = useState("");
 const [search, setSearch] = useState("");
@@ -1915,6 +1915,23 @@ const next = clientes.map((c,i) => i===idx ? { ...c, ...form, tel:normalizePhone
 setClientes(next);
 }
 setView("list"); setError("");
+// ── BREVO: sincronizar contacto + email de bienvenida (solo si tiene email) ──
+if (form.email && form.email.includes("@")) {
+  try {
+    fetch("/.netlify/functions/brevo-contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "add", email: form.email, data: { nombre: form.nombre, telefono: form.tel, ciudad: form.dir } })
+    }).then(r => r.ok ? console.log("✅ Contacto sincronizado con Brevo") : console.warn("⚠️ Brevo sync falló")).catch(() => {});
+    if (idx === null) {
+      fetch("/.netlify/functions/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "bienvenida", to: form.email, data: { clienteNombre: form.nombre, tratamiento: form.tratamiento, cuponCode: "BIENVENIDO10" } })
+      }).then(r => r.ok ? console.log("✅ Email de bienvenida enviado") : console.warn("⚠️ Email bienvenida falló")).catch(() => {});
+    }
+  } catch(e) { /* Brevo falla silenciosamente, no afecta la app */ }
+}
 };
 const eliminar = (i) => {
 const next = clientes.filter((_,j)=>j!==i);
@@ -1944,7 +1961,7 @@ style={{ width:"100%", background:CARD, border:`1px solid ${GOLD}55`, color:GOLD
 ))}
 </div>
 </div>
-{[{label:"NOMBRE COMPLETO",key:"nombre",ph:"Ej: Juan Pérez",type:"text"},{label:"TELÉFONO",key:"tel",ph:"09XX XXX XXX",type:"tel"},{label:"DIRECCIÓN",key:"dir",ph:"Calle, ciudad...",type:"text"}].map(f => (
+{[{label:"NOMBRE COMPLETO",key:"nombre",ph:"Ej: Juan Pérez",type:"text"},{label:"TELÉFONO",key:"tel",ph:"09XX XXX XXX",type:"tel"},{label:"EMAIL",key:"email",ph:"correo@ejemplo.com (opcional)",type:"email"},{label:"DIRECCIÓN",key:"dir",ph:"Calle, ciudad...",type:"text"}].map(f => (
 <div key={f.key}>
 <div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif",letterSpacing:"1px",marginBottom:8 }}>{f.label}</div>
 <input type={f.type} placeholder={f.ph} value={form[f.key]} onChange={e => setForm({...form,[f.key]:e.target.value})}
@@ -2468,6 +2485,25 @@ return (
         if (i !== prevEstado) {
           const telClean = (p.tel||"").replace(/\D/g,"").replace(/^0/,"");
           window.open(`https://wa.me/595${telClean}?text=${encodeURIComponent(waMsg)}`, "_blank");
+          // ── EMAIL AUTOMÁTICO: al marcar como Entregado (estado 4) ──
+          if (i === 4 && cliente?.email) {
+            try {
+              fetch("/.netlify/functions/send-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  type: "entrega",
+                  to: cliente.email,
+                  data: {
+                    clienteNombre: cliente.nombre || "",
+                    tratamiento: cliente.tratamiento || "",
+                    modelo: p.modelo || "",
+                    pedidoId: p.id || ""
+                  }
+                })
+              }).then(r => r.ok ? console.log("✅ Email de entrega enviado") : console.warn("⚠️ Email de entrega falló")).catch(() => {});
+            } catch(e) { /* Email falla silenciosamente, no afecta la app */ }
+          }
         }
       }}
         style={{ padding:"12px 16px",borderRadius:10,border:`1px solid ${isCurrentState?GOLD:BORDER}`,background:isCurrentState?GOLD+"18":CARD,cursor:"pointer",display:"flex",alignItems:"center",gap:12,textAlign:"left" }}>
