@@ -1923,7 +1923,10 @@ if (form.email && form.email.includes("@")) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "add", email: form.email, data: { nombre: form.nombre, telefono: form.tel, ciudad: form.dir } })
     }).then(r => r.ok ? console.log("✅ Contacto sincronizado con Brevo") : console.warn("⚠️ Brevo sync falló")).catch(() => {});
-    if (idx === null) {
+    // Enviar bienvenida si: es cliente nuevo O si es edición y antes no tenía email
+    const esNuevo = idx === null;
+    const emailAnterior = idx !== null ? clientes[idx]?.email : null;
+    if (esNuevo || !emailAnterior || !emailAnterior.includes("@")) {
       fetch("/.netlify/functions/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
