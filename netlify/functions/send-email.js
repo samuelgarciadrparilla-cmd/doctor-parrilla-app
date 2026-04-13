@@ -7,9 +7,9 @@
 // ──────────────────────────────────────────────────────────────────────────────
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
-const SENDER_EMAIL = "drparrillapy@gmail.com";
+const SENDER_EMAIL = "cotizacion@drparrilla.com.py";
 const SENDER_NAME = "Dr. Parrilla";
-const REPLY_TO_EMAIL = "drparrillapy@gmail.com";
+const REPLY_TO_EMAIL = "cotizacion@drparrilla.com.py";
 
 // Link directo de reseña de Google Business — Place ID verificado
 const GOOGLE_REVIEW_LINK = "https://search.google.com/local/writereview?placeid=ChIJxz02rNqpXZQRH4Mx5vR7Mx8";
