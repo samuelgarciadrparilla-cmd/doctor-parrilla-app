@@ -608,7 +608,7 @@ return (
 }
 function BottomNav({ active, setActive, isAdmin }) {
 const items = isAdmin
-? [{ key:"admin-orders",label:"Pedidos",icon:"📦" },{ key:"admin-tickets",label:"Soporte",icon:"🔧" },{ key:"admin-cupones",label:"Cupones",icon:"🎟️" },{ key:"admin-clientes",label:"Clientes",icon:"👥" },{ key:"admin-catalog",label:"Catálogo",icon:"🔥" },{ key:"admin-visitas",label:"Visitas",icon:"📅" },{ key:"admin-resenas",label:"Reseñas",icon:"⭐" }]
+? [{ key:"admin-orders",label:"Pedidos",icon:"📦" },{ key:"admin-tickets",label:"Soporte",icon:"🔧" },{ key:"admin-cupones",label:"Cupones",icon:"🎟️" },{ key:"admin-clientes",label:"Clientes",icon:"👥" },{ key:"admin-leads",label:"Leads",icon:"🎯" },{ key:"admin-catalog",label:"Catálogo",icon:"🔥" },{ key:"admin-visitas",label:"Visitas",icon:"📅" },{ key:"admin-resenas",label:"Reseñas",icon:"⭐" }]
 : [{ key:"home",label:"Inicio",icon:"⌂" },{ key:"catalogo",label:"Catálogo",icon:"🔥" },{ key:"pedidos",label:"Pedidos",icon:"📦" },{ key:"cupones",label:"Cupones",icon:"🎟️" },{ key:"resenas",label:"Reseñas",icon:"⭐" },{ key:"agendar",label:"Visita",icon:"📅" },{ key:"soporte",label:"Soporte",icon:"🔧" }];
 return (
 <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", maxWidth:430, background:"linear-gradient(0deg,#080C10,#0D0D0D)", borderTop:`1px solid ${GOLD}22`, display:"flex", zIndex:100 }}>
@@ -1152,14 +1152,24 @@ return (
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
-function LoginScreen({ onLogin, clientes }) {
+function LoginScreen({ onLogin, clientes, onNewLead }) {
+const [tab, setTab] = useState("login"); // "login" | "registro"
 const [phone, setPhone] = useState("");
 const [pass, setPass]   = useState("");
 const [showPass, setShowPass] = useState(false);
 const [error, setError] = useState("");
+// Registro de lead
+const [regNombre, setRegNombre] = useState("");
+const [regTel, setRegTel] = useState("");
+const [regEmail, setRegEmail] = useState("");
+const [regEmailConf, setRegEmailConf] = useState("");
+const [regComo, setRegComo] = useState("");
+const [regCumple, setRegCumple] = useState("");
+const [regOk, setRegOk] = useState(false);
+const [regError, setRegError] = useState("");
+const [regLoading, setRegLoading] = useState(false);
 const isAdmin = !!findAdmin(phone);
 const clienteMatch = !isAdmin ? findCliente(phone, clientes) : null;
-
 const handleLogin = () => {
 if (phone.length < 7) { setError("Ingresá tu número"); return; }
 if (isAdmin) {
@@ -1172,41 +1182,49 @@ onLogin(null, clienteMatch, false);
 setError("Número no registrado");
 }
 };
+const handleRegistro = async () => {
+if (!regNombre.trim()) { setRegError("Tu nombre es obligatorio"); return; }
+if (normalizePhone(regTel).length < 7) { setRegError("Ingresá un teléfono válido"); return; }
+if (!regEmail.includes("@")) { setRegError("Ingresá un email válido"); return; }
+if (regEmail !== regEmailConf) { setRegError("Los emails no coinciden"); return; }
+setRegLoading(true); setRegError("");
+const cupon = "BIENVENIDO15";
+const lead = { id:"L-"+Date.now().toString(36).toUpperCase(), nombre:regNombre.trim(), tel:normalizePhone(regTel), email:regEmail.trim().toLowerCase(), comoNosConocio:regComo, cumpleanos:regCumple, cupon, fecha:new Date().toISOString().slice(0,10), estado:"nuevo" };
+try {
+if (onNewLead) onNewLead(lead);
+await fetch("/.netlify/functions/send-email", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ type:"registro", to:lead.email, data:{ clienteNombre:lead.nombre, cuponCode:cupon } }) });
+} catch(e) {}
+setRegLoading(false); setRegOk(true);
+};;
 
 return (
 <div style={{ minHeight:"100vh", background:STEEL_BG, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 24px", position:"relative", overflow:"hidden" }}>
-
-  {/* Steel grain texture */}
   <div style={{ position:"absolute", inset:0, pointerEvents:"none", backgroundImage:`repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(212,168,75,0.012) 2px,rgba(212,168,75,0.012) 3px)`, opacity:0.8 }}/>
-
-  {/* Ambient orbs */}
   <AmbientOrb x="-60px" y="-60px" size="280px" color="rgba(212,168,75,0.12)" delay="0s"/>
   <AmbientOrb x="60%" y="60%" size="220px" color="rgba(176,48,0,0.08)" delay="2s"/>
   <AmbientOrb x="30%" y="40%" size="160px" color="rgba(212,168,75,0.05)" delay="1s"/>
-
-  {/* Bottom fire gradient */}
   <div style={{ position:"absolute", bottom:0, left:0, right:0, height:200, background:"linear-gradient(0deg, rgba(176,48,0,0.14) 0%, rgba(224,80,16,0.05) 40%, transparent 100%)", pointerEvents:"none" }}/>
-
-  {/* Brasas animadas reales */}
   <EmberSystem count={14} bottom={0} spread={90}/>
-
-  {/* Logo — SIN CAMBIOS */}
   <div style={{ marginBottom:8, zIndex:1 }}>
     <Logo width={260} style={{ filter:"drop-shadow(0 0 30px rgba(200,169,110,0.35))" }} />
   </div>
-
-  {/* Tagline con typewriter */}
-  <div style={{ fontSize:11, color:GOLD_DARK, fontFamily:"'DM Mono', monospace, sans-serif", fontStyle:"italic", marginBottom:32, letterSpacing:"2px", textAlign:"center", zIndex:1, minHeight:18 }}>
+  <div style={{ fontSize:11, color:GOLD_DARK, fontFamily:"'DM Mono', monospace, sans-serif", fontStyle:"italic", marginBottom:20, letterSpacing:"2px", textAlign:"center", zIndex:1, minHeight:18 }}>
     "La parrilla de tus sueños te espera"
   </div>
 
-  {/* Form card con glass effect */}
+  {/* TABS */}
+  <div style={{ width:"100%", maxWidth:340, zIndex:1, marginBottom:16 }}>
+    <div style={{ display:"flex", background:"rgba(9,9,15,0.7)", border:`1px solid ${GOLD}22`, borderRadius:14, padding:4, gap:4 }}>
+      <button onClick={() => setTab("login")} style={{ flex:1, padding:"11px 8px", borderRadius:10, border:"none", background:tab==="login"?GOLD_GRAD:"transparent", color:tab==="login"?DARK:"#666", fontSize:11, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"1px", cursor:"pointer", transition:"all .2s" }}>YA SOY CLIENTE</button>
+      <button onClick={() => setTab("registro")} style={{ flex:1, padding:"11px 8px", borderRadius:10, border:"none", background:tab==="registro"?GOLD_GRAD:"transparent", color:tab==="registro"?DARK:"#888", fontSize:10, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"0.5px", cursor:"pointer", transition:"all .2s" }}>🔥 QUIERO CONOCER DR. PARRILLA</button>
+    </div>
+  </div>
+
   <div style={{ width:"100%", maxWidth:340, zIndex:1 }}>
+  {tab==="login" ? (
+    <>
     <div style={{ background:"rgba(9,9,15,0.82)", backdropFilter:"blur(28px)", WebkitBackdropFilter:"blur(28px)", border:`1px solid ${GOLD}22`, borderRadius:22, padding:"24px 22px", marginBottom:14, boxShadow:"0 40px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(212,168,75,.1)" }}>
-
       <div style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:10, textTransform:"uppercase" }}>Teléfono</div>
-
-      {/* Input con focus glow */}
       <div style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(255,255,255,0.03)", border:`1px solid ${isAdmin||clienteMatch?GOLD+"88":BORDER2}`, borderRadius:14, padding:"14px 16px", marginBottom:12, transition:"all .25s", boxShadow:isAdmin||clienteMatch?`0 0 0 3px ${GOLD}18`:"none" }}>
         <span style={{ fontSize:20 }}>🇵🇾</span>
         <input type="tel" placeholder="09XX XXX XXX" value={phone}
@@ -1215,8 +1233,6 @@ return (
           style={{ flex:1, background:"none", border:"none", color:CREAM, fontSize:18, fontFamily:"'DM Mono', monospace", outline:"none", letterSpacing:"2px" }}/>
         {(isAdmin||clienteMatch) && <div style={{ width:8, height:8, borderRadius:"50%", background:GREEN, flexShrink:0, boxShadow:`0 0 8px ${GREEN}` }}/>}
       </div>
-
-      {/* Admin password field */}
       {isAdmin && (
         <div style={{ marginBottom:12 }}>
           <div style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:8 }}>CONTRASEÑA</div>
@@ -1233,39 +1249,75 @@ return (
           </div>
         </div>
       )}
-
-      {/* User preview */}
       {(isAdmin || clienteMatch) && (
         <div style={{ background:`${GOLD}11`, border:`1px solid ${GOLD}33`, borderRadius:12, padding:"10px 14px", marginBottom:12, display:"flex", alignItems:"center", gap:10 }}>
           <div style={{ width:36, height:36, borderRadius:"50%", background:GOLD_GRAD, display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, color:DARK, fontWeight:"bold", fontFamily:"sans-serif" }}>
             {isAdmin ? findAdmin(phone)?.avatar || "A" : clienteMatch?.nombre?.charAt(0)}
           </div>
           <div>
-            <div style={{ fontSize:13, fontWeight:"bold", color:GOLD }}>
-              {isAdmin ? findAdmin(phone)?.nombre : clienteMatch?.nombre}
-            </div>
-            <div style={{ fontSize:11, color:"#777", fontFamily:"sans-serif" }}>
-              {isAdmin ? findAdmin(phone)?.rol : "Cliente"}
-            </div>
+            <div style={{ fontSize:13, fontWeight:"bold", color:GOLD }}>{isAdmin ? findAdmin(phone)?.nombre : clienteMatch?.nombre}</div>
+            <div style={{ fontSize:11, color:"#777", fontFamily:"sans-serif" }}>{isAdmin ? findAdmin(phone)?.rol : "Cliente"}</div>
           </div>
         </div>
       )}
-
-      {/* Error */}
       {error && <div style={{ color:"#E57373", fontSize:12, fontFamily:"sans-serif", marginBottom:10, textAlign:"center", letterSpacing:"0.5px" }}>{error}</div>}
     </div>
-
-    {/* Login button con glow */}
     <button onClick={handleLogin}
       style={{ width:"100%", background:phone.length>4?GOLD_GRAD:"rgba(255,255,255,0.04)", border:`1px solid ${phone.length>4?GOLD+"88":BORDER}`, color:phone.length>4?DARK:"#444", padding:"18px", borderRadius:16, fontSize:13, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"3px", cursor:phone.length>4?"pointer":"default", transition:"all .2s", boxShadow:phone.length>4?`0 8px 32px rgba(212,168,75,.28),0 2px 0 rgba(255,255,255,.08) inset`:"none" }}>
       {isAdmin ? "ACCEDER AL PANEL" : "INGRESAR"}
     </button>
-
-    <div style={{ textAlign:"center", marginTop:16, fontSize:10, color:"#333", fontFamily:"sans-serif" }}>
-      #ElFuegoNosUne🔥
+    </>
+  ) : (
+    <div style={{ background:"rgba(9,9,15,0.88)", backdropFilter:"blur(28px)", WebkitBackdropFilter:"blur(28px)", border:`1px solid ${GOLD}33`, borderRadius:22, padding:"24px 22px", boxShadow:"0 40px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(212,168,75,.12)" }}>
+      {regOk ? (
+        <div style={{ textAlign:"center", padding:"20px 0" }}>
+          <div style={{ fontSize:48, marginBottom:12 }}>🔥</div>
+          <div style={{ fontSize:18, fontWeight:"bold", color:GOLD, marginBottom:8, fontFamily:"sans-serif" }}>¡Bienvenido a la familia!</div>
+          <div style={{ fontSize:13, color:"#CCC", fontFamily:"sans-serif", lineHeight:1.6, marginBottom:16 }}>Revisá tu email. Te enviamos un <strong style={{color:GOLD}}>cupón exclusivo de 15% OFF</strong> para tu primera parrilla.</div>
+          <div style={{ background:GOLD+"18", border:`1px solid ${GOLD}55`, borderRadius:12, padding:"14px", marginBottom:16 }}>
+            <div style={{ fontSize:10, color:"#888", fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:4 }}>TU CUPÓN</div>
+            <div style={{ fontSize:22, fontWeight:"bold", color:GOLD, letterSpacing:"4px", fontFamily:"monospace" }}>BIENVENIDO15</div>
+          </div>
+          <div style={{ fontSize:11, color:"#666", fontFamily:"sans-serif" }}>Un asesor se va a contactar con vos en las próximas 24hs</div>
+        </div>
+      ) : (
+        <>
+          <div style={{ fontSize:10, color:GOLD, fontFamily:"sans-serif", letterSpacing:"3px", marginBottom:4 }}>QUIERO CONOCER DR. PARRILLA</div>
+          <div style={{ fontSize:12, color:"#888", fontFamily:"sans-serif", marginBottom:18, lineHeight:1.5 }}>Registrate y recibí un <strong style={{color:GOLD}}>cupón de 15% OFF</strong> para tu primera parrilla. Más de 500 familias ya eligieron el estándar que no se negocia.</div>
+          {[{label:"TU NOMBRE COMPLETO",val:regNombre,set:setRegNombre,ph:"Ej: Juan Pérez",type:"text"},{label:"TU TELÉFONO",val:regTel,set:setRegTel,ph:"09XX XXX XXX",type:"tel"},{label:"TU EMAIL",val:regEmail,set:setRegEmail,ph:"correo@ejemplo.com",type:"email"},{label:"CONFIRMÁ TU EMAIL",val:regEmailConf,set:setRegEmailConf,ph:"correo@ejemplo.com",type:"email"}].map(f => (
+            <div key={f.label} style={{ marginBottom:12 }}>
+              <div style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:6 }}>{f.label}</div>
+              <input type={f.type} placeholder={f.ph} value={f.val} onChange={e => f.set(e.target.value)}
+                style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:`1px solid ${BORDER2}`, color:CREAM, padding:"13px 14px", borderRadius:10, fontSize:14, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}/>
+            </div>
+          ))}
+          <div style={{ marginBottom:12 }}>
+            <div style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:6 }}>🎂 FECHA DE CUMPLEAÑOS (opcional)</div>
+            <div style={{ fontSize:9, color:"#555", fontFamily:"sans-serif", marginBottom:6 }}>Para sorprenderte con una promoción exclusiva ese día</div>
+            <input type="date" value={regCumple} onChange={e => setRegCumple(e.target.value)}
+              style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:`1px solid ${GOLD}33`, color:GOLD, padding:"13px 14px", borderRadius:10, fontSize:14, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box" }}/>
+          </div>
+          <div style={{ marginBottom:16 }}>
+            <div style={{ fontSize:9, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:6 }}>¿CÓMO NOS CONOCÍSTE?</div>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
+              {["Instagram","Facebook","WhatsApp","Google","Un amigo","Otro"].map(op => (
+                <button key={op} onClick={() => setRegComo(op)}
+                  style={{ padding:"10px 8px", borderRadius:8, border:`1px solid ${regComo===op?GOLD:BORDER}`, background:regComo===op?GOLD+"22":"rgba(255,255,255,0.02)", color:regComo===op?GOLD:"#666", fontSize:11, fontFamily:"sans-serif", cursor:"pointer", fontWeight:regComo===op?"bold":"normal", transition:"all .15s" }}>{op}</button>
+              ))}
+            </div>
+          </div>
+          {regError && <div style={{ color:"#E57373", fontSize:12, fontFamily:"sans-serif", marginBottom:10, textAlign:"center" }}>{regError}</div>}
+          <button onClick={handleRegistro} disabled={regLoading}
+            style={{ width:"100%", background:GOLD_GRAD, border:"none", color:DARK, padding:"16px", borderRadius:14, fontSize:13, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"2px", cursor:"pointer", boxShadow:`0 8px 32px rgba(212,168,75,.35)`, opacity:regLoading?0.7:1 }}>
+            {regLoading?"⏳ ENVIANDO...":"🔥 QUIERO MI CUPÓN DE 15% OFF"}
+          </button>
+          <div style={{ fontSize:10, color:"#444", fontFamily:"sans-serif", textAlign:"center", marginTop:10, lineHeight:1.5 }}>Al registrarte aceptas recibir comunicaciones de Dr. Parrilla. Sin spam, solo fuego.</div>
+        </>
+      )}
     </div>
+  )}
 
-    {/* Países */}
+    <div style={{ textAlign:"center", marginTop:16, fontSize:10, color:"#333", fontFamily:"sans-serif" }}>#ElFuegoNosUne🔥</div>
     <div style={{ marginTop:24 }}>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:10, justifyItems:"center", marginBottom:14 }}>
         {[{f:"🇵🇾",n:"Paraguay"},{f:"🇦🇷",n:"Argentina"},{f:"🇧🇷",n:"Brasil"},{f:"🇺🇾",n:"Uruguay"},{f:"🇨🇴",n:"Colombia"},{f:"🇺🇸",n:"EE.UU."},{f:"🇪🇸",n:"España"},{f:"🇵🇦",n:"Panamá"},{f:"🇸🇻",n:"El Salvador"},{f:"🇷🇸",n:"Serbia"}].map((p,i) => (
@@ -1891,7 +1943,7 @@ return (
 function AdminClientes({ clientes, setClientes }) {
 const [view, setView] = useState("list");
 const [idx, setIdx] = useState(null);
-const emptyForm = { nombre:"", tel:"", dir:"", historial:"", tratamiento:"", email:"" };
+const emptyForm = { nombre:"", tel:"", dir:"", historial:"", tratamiento:"", email:"", cumpleanos:"" };
 const [form, setForm] = useState(emptyForm);
 const [error, setError] = useState("");
 const [search, setSearch] = useState("");
@@ -1971,6 +2023,12 @@ style={{ width:"100%", background:CARD, border:`1px solid ${GOLD}55`, color:GOLD
 style={{ width:"100%",background:CARD,border:`1px solid ${BORDER}`,color:"#F0F0F0",padding:"14px 16px",borderRadius:8,fontSize:15,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box" }} />
 </div>
 ))}
+<div>
+<div style={{ fontSize:11,color:GOLD,fontFamily:"sans-serif",letterSpacing:"1px",marginBottom:4 }}>🎂 FECHA DE CUMPLEAÑOS</div>
+<div style={{ fontSize:10,color:"#555",fontFamily:"sans-serif",marginBottom:8 }}>Para sorprenderlo con una promoción especial ese día</div>
+<input type="date" value={form.cumpleanos||""} onChange={e => setForm({...form,cumpleanos:e.target.value})}
+style={{ width:"100%",background:CARD,border:`1px solid ${GOLD}44`,color:GOLD,padding:"14px 16px",borderRadius:8,fontSize:15,fontFamily:"sans-serif",outline:"none",boxSizing:"border-box" }} />
+</div>
 <div>
 <div style={{ fontSize:11,color:"#888",fontFamily:"sans-serif",letterSpacing:"1px",marginBottom:8 }}>HISTORIAL / REFERENCIA</div>
 <textarea value={form.historial} onChange={e => setForm({...form,historial:e.target.value})} placeholder="Observaciones, preferencias, historial de compras..."
@@ -3444,8 +3502,120 @@ return (
 );
 }
 
-// ── ADMIN: VISITAS ────────────────────────────────────────────────────────────
-function AdminVisitas({ visitas, setVisitas }) {
+// ─// ── ADMIN: LEADS ────────────────────────────────────────────────
+function AdminLeads({ leads, setLeads }) {
+const [search, setSearch] = useState("");
+const [filter, setFilter] = useState("todos");
+const [sending, setSending] = useState(null);
+const [toast, setToast] = useState("");
+
+const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
+
+const filtered = (leads||[]).filter(l => {
+  const q = search.toLowerCase();
+  const matchSearch = !q || l.nombre?.toLowerCase().includes(q) || l.tel?.includes(q) || l.email?.toLowerCase().includes(q);
+  const matchFilter = filter==="todos" || l.estado===filter;
+  return matchSearch && matchFilter;
+});
+
+const stats = [
+  { label:"Total Leads", value:(leads||[]).length, color:GOLD },
+  { label:"Nuevos", value:(leads||[]).filter(l=>l.estado==="nuevo").length, color:"#4FC3F7" },
+  { label:"Contactados", value:(leads||[]).filter(l=>l.estado==="contactado").length, color:GREEN },
+  { label:"Convertidos", value:(leads||[]).filter(l=>l.estado==="convertido").length, color:GOLD_DARK },
+];
+
+const exportCSV = () => {
+  const headers = ["ID","Nombre","Teléfono","Email","Cómo nos conoció","Cumpleaños","Cupón","Fecha","Estado"];
+  const rows = (leads||[]).map(l => [l.id,l.nombre,l.tel,l.email,l.comoNosConocio||"N/A",l.cumpleanos||"N/A",l.cupon||"N/A",l.fecha,l.estado].map(v => `"${(v||"").toString().replace(/"/g,'""')}"`).join(","));
+  const csv = [headers.join(","),...rows].join("\n");
+  const blob = new Blob(["\uFEFF"+csv], { type:"text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href=url; a.download="leads-drparrilla.csv"; a.click();
+  URL.revokeObjectURL(url);
+  showToast("✅ CSV exportado exitosamente");
+};
+
+const sendRecordatorio = async (lead) => {
+  setSending(lead.id);
+  try {
+    await fetch("/.netlify/functions/send-email", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ type:"recordatorio", to:lead.email, data:{ clienteNombre:lead.nombre, cuponCode:lead.cupon||"VOLVISTE15" } }) });
+    const updated = (leads||[]).map(l => l.id===lead.id ? {...l, estado:"contactado", ultimoContacto:new Date().toISOString().slice(0,10)} : l);
+    setLeads(updated);
+    showToast("🔥 Recordatorio enviado a "+lead.nombre);
+  } catch(e) { showToast("❌ Error al enviar"); }
+  setSending(null);
+};
+
+const cambiarEstado = (lead, nuevoEstado) => {
+  const updated = (leads||[]).map(l => l.id===lead.id ? {...l, estado:nuevoEstado} : l);
+  setLeads(updated);
+};
+
+return (
+<div style={{ paddingBottom:80 }}>
+  <Header title="🎯 Leads" />
+  {toast && <div style={{ position:"fixed", top:20, left:"50%", transform:"translateX(-50%)", background:GOLD, color:DARK, padding:"12px 24px", borderRadius:12, fontSize:13, fontFamily:"sans-serif", fontWeight:"bold", zIndex:9999, boxShadow:"0 8px 32px rgba(0,0,0,.4)" }}>{toast}</div>}
+  <div style={{ padding:"16px 16px 0" }}>
+    {/* KPIs */}
+    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:16 }}>
+      {stats.map(s => (
+        <div key={s.label} style={{ background:CARD, border:`1px solid ${s.color}33`, borderRadius:12, padding:"12px 14px" }}>
+          <div style={{ fontSize:9, color:"#666", fontFamily:"sans-serif", letterSpacing:"1.5px", marginBottom:4 }}>{s.label.toUpperCase()}</div>
+          <div style={{ fontSize:24, fontWeight:"bold", color:s.color, fontFamily:"sans-serif" }}>{s.value}</div>
+        </div>
+      ))}
+    </div>
+    {/* Filtros */}
+    <div style={{ display:"flex", gap:6, marginBottom:12, overflowX:"auto", paddingBottom:4 }}>
+      {["todos","nuevo","contactado","convertido"].map(f => (
+        <button key={f} onClick={() => setFilter(f)} style={{ flexShrink:0, padding:"7px 14px", borderRadius:20, border:`1px solid ${filter===f?GOLD:BORDER}`, background:filter===f?GOLD+"22":CARD, color:filter===f?GOLD:"#666", fontSize:11, fontFamily:"sans-serif", cursor:"pointer", fontWeight:filter===f?"bold":"normal", textTransform:"capitalize" }}>{f}</button>
+      ))}
+      <button onClick={exportCSV} style={{ flexShrink:0, marginLeft:"auto", padding:"7px 14px", borderRadius:20, border:`1px solid ${GREEN}55`, background:GREEN+"18", color:GREEN, fontSize:11, fontFamily:"sans-serif", cursor:"pointer", fontWeight:"bold" }}>📊 Exportar CSV</button>
+    </div>
+    {/* Buscador */}
+    <input placeholder="🔍 Buscar por nombre, teléfono o email..." value={search} onChange={e => setSearch(e.target.value)}
+      style={{ width:"100%", background:CARD, border:`1px solid ${BORDER}`, color:"#F0F0F0", padding:"12px 14px", borderRadius:10, fontSize:13, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box", marginBottom:16 }}/>
+    {/* Lista */}
+    {filtered.length===0 ? (
+      <div style={{ textAlign:"center", padding:"40px 0", color:"#444", fontFamily:"sans-serif", fontSize:13 }}>
+        <div style={{ fontSize:32, marginBottom:8 }}>🎯</div>
+        {(leads||[]).length===0 ? "Aún no hay leads registrados. Cuando alguien use la pestaña \"Quiero conocer Dr. Parrilla\" aparecerán aquí." : "No hay resultados para tu búsqueda"}
+      </div>
+    ) : filtered.map((lead, i) => (
+      <div key={lead.id} style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:14, padding:"14px 16px", marginBottom:10, animation:"card-enter 0.3s ease forwards", animationDelay:`${i*0.05}s`, opacity:0 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+          <div>
+            <div style={{ fontSize:15, fontWeight:"bold", color:"#F0F0F0", fontFamily:"sans-serif", marginBottom:2 }}>{lead.nombre}</div>
+            <div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif" }}>{lead.tel} · {lead.email}</div>
+            {lead.comoNosConocio && <div style={{ fontSize:10, color:GOLD_DARK, fontFamily:"sans-serif", marginTop:2 }}>Nos conoció por: {lead.comoNosConocio}</div>}
+            {lead.cumpleanos && <div style={{ fontSize:10, color:"#C8A96E", fontFamily:"sans-serif", marginTop:2 }}>🎂 Cumpleaños: {lead.cumpleanos}</div>}
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:4 }}>
+            <span style={{ fontSize:9, padding:"3px 8px", borderRadius:20, background:lead.estado==="nuevo"?"#4FC3F722":lead.estado==="contactado"?GREEN+"22":GOLD+"22", color:lead.estado==="nuevo"?"#4FC3F7":lead.estado==="contactado"?GREEN:GOLD, fontFamily:"sans-serif", fontWeight:"bold", letterSpacing:"1px", textTransform:"uppercase" }}>{lead.estado}</span>
+            <span style={{ fontSize:9, color:"#555", fontFamily:"sans-serif" }}>{lead.fecha}</span>
+          </div>
+        </div>
+        {lead.cupon && <div style={{ fontSize:11, color:GOLD, fontFamily:"monospace", marginBottom:8 }}>Cupón: <strong>{lead.cupon}</strong></div>}
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+          <button onClick={() => sendRecordatorio(lead)} disabled={sending===lead.id}
+            style={{ flex:1, minWidth:120, padding:"9px", borderRadius:8, border:`1px solid ${GOLD}55`, background:GOLD+"18", color:GOLD, fontSize:11, fontFamily:"sans-serif", cursor:"pointer", fontWeight:"bold" }}>
+            {sending===lead.id?"⏳ Enviando...":"🔥 Enviar Recordatorio"}
+          </button>
+          {["nuevo","contactado","convertido"].filter(e=>e!==lead.estado).map(e => (
+            <button key={e} onClick={() => cambiarEstado(lead,e)}
+              style={{ padding:"9px 12px", borderRadius:8, border:`1px solid ${BORDER}`, background:CARD, color:"#777", fontSize:10, fontFamily:"sans-serif", cursor:"pointer", textTransform:"capitalize" }}>{e}</button>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+);
+}
+
+// ── ADMIN: VISITAS ────────────────────────────────────────────────
+function AdminVisitas({ visitas, setVisitas }) {tas }) {
 const estadoColors = { "Pendiente": ORANGE, "Confirmada": GREEN, "Realizada": GOLD_DARK, "Cancelada": RED };
 
 const stats = [
@@ -3521,6 +3691,7 @@ const [firebaseOk, setFirebaseOk] = useState(false);
 const [visitas, setVisitas] = useState([]);
 const [cupones, setCupones] = useState([]);
 const [config, setConfig] = useState({ catalogoPdf: null, catalogoPdfNombre: null }); // PDF del catálogo general
+const [leads, setLeads] = useState([]);
 const dataLoaded = useRef(false);
 
 // ── Timestamps del último guardado (para evitar sobreescritura en polling) ──
@@ -3541,20 +3712,22 @@ try { const r4 = await appStorage.get("dp_productos"); if (r4) setProductos(JSON
 try { const r5 = await appStorage.get("dp_visitas");   if (r5) setVisitas(JSON.parse(r5));   } catch(e) {}
 try { const r6 = await appStorage.get("dp_cupones");   if (r6) setCupones(JSON.parse(r6));   } catch(e) {}
 try { const r7 = await appStorage.get("dp_config");   if (r7) setConfig(JSON.parse(r7));   } catch(e) {}
+try { const r8 = await appStorage.get("dp_leads");    if (r8) setLeads(JSON.parse(r8));    } catch(e) {}
 
 // 2. Si Firebase está disponible, cargar desde Firebase para tener los datos más actualizados
 if (fbOk && FIREBASE_URL) {
 try {
-const [rc, rp, rt, rprod, rv, rcu, rcfg] = await Promise.all([
+const [rc, rp, rt, rprod, rv, rcu, rcfg, rl] = await Promise.all([
 fetch(`${FIREBASE_URL}/drparrilla/dp_clientes.json`),
 fetch(`${FIREBASE_URL}/drparrilla/dp_pedidos.json`),
 fetch(`${FIREBASE_URL}/drparrilla/dp_tickets.json`),
 fetch(`${FIREBASE_URL}/drparrilla/dp_productos.json`),
 fetch(`${FIREBASE_URL}/drparrilla/dp_visitas.json`),
 fetch(`${FIREBASE_URL}/drparrilla/dp_cupones.json`),
-fetch(`${FIREBASE_URL}/drparrilla/dp_config.json`)
+fetch(`${FIREBASE_URL}/drparrilla/dp_config.json`),
+fetch(`${FIREBASE_URL}/drparrilla/dp_leads.json`)
 ]);
-const [fbC, fbP, fbT, fbProd, fbV, fbCu, fbCfg] = await Promise.all([rc.json(), rp.json(), rt.json(), rprod.json(), rv.json(), rcu.json(), rcfg.json()]);
+const [fbC, fbP, fbT, fbProd, fbV, fbCu, fbCfg, fbLeads] = await Promise.all([rc.json(), rp.json(), rt.json(), rprod.json(), rv.json(), rcu.json(), rcfg.json(), rl.json()]);
 if (fbC && Array.isArray(fbC) && fbC.length > 0) {
 // Merge: Firebase + clientes locales que no estén en Firebase
 const localRaw = await appStorage.get("dp_clientes");
@@ -3581,6 +3754,7 @@ lastCuponesSave.current = Date.now();
 appStorage.set("dp_cupones", JSON.stringify(mergedCu));
 }
 if (fbCfg && typeof fbCfg === 'object' && !Array.isArray(fbCfg)) { setConfig(fbCfg); appStorage.set("dp_config", JSON.stringify(fbCfg)); }
+if (fbLeads && Array.isArray(fbLeads)) { setLeads(fbLeads); appStorage.set("dp_leads", JSON.stringify(fbLeads)); }
 } catch(e) { console.warn("Error cargando desde Firebase al inicio:", e); }
 }
 
@@ -3650,6 +3824,13 @@ const saveConfig = useCallback((next) => {
 setConfig(prev => {
 const data = typeof next === 'function' ? next(prev) : next;
 saveNow("dp_config", data);
+return data;
+});
+}, [saveNow]);
+const saveLeads = useCallback((next) => {
+setLeads(prev => {
+const data = typeof next === 'function' ? next(prev) : next;
+saveNow("dp_leads", data);
 return data;
 });
 }, [saveNow]);
@@ -3763,7 +3944,7 @@ if (!logged) return (
 
 <div style={{ fontFamily:"Georgia, serif",background:DARK,color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto" }}>
 <InjectPremiumStyles />
-<LoginScreen clientes={clientes} onLogin={(admin,cliente,esAdmin) => { setAdminUser(admin); setClienteUser(cliente); setIsAdmin(esAdmin); setActive(esAdmin?"admin-orders":"home"); setLogged(true); }} />
+<LoginScreen clientes={clientes} onLogin={(admin,cliente,esAdmin) => { setAdminUser(admin); setClienteUser(cliente); setIsAdmin(esAdmin); setActive(esAdmin?"admin-orders":"home"); setLogged(true); }} onNewLead={(lead) => { saveLeads(prev => [...(Array.isArray(prev)?prev:[]), lead]); }} />
 </div>
 );
 
@@ -3779,6 +3960,7 @@ soporte:          () => <SoporteScreen tickets={tickets} setTickets={saveTickets
 "admin-cupones":  () => <AdminCupones cupones={cupones} setCupones={saveCupones} clientes={clientes} pedidos={pedidos} />,
 "admin-resenas":  () => <AdminResenas pedidos={pedidos} clientes={clientes} cupones={cupones} setCupones={saveCupones} />,
 "admin-visitas":  () => <AdminVisitas visitas={visitas} setVisitas={saveVisitas} />,
+"admin-leads":    () => <AdminLeads leads={leads} setLeads={saveLeads} />,
 "cupones":        () => <MisCuponesScreen cupones={cupones} clienteUser={clienteUser} />,
 "resenas":        () => <ClienteResenasScreen pedidos={pedidos} clientes={clientes} clienteUser={clienteUser} cupones={cupones} setCupones={saveCupones} setPedidos={savePedidos} />,
 "agendar":        () => <AgendarVisitaScreen visitas={visitas} setVisitas={saveVisitas} clienteUser={clienteUser} />,
