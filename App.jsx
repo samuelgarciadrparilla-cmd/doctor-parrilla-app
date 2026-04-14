@@ -3615,7 +3615,7 @@ return (
 }
 
 // ── ADMIN: VISITAS ────────────────────────────────────────────────
-function AdminVisitas({ visitas, setVisitas }) {tas }) {
+function AdminVisitas({ visitas, setVisitas }) {
 const estadoColors = { "Pendiente": ORANGE, "Confirmada": GREEN, "Realizada": GOLD_DARK, "Cancelada": RED };
 
 const stats = [
