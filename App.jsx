@@ -321,7 +321,7 @@ const ADMIN_USERS = [
 { phone: "0982234753", password: "drp2026", nombre: "Dalila García",   rol: "Presidente",         avatar: "DG" },
 ]; // Contraseña por defecto: drp2026
 
-function normalizePhone(p) { return p.replace(/[\s-().]/g, ""); }
+function normalizePhone(p) { return (p||'').replace(/[^\d+]/g, ""); }
 function findAdmin(phone, pass) {
 const c = normalizePhone(phone);
 const u = ADMIN_USERS.find(u => normalizePhone(u.phone)===c);
