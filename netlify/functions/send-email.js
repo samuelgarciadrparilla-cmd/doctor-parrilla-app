@@ -436,6 +436,75 @@ function buildSeguimientoEmail(data) {
   return { subject, html };
 }
 
+// ── Email: Recordatorio (para leads que no compraron) ────────────────────────────────────────────
+// NEUROMARKETING: Efecto Zeigarnik + Escasez + Reciprocidad + Urgencia
+
+function buildRecordatorioEmail(data) {
+  const nombre = formatNombre(data);
+  const { cuponCode } = data || {};
+  const cupon = cuponCode || "VOLVISTE15";
+  const subject = `${nombre}, tu lugar en Dr. Parrilla sigue reservado — pero no por mucho tiempo`;
+
+  const html = emailWrapper(`
+    ${emailHeader("TE ESTAMOS ESPERANDO")}
+    <div style="padding:36px 30px;">
+
+      <div style="font-size:18px;color:#F5EDD6;margin-bottom:20px;">Hola ${nombre},</div>
+
+      <!-- NEUROMARKETING: Efecto Zeigarnik — tarea incompleta genera tensión que busca resolución -->
+      <div style="font-size:15px;color:#CCC;line-height:1.8;margin-bottom:20px;">
+        Notamos que todavía no diste el paso final. Y lo entendemos — una parrilla premium es una decisión importante.
+        Por eso queremos que la tomes con toda la información.
+      </div>
+
+      <!-- NEUROMARKETING: Prueba social + Autoridad -->
+      <div style="background:#1A1A1A;border-left:4px solid #C8A96E;border-radius:8px;padding:24px;margin:24px 0;">
+        <div style="font-size:14px;color:#C8A96E;font-weight:bold;margin-bottom:12px;letter-spacing:1px;">¿POR QUÉ ELEGIR DR. PARRILLA?</div>
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr><td style="padding:6px 0;vertical-align:top;width:28px;"><div style="width:8px;height:8px;background:#C8A96E;border-radius:50%;margin-top:6px;"></div></td><td style="padding:6px 0;color:#CCC;font-size:14px;"><strong style="color:#F5EDD6;">+500 familias</strong> ya eligieron nuestras parrillas. No es casualidad.</td></tr>
+          <tr><td style="padding:6px 0;vertical-align:top;width:28px;"><div style="width:8px;height:8px;background:#C8A96E;border-radius:50%;margin-top:6px;"></div></td><td style="padding:6px 0;color:#CCC;font-size:14px;"><strong style="color:#F5EDD6;">4.9 estrellas en Google</strong> — la calidad habla por sí sola.</td></tr>
+          <tr><td style="padding:6px 0;vertical-align:top;width:28px;"><div style="width:8px;height:8px;background:#C8A96E;border-radius:50%;margin-top:6px;"></div></td><td style="padding:6px 0;color:#CCC;font-size:14px;"><strong style="color:#F5EDD6;">Acero inoxidable 304</strong> — fabricación artesanal, diseño personalizado.</td></tr>
+          <tr><td style="padding:6px 0;vertical-align:top;width:28px;"><div style="width:8px;height:8px;background:#C8A96E;border-radius:50%;margin-top:6px;"></div></td><td style="padding:6px 0;color:#CCC;font-size:14px;"><strong style="color:#F5EDD6;">Presencia internacional</strong> — el sello paraguayo ya se enciende en el mundo.</td></tr>
+        </table>
+      </div>
+
+      <!-- NEUROMARKETING: Reciprocidad + Escasez + Urgencia -->
+      <div style="background:#1A1400;border:2px solid #C8A96E;border-radius:12px;padding:28px;margin:28px 0;text-align:center;">
+        <div style="font-size:12px;color:#C8A96E;letter-spacing:3px;margin-bottom:10px;">DESCUENTO ESPECIAL PARA VOS</div>
+        <div style="font-size:28px;font-weight:bold;color:#F5EDD6;letter-spacing:4px;font-family:'Courier New',monospace;margin-bottom:10px;padding:12px;background:#0D0A00;border-radius:6px;display:inline-block;">${cupon}</div>
+        <div style="font-size:14px;color:#C8A96E;font-weight:bold;margin-top:8px;">15% de descuento en tu primera parrilla</div>
+        <!-- NEUROMARKETING: Urgencia con deadline específico -->
+        <div style="font-size:12px;color:#B22222;margin-top:10px;font-weight:bold;">Válido solo por 72 horas — después vuelve al precio estándar.</div>
+      </div>
+
+      <!-- NEUROMARKETING: Reducción de fricción — WhatsApp como canal de menor resistencia -->
+      <div style="font-size:15px;color:#CCC;line-height:1.8;margin-bottom:24px;">
+        No hace falta que decidas todo ahora. Solo escribinos y te asesoramos sin compromiso.
+        <strong style="color:#C8A96E;">Un asesor personal te responde en minutos.</strong>
+      </div>
+
+      <div style="text-align:center;margin:28px 0;">
+        <a href="https://wa.me/595994389932?text=Hola%2C%20quiero%20retomar%20mi%20consulta%20sobre%20una%20parrilla%20Dr.%20Parrilla" style="display:inline-block;background:#25D366;color:#FFFFFF;padding:16px 40px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:15px;letter-spacing:1px;">
+          Hablar con un asesor ahora
+        </a>
+      </div>
+
+      <div style="text-align:center;margin:16px 0;">
+        <a href="https://drparrilla.com.py" style="display:inline-block;background:#C8A96E;color:#0A0A0A;padding:14px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px;letter-spacing:1px;">
+          Ver catálogo completo
+        </a>
+      </div>
+
+      <div style="font-size:13px;color:#888;text-align:center;margin-top:16px;font-style:italic;">
+        El fuego que no se enciende hoy, se apaga mañana. 🔥
+      </div>
+
+      ${emailFooter()}
+    </div>
+  `, `Tu lugar en Dr. Parrilla sigue reservado — y tu descuento también`);
+  return { subject, html };
+}
+
 // ── Handler principal ────────────────────────────────────────────────────────
 
 exports.handler = async (event) => {
@@ -460,6 +529,8 @@ exports.handler = async (event) => {
       ({ subject, html } = buildBienvenidaEmail(data));
     } else if (type === "registro") {
       ({ subject, html } = buildRegistroEmail(data));
+    } else if (type === "recordatorio") {
+      ({ subject, html } = buildRecordatorioEmail(data));
     } else if (type === "seguimiento") {
       ({ subject, html } = buildSeguimientoEmail(data));
     } else {
