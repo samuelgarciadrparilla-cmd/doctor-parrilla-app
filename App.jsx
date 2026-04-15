@@ -1152,7 +1152,7 @@ return (
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
-function LoginScreen({ onLogin, clientes, onNewLead }) {
+function LoginScreen({ onLogin, clientes, onNewLead, onNewCliente }) {
 const [tab, setTab] = useState("login"); // "login" | "registro"
 const [phone, setPhone] = useState("");
 const [pass, setPass]   = useState("");
@@ -1192,7 +1192,12 @@ const cupon = "BIENVENIDO15";
 const lead = { id:"L-"+Date.now().toString(36).toUpperCase(), nombre:regNombre.trim(), tel:normalizePhone(regTel), email:regEmail.trim().toLowerCase(), comoNosConocio:regComo, cumpleanos:regCumple, cupon, fecha:new Date().toISOString().slice(0,10), estado:"nuevo" };
 try {
 if (onNewLead) onNewLead(lead);
+// Crear cliente automáticamente para que pueda loguearse
+const nuevoCliente = { nombre:lead.nombre, tel:lead.tel, email:lead.email, dir:"", historial:"", tratamiento:"", cumpleanos:lead.cumpleanos||"", origen:"lead", fechaRegistro:lead.fecha };
+if (onNewCliente) onNewCliente(nuevoCliente);
 await fetch("/.netlify/functions/send-email", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ type:"registro", to:lead.email, data:{ clienteNombre:lead.nombre, cuponCode:cupon } }) });
+// Sincronizar con Brevo CRM
+try { await fetch("/.netlify/functions/brevo-contact", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ email:lead.email, nombre:lead.nombre, telefono:lead.tel, cumpleanos:lead.cumpleanos, fuente:lead.comoNosConocio, tipo:"lead" }) }); } catch(e2) {}
 } catch(e) {}
 setRegLoading(false); setRegOk(true);
 };;
@@ -1343,7 +1348,21 @@ return (
 }
 
 // ── CLIENT: HOME ──────────────────────────────────────────────────────────────: HOME ──────────────────────────────────────────────────────────────
-function HomeScreen({ setActive, clienteUser, pedidos, cupones }) {
+function HomeScreen({ setActive, clienteUser, pedidos, cupones, onUpdateCliente }) {
+const [editCumple, setEditCumple] = useState(false);
+const [cumpleValue, setCumpleValue] = useState(clienteUser?.cumpleanos || "");
+const [cumpleSaved, setCumpleSaved] = useState(false);
+const guardarCumple = () => {
+if (cumpleValue && onUpdateCliente) {
+onUpdateCliente({ ...clienteUser, cumpleanos: cumpleValue });
+setEditCumple(false); setCumpleSaved(true);
+setTimeout(() => setCumpleSaved(false), 3000);
+// Sincronizar con Brevo CRM
+if (clienteUser?.email) {
+fetch("/.netlify/functions/brevo-contact", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ email:clienteUser.email, nombre:clienteUser.nombre, telefono:clienteUser.tel, cumpleanos:cumpleValue, tipo:"cliente" }) }).catch(() => {});
+}
+}
+};
 const tratamiento = clienteUser?.tratamiento || "";
 const nombreBase = clienteUser?.nombre?.split(" ")[0] || "";
 const nombre = tratamiento ? `${tratamiento} ${clienteUser?.nombre?.split(" ").slice(-1)[0] || nombreBase}` : nombreBase;
@@ -1397,6 +1416,39 @@ return (
 </button>
 ))}
 </div>
+{/* CUMPLEAÑOS EDITABLE */}
+{!clienteUser?.cumpleanos && !editCumple && !cumpleSaved && (
+<div style={{ margin:"16px 20px 0", background:"linear-gradient(135deg, #1A0D00 0%, #0D0500 100%)", border:`1px solid ${GOLD}33`, borderRadius:12, padding:"16px 20px" }}>
+<div style={{ display:"flex", alignItems:"center", gap:12 }}>
+<span style={{ fontSize:28 }}>🎂</span>
+<div style={{ flex:1 }}>
+<div style={{ fontSize:13, fontWeight:"bold", color:GOLD_LIGHT, fontFamily:"sans-serif" }}>Recibí un regalo en tu cumpleaños</div>
+<div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", marginTop:2 }}>Agregá tu fecha y te preparamos algo especial</div>
+</div>
+<button onClick={() => setEditCumple(true)} style={{ background:GOLD_GRAD, border:"none", color:DARK, fontSize:11, padding:"8px 16px", borderRadius:20, fontFamily:"sans-serif", fontWeight:"bold", cursor:"pointer" }}>AGREGAR</button>
+</div>
+</div>
+)}
+{editCumple && (
+<div style={{ margin:"16px 20px 0", background:"rgba(9,9,15,0.9)", border:`1px solid ${GOLD}44`, borderRadius:12, padding:"20px" }}>
+<div style={{ fontSize:11, color:GOLD, fontFamily:"sans-serif", letterSpacing:"2px", marginBottom:10 }}>MI FECHA DE CUMPLEAÑOS</div>
+<input type="date" value={cumpleValue} onChange={e => setCumpleValue(e.target.value)} style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:`1px solid ${GOLD}55`, color:CREAM, padding:"12px 14px", borderRadius:10, fontSize:15, fontFamily:"sans-serif", outline:"none", boxSizing:"border-box", marginBottom:12 }} />
+<div style={{ display:"flex", gap:8 }}>
+<button onClick={guardarCumple} style={{ flex:1, background:GOLD_GRAD, border:"none", color:DARK, padding:"12px", borderRadius:10, fontFamily:"sans-serif", fontWeight:"bold", fontSize:13, cursor:"pointer" }}>GUARDAR</button>
+<button onClick={() => setEditCumple(false)} style={{ padding:"12px 16px", background:"transparent", border:`1px solid ${GOLD}33`, color:"#888", borderRadius:10, fontFamily:"sans-serif", fontSize:12, cursor:"pointer" }}>CANCELAR</button>
+</div>
+</div>
+)}
+{(clienteUser?.cumpleanos || cumpleSaved) && (
+<div style={{ margin:"16px 20px 0", background:"#0D0500", border:`1px solid ${GOLD}22`, borderRadius:12, padding:"14px 20px", display:"flex", alignItems:"center", gap:12 }}>
+<span style={{ fontSize:24 }}>🎂</span>
+<div style={{ flex:1 }}>
+<div style={{ fontSize:12, color:GOLD, fontFamily:"sans-serif", fontWeight:"bold" }}>Tu cumpleaños está registrado</div>
+<div style={{ fontSize:11, color:"#888", fontFamily:"sans-serif", marginTop:2 }}>Te enviaremos algo especial ese día</div>
+</div>
+<button onClick={() => { setEditCumple(true); setCumpleValue(clienteUser?.cumpleanos||""); }} style={{ background:"transparent", border:`1px solid ${GOLD}33`, color:GOLD, fontSize:10, padding:"6px 12px", borderRadius:16, fontFamily:"sans-serif", cursor:"pointer" }}>EDITAR</button>
+</div>
+)}
 <div style={{ margin:"16px 20px 0" }}>
 <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noreferrer"
 style={{ display:"flex", alignItems:"center", gap:12, background:"#0A1F0A", border:"1px solid #1A3A1A", borderRadius:12, padding:"16px 20px", textDecoration:"none" }}>
@@ -1973,8 +2025,8 @@ if (form.email && form.email.includes("@")) {
     fetch("/.netlify/functions/brevo-contact", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "add", email: form.email, data: { nombre: form.nombre, telefono: form.tel, ciudad: form.dir } })
-    }).then(r => r.ok ? console.log("✅ Contacto sincronizado con Brevo") : console.warn("⚠️ Brevo sync falló")).catch(() => {});
+      body: JSON.stringify({ email: form.email, nombre: form.nombre, telefono: normalizePhone(form.tel), cumpleanos: form.cumpleanos || "", ciudad: form.dir, tipo: "cliente" })
+    }).then(r => r.ok ? console.log("Contacto sincronizado con Brevo") : console.warn("Brevo sync fallo")).catch(() => {});
     // Enviar bienvenida si: es cliente nuevo O si es edición y antes no tenía email
     const esNuevo = idx === null;
     const emailAnterior = idx !== null ? clientes[idx]?.email : null;
@@ -3944,12 +3996,12 @@ if (!logged) return (
 
 <div style={{ fontFamily:"Georgia, serif",background:DARK,color:"#F0F0F0",minHeight:"100vh",maxWidth:430,margin:"0 auto" }}>
 <InjectPremiumStyles />
-<LoginScreen clientes={clientes} onLogin={(admin,cliente,esAdmin) => { setAdminUser(admin); setClienteUser(cliente); setIsAdmin(esAdmin); setActive(esAdmin?"admin-orders":"home"); setLogged(true); }} onNewLead={(lead) => { saveLeads(prev => [...(Array.isArray(prev)?prev:[]), lead]); }} />
+<LoginScreen clientes={clientes} onLogin={(admin,cliente,esAdmin) => { setAdminUser(admin); setClienteUser(cliente); setIsAdmin(esAdmin); setActive(esAdmin?"admin-orders":"home"); setLogged(true); }} onNewLead={(lead) => { saveLeads(prev => [...(Array.isArray(prev)?prev:[]), lead]); }} onNewCliente={(cli) => { saveClientes(prev => [...(Array.isArray(prev)?prev:[]), cli]); }} />
 </div>
 );
 
 const screens = {
-home:             () => <HomeScreen setActive={setActive} clienteUser={clienteUser} pedidos={pedidos} cupones={cupones} />,
+home:             () => <HomeScreen setActive={setActive} clienteUser={clienteUser} pedidos={pedidos} cupones={cupones} onUpdateCliente={(updated) => { saveClientes(prev => (Array.isArray(prev)?prev:[]).map(c => normalizePhone(c.tel)===normalizePhone(updated.tel) ? {...c, ...updated} : c)); setClienteUser(updated); }} />,
 catalogo:         () => <CatalogoScreen productos={productos} config={config} />,
 pedidos:          () => <PedidosScreen setPedidos={savePedidos} pedidos={pedidos} clienteUser={clienteUser} cupones={cupones} setCupones={saveCupones} />,
 soporte:          () => <SoporteScreen tickets={tickets} setTickets={saveTickets} clienteUser={clienteUser} />,
