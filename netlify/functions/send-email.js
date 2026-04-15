@@ -546,7 +546,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         sender: { name: SENDER_NAME, email: SENDER_EMAIL },
-        to: [{ email: to, name: data?.clienteNombre || "" }],
+        to: [{ email: to, name: data?.nombre || data?.clienteNombre || "Cliente" }],
         replyTo: { email: REPLY_TO_EMAIL, name: "Dr. Parrilla" },
         subject,
         htmlContent: html,
